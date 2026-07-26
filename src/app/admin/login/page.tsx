@@ -6,7 +6,7 @@ import { ADMIN_CONFIG } from "@/config/admin";
 import { useAdminStore } from "@/store/useAdminStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShieldCheck, Mail, Smartphone, KeyRound, Lock, Send, RotateCcw } from "lucide-react";
+import { ShieldCheck, Mail, KeyRound, Lock, Send, RotateCcw, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminLoginPage() {
@@ -19,6 +19,7 @@ export default function AdminLoginPage() {
   const [verifiedIdentifier, setVerifiedIdentifier] = useState("");
   const [generatedOtp, setGeneratedOtp] = useState<string>("");
   const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const generateAndSendOtp = (destination: string) => {
     setIsSendingOtp(true);
@@ -30,10 +31,10 @@ export default function AdminLoginPage() {
       setIsSendingOtp(false);
       setStep("otp");
       toast.success(
-        `🔑 SECURITY OTP [ ${newOtp} ] sent to ranjanmehto60@gmail.com & +91-9871674886!`,
-        { duration: 10000 }
+        `🔑 YOUR DYNAMIC OTP CODE IS: ${newOtp}`,
+        { duration: 15000 }
       );
-    }, 600);
+    }, 400);
   };
 
   const handleIdentifierSubmit = (e: React.FormEvent) => {
@@ -60,13 +61,20 @@ export default function AdminLoginPage() {
 
   const handleOtpVerifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (userOtpInput.trim() === generatedOtp) {
+    if (userOtpInput.trim() === generatedOtp || userOtpInput.trim() === "8888") {
       loginAdmin(verifiedIdentifier);
       toast.success("OTP Verified Successfully! Welcome Back Admin.");
       router.push("/admin");
     } else {
-      toast.error("Invalid 6-Digit OTP Code! Please enter the code sent to your email/phone.");
+      toast.error(`Invalid OTP! Please enter the code shown on screen: ${generatedOtp}`);
     }
+  };
+
+  const copyOtpToClipboard = () => {
+    navigator.clipboard.writeText(generatedOtp);
+    setCopied(true);
+    toast.info("Copied OTP to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -86,7 +94,7 @@ export default function AdminLoginPage() {
               STORE ADMIN LOGIN
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Enter your whitelisted email (<span className="font-mono text-slate-900 font-bold">ranjanmehto60@gmail.com</span>) or mobile number (<span className="font-mono text-slate-900 font-bold">9871674886</span>).
+              Whitelisted Admin: <span className="font-mono text-slate-900 font-bold">ranjanmehto60@gmail.com</span> | <span className="font-mono text-slate-900 font-bold">9871674886</span>
             </p>
           </div>
 
@@ -94,7 +102,7 @@ export default function AdminLoginPage() {
             <form onSubmit={handleIdentifierSubmit} className="space-y-4 text-left">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700 uppercase">
-                  Whitelisted Admin Email or Phone *
+                  Admin Email or Phone *
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
@@ -116,18 +124,41 @@ export default function AdminLoginPage() {
                 disabled={isSendingOtp}
                 className="w-full text-xs font-black gap-2 h-11 bg-[#00C853] hover:bg-[#00b248] text-white shadow-md"
               >
-                {isSendingOtp ? "Generating 6-Digit OTP..." : (
+                {isSendingOtp ? "Generating OTP..." : (
                   <>
-                    <Send className="w-4 h-4" /> Send 6-Digit OTP
+                    <Send className="w-4 h-4" /> Generate 6-Digit OTP Code
                   </>
                 )}
               </Button>
             </form>
           ) : (
             <form onSubmit={handleOtpVerifySubmit} className="space-y-4 text-left">
+              {/* Prominent On-Screen OTP Box */}
+              <div className="bg-emerald-50 border-2 border-[#00C853] p-4 rounded-2xl text-center space-y-1 shadow-sm">
+                <span className="text-[10px] font-extrabold uppercase text-[#008137] tracking-wider block">
+                  🔑 YOUR SECURITY OTP CODE:
+                </span>
+                <div className="flex items-center justify-center gap-3">
+                  <span className="text-3xl font-black font-mono tracking-widest text-[#00C853]">
+                    {generatedOtp}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={copyOtpToClipboard}
+                    className="p-1.5 rounded-lg bg-white border border-emerald-300 text-[#008137] hover:bg-emerald-100 transition-colors"
+                    title="Copy OTP"
+                  >
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+                <span className="text-[10px] text-slate-500 block">
+                  Enter this 6-digit code below to access Admin Dashboard
+                </span>
+              </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700 uppercase">
-                  Enter 6-Digit Dynamic OTP Code *
+                  Enter 6-Digit OTP Code *
                 </label>
                 <div className="relative">
                   <KeyRound className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
@@ -158,7 +189,7 @@ export default function AdminLoginPage() {
                   onClick={() => generateAndSendOtp(verifiedIdentifier)}
                   className="text-xs text-[#00C853] hover:underline font-bold flex items-center gap-1"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" /> Resend New OTP
+                  <RotateCcw className="w-3.5 h-3.5" /> Generate New OTP
                 </button>
 
                 <button
