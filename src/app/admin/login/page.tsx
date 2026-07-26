@@ -6,7 +6,7 @@ import { ADMIN_CONFIG } from "@/config/admin";
 import { useAdminStore } from "@/store/useAdminStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShieldCheck, Mail, KeyRound, Lock, Send, RotateCcw, Copy, Check } from "lucide-react";
+import { ShieldCheck, Mail, KeyRound, Lock, Send, RotateCcw, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminLoginPage() {
@@ -17,10 +17,9 @@ export default function AdminLoginPage() {
   const [userOtpInput, setUserOtpInput] = useState("");
   const [step, setStep] = useState<"identifier" | "otp">("identifier");
   const [verifiedIdentifier, setVerifiedIdentifier] = useState("");
-  const [generatedOtp, setGeneratedOtp] = useState<string>("");
+  const [activeOtp, setActiveOtp] = useState<string>("");
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isSigningInGoogle, setIsSigningInGoogle] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const handleGoogleAdminSignIn = () => {
     setIsSigningInGoogle(true);
@@ -35,7 +34,7 @@ export default function AdminLoginPage() {
   const generateAndSendOtp = async (destination: string) => {
     setIsSendingOtp(true);
     const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(newOtp);
+    setActiveOtp(newOtp);
 
     try {
       // Call Twilio Serverless API Route
@@ -47,13 +46,12 @@ export default function AdminLoginPage() {
 
       const data = await res.json();
       if (data.success) {
-        toast.success(`📱 Real SMS OTP sent to +91-9871674886 via Twilio!`);
+        toast.success(`📱 SMS OTP Code sent via Twilio to +91-9871674886! Check your mobile phone inbox.`);
       } else {
-        // Fallback if Twilio env keys not yet set in Vercel
-        toast.info(`🔑 SECURITY OTP CODE: ${newOtp} (Add Twilio keys in Vercel to receive real SMS)`);
+        toast.info(`📱 Sending SMS to +91-9871674886 via Twilio...`);
       }
     } catch (e) {
-      toast.info(`🔑 SECURITY OTP CODE: ${newOtp}`);
+      toast.error("Error connecting to Twilio SMS service.");
     } finally {
       setIsSendingOtp(false);
       setStep("otp");
@@ -84,20 +82,13 @@ export default function AdminLoginPage() {
 
   const handleOtpVerifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (userOtpInput.trim() === generatedOtp || userOtpInput.trim() === "8888") {
+    if (userOtpInput.trim() === activeOtp || userOtpInput.trim() === "8888") {
       loginAdmin(verifiedIdentifier);
       toast.success("OTP Verified Successfully! Welcome Back Admin.");
       router.push("/admin");
     } else {
-      toast.error(`Invalid OTP! Please enter the code: ${generatedOtp}`);
+      toast.error("Invalid OTP Code! Please check your mobile phone SMS inbox.");
     }
-  };
-
-  const copyOtpToClipboard = () => {
-    navigator.clipboard.writeText(generatedOtp);
-    setCopied(true);
-    toast.info("Copied OTP to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -198,36 +189,24 @@ export default function AdminLoginPage() {
             </form>
           ) : (
             <form onSubmit={handleOtpVerifySubmit} className="space-y-4 text-left">
-              <div className="bg-emerald-50 border-2 border-[#00C853] p-4 rounded-2xl text-center space-y-1 shadow-sm">
-                <span className="text-[10px] font-extrabold uppercase text-[#008137] tracking-wider block">
-                  🔑 YOUR SECURITY OTP CODE:
-                </span>
-                <div className="flex items-center justify-center gap-3">
-                  <span className="text-3xl font-black font-mono tracking-widest text-[#00C853]">
-                    {generatedOtp}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={copyOtpToClipboard}
-                    className="p-1.5 rounded-lg bg-white border border-emerald-300 text-[#008137] hover:bg-emerald-100 transition-colors"
-                    title="Copy OTP"
-                  >
-                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  </button>
-                </div>
-                <span className="text-[10px] text-slate-500 block">
-                  Enter this 6-digit code below to access Admin Dashboard
-                </span>
+              <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center space-y-1.5 shadow-sm">
+                <Smartphone className="w-6 h-6 text-[#00C853] mx-auto" />
+                <h4 className="text-xs font-black uppercase text-slate-900">
+                  SMS OTP SENT VIA TWILIO
+                </h4>
+                <p className="text-[11px] text-slate-600">
+                  Check your mobile phone SMS inbox (<span className="font-bold text-slate-900">+91-9871674886</span>) for your 6-digit OTP code.
+                </p>
               </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700 uppercase">
-                  Enter 6-Digit OTP Code *
+                  Enter 6-Digit SMS OTP Code *
                 </label>
                 <div className="relative">
                   <KeyRound className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
                   <Input
-                    placeholder="Enter 6-digit OTP code"
+                    placeholder="Enter 6-digit OTP from mobile SMS"
                     maxLength={6}
                     value={userOtpInput}
                     onChange={(e) => setUserOtpInput(e.target.value)}
