@@ -6,7 +6,7 @@ import { ADMIN_CONFIG } from "@/config/admin";
 import { useAdminStore } from "@/store/useAdminStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShieldCheck, Mail, KeyRound, Lock, Send, RotateCcw, Smartphone, Key } from "lucide-react";
+import { ShieldCheck, Mail, KeyRound, Lock, Send, RotateCcw, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminLoginPage() {
@@ -20,6 +20,7 @@ export default function AdminLoginPage() {
   const [activeOtp, setActiveOtp] = useState<string>("");
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isSigningInGoogle, setIsSigningInGoogle] = useState(false);
+  const [twilioStatus, setTwilioStatus] = useState<string>("");
 
   const handleGoogleAdminSignIn = () => {
     setIsSigningInGoogle(true);
@@ -45,12 +46,15 @@ export default function AdminLoginPage() {
 
       const data = await res.json();
       if (data.success) {
+        setTwilioStatus(`📱 SMS Sent via Twilio (SID: ${data.sid})`);
         toast.success(`📱 SMS OTP Code sent via Twilio to +91-9871674886!`);
       } else {
-        toast.info(`📱 Dispatched OTP. Note: You can also enter Master PIN '9871' to log in instantly!`);
+        setTwilioStatus(`⚠️ Twilio Status: ${data.error}`);
+        toast.error(`Twilio Error: ${data.error}`);
       }
-    } catch (e) {
-      toast.info(`📱 Note: Master PIN '9871' or '8888' works for instant login!`);
+    } catch (e: any) {
+      setTwilioStatus(`⚠️ Network Error connecting to Twilio route`);
+      toast.error("Network Error connecting to Twilio route");
     } finally {
       setIsSendingOtp(false);
       setStep("otp");
@@ -184,7 +188,7 @@ export default function AdminLoginPage() {
                 disabled={isSendingOtp}
                 className="w-full text-xs font-black gap-2 h-11 bg-[#00C853] hover:bg-[#00b248] text-white shadow-md"
               >
-                {isSendingOtp ? "Sending Twilio SMS..." : (
+                {isSendingOtp ? "Connecting to Twilio SMS..." : (
                   <>
                     <Send className="w-4 h-4" /> Send Real SMS OTP via Twilio
                   </>
@@ -196,10 +200,13 @@ export default function AdminLoginPage() {
               <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center space-y-1 shadow-sm">
                 <Smartphone className="w-5 h-5 text-[#00C853] mx-auto" />
                 <h4 className="text-xs font-black uppercase text-slate-900">
-                  SMS DISPATCHED VIA TWILIO
+                  TWILIO SMS DISPATCHED
                 </h4>
-                <p className="text-[11px] text-slate-600 leading-relaxed">
-                  SMS sent to <span className="font-bold text-slate-900">+91-9871674886</span>.<br />
+                {twilioStatus && (
+                  <p className="text-[11px] font-bold text-slate-700">{twilioStatus}</p>
+                )}
+                <p className="text-[11px] text-slate-600 leading-relaxed pt-1">
+                  Sent to <span className="font-bold text-slate-900">+91-9871674886</span>.<br />
                   <span className="text-[#008137] font-bold">💡 Master PIN &lsquo;9871&rsquo; also works instantly!</span>
                 </p>
               </div>
