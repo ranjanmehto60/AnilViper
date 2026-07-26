@@ -32,19 +32,32 @@ export default function AdminLoginPage() {
     }, 600);
   };
 
-  const generateAndSendOtp = (destination: string) => {
+  const generateAndSendOtp = async (destination: string) => {
     setIsSendingOtp(true);
     const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
     setGeneratedOtp(newOtp);
 
-    setTimeout(() => {
+    try {
+      // Call Twilio Serverless API Route
+      const res = await fetch("/api/admin/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: "9871674886", otp: newOtp }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`📱 Real SMS OTP sent to +91-9871674886 via Twilio!`);
+      } else {
+        // Fallback if Twilio env keys not yet set in Vercel
+        toast.info(`🔑 SECURITY OTP CODE: ${newOtp} (Add Twilio keys in Vercel to receive real SMS)`);
+      }
+    } catch (e) {
+      toast.info(`🔑 SECURITY OTP CODE: ${newOtp}`);
+    } finally {
       setIsSendingOtp(false);
       setStep("otp");
-      toast.success(
-        `🔑 YOUR DYNAMIC OTP CODE IS: ${newOtp}`,
-        { duration: 15000 }
-      );
-    }, 400);
+    }
   };
 
   const handleIdentifierSubmit = (e: React.FormEvent) => {
@@ -76,7 +89,7 @@ export default function AdminLoginPage() {
       toast.success("OTP Verified Successfully! Welcome Back Admin.");
       router.push("/admin");
     } else {
-      toast.error(`Invalid OTP! Please enter the code shown on screen: ${generatedOtp}`);
+      toast.error(`Invalid OTP! Please enter the code: ${generatedOtp}`);
     }
   };
 
@@ -108,7 +121,7 @@ export default function AdminLoginPage() {
             </p>
           </div>
 
-          {/* 1-Click Google Sign In for ranjanmehto60@gmail.com */}
+          {/* 1-Click Google Sign In */}
           <div className="space-y-3 pb-2 border-b border-slate-100">
             <Button
               type="button"
@@ -143,7 +156,7 @@ export default function AdminLoginPage() {
 
             <div className="relative flex items-center justify-center">
               <span className="bg-white px-3 text-[10px] text-slate-400 font-bold uppercase z-10">
-                OR LOGIN WITH OTP
+                OR TWILIO SMS OTP
               </span>
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200" />
@@ -176,9 +189,9 @@ export default function AdminLoginPage() {
                 disabled={isSendingOtp}
                 className="w-full text-xs font-black gap-2 h-11 bg-[#00C853] hover:bg-[#00b248] text-white shadow-md"
               >
-                {isSendingOtp ? "Generating OTP..." : (
+                {isSendingOtp ? "Sending Twilio SMS..." : (
                   <>
-                    <Send className="w-4 h-4" /> Generate 6-Digit OTP Code
+                    <Send className="w-4 h-4" /> Send Real SMS OTP via Twilio
                   </>
                 )}
               </Button>
@@ -240,7 +253,7 @@ export default function AdminLoginPage() {
                   onClick={() => generateAndSendOtp(verifiedIdentifier)}
                   className="text-xs text-[#00C853] hover:underline font-bold flex items-center gap-1"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" /> Generate New OTP
+                  <RotateCcw className="w-3.5 h-3.5" /> Resend Twilio SMS
                 </button>
 
                 <button
