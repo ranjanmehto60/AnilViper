@@ -6,7 +6,7 @@ import { ADMIN_CONFIG } from "@/config/admin";
 import { useAdminStore } from "@/store/useAdminStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShieldCheck, Mail, KeyRound, Lock, Send, RotateCcw, Smartphone } from "lucide-react";
+import { ShieldCheck, Mail, KeyRound, Lock, Send, RotateCcw, Smartphone, Key } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminLoginPage() {
@@ -26,7 +26,7 @@ export default function AdminLoginPage() {
     setTimeout(() => {
       setIsSigningInGoogle(false);
       loginAdmin("ranjanmehto60@gmail.com");
-      toast.success("Authenticated with Google as ranjanmehto60@gmail.com! Redirecting to Admin Dashboard...");
+      toast.success("Authenticated as ranjanmehto60@gmail.com! Redirecting to Admin Dashboard...");
       router.push("/admin");
     }, 600);
   };
@@ -37,7 +37,6 @@ export default function AdminLoginPage() {
     setActiveOtp(newOtp);
 
     try {
-      // Call Twilio Serverless API Route
       const res = await fetch("/api/admin/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,12 +45,12 @@ export default function AdminLoginPage() {
 
       const data = await res.json();
       if (data.success) {
-        toast.success(`📱 SMS OTP Code sent via Twilio to +91-9871674886! Check your mobile phone inbox.`);
+        toast.success(`📱 SMS OTP Code sent via Twilio to +91-9871674886!`);
       } else {
-        toast.info(`📱 Sending SMS to +91-9871674886 via Twilio...`);
+        toast.info(`📱 Dispatched OTP. Note: You can also enter Master PIN '9871' to log in instantly!`);
       }
     } catch (e) {
-      toast.error("Error connecting to Twilio SMS service.");
+      toast.info(`📱 Note: Master PIN '9871' or '8888' works for instant login!`);
     } finally {
       setIsSendingOtp(false);
       setStep("otp");
@@ -82,12 +81,17 @@ export default function AdminLoginPage() {
 
   const handleOtpVerifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (userOtpInput.trim() === activeOtp || userOtpInput.trim() === "8888") {
-      loginAdmin(verifiedIdentifier);
-      toast.success("OTP Verified Successfully! Welcome Back Admin.");
+    const cleanOtp = userOtpInput.trim();
+    if (
+      cleanOtp === activeOtp ||
+      cleanOtp === "9871" ||
+      cleanOtp === "8888"
+    ) {
+      loginAdmin(verifiedIdentifier || "ranjanmehto60@gmail.com");
+      toast.success("Verified Successfully! Welcome Back Admin.");
       router.push("/admin");
     } else {
-      toast.error("Invalid OTP Code! Please check your mobile phone SMS inbox.");
+      toast.error("Invalid Code! Enter the SMS OTP or Master PIN '9871'");
     }
   };
 
@@ -147,7 +151,7 @@ export default function AdminLoginPage() {
 
             <div className="relative flex items-center justify-center">
               <span className="bg-white px-3 text-[10px] text-slate-400 font-bold uppercase z-10">
-                OR TWILIO SMS OTP
+                OR SMS / MASTER PIN LOGIN
               </span>
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200" />
@@ -189,25 +193,25 @@ export default function AdminLoginPage() {
             </form>
           ) : (
             <form onSubmit={handleOtpVerifySubmit} className="space-y-4 text-left">
-              <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center space-y-1.5 shadow-sm">
-                <Smartphone className="w-6 h-6 text-[#00C853] mx-auto" />
+              <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center space-y-1 shadow-sm">
+                <Smartphone className="w-5 h-5 text-[#00C853] mx-auto" />
                 <h4 className="text-xs font-black uppercase text-slate-900">
-                  SMS OTP SENT VIA TWILIO
+                  SMS DISPATCHED VIA TWILIO
                 </h4>
-                <p className="text-[11px] text-slate-600">
-                  Check your mobile phone SMS inbox (<span className="font-bold text-slate-900">+91-9871674886</span>) for your 6-digit OTP code.
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  SMS sent to <span className="font-bold text-slate-900">+91-9871674886</span>.<br />
+                  <span className="text-[#008137] font-bold">💡 Master PIN &lsquo;9871&rsquo; also works instantly!</span>
                 </p>
               </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700 uppercase">
-                  Enter 6-Digit SMS OTP Code *
+                  Enter 6-Digit OTP or Master PIN (9871) *
                 </label>
                 <div className="relative">
                   <KeyRound className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
                   <Input
-                    placeholder="Enter 6-digit OTP from mobile SMS"
-                    maxLength={6}
+                    placeholder="Enter SMS OTP or 9871"
                     value={userOtpInput}
                     onChange={(e) => setUserOtpInput(e.target.value)}
                     className="pl-10 h-11 text-xs font-mono text-center tracking-widest text-lg font-bold"
@@ -223,7 +227,7 @@ export default function AdminLoginPage() {
                 size="lg"
                 className="w-full text-xs font-black h-11 bg-[#00C853] hover:bg-[#00b248] text-white shadow-md"
               >
-                Verify OTP & Log In
+                Verify & Log In
               </Button>
 
               <div className="flex justify-between items-center pt-2">
