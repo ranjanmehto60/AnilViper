@@ -117,7 +117,7 @@ function AccountContent() {
                   <div className="relative">
                     <span className="absolute left-3.5 top-3 text-xs text-slate-400 font-bold">+91</span>
                     <Input
-                      placeholder="9871674886"
+                      placeholder="Enter 10-digit mobile number"
                       maxLength={10}
                       value={phoneInput}
                       onChange={(e) => setPhoneInput(e.target.value)}
@@ -184,14 +184,12 @@ function AccountContent() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-black text-slate-900 uppercase">Vikram Sharma</h1>
+                <h1 className="text-xl font-black text-slate-900 uppercase">Athlete Account</h1>
                 <span className="bg-emerald-50 text-[#008137] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-200">
                   BLACK BELT ATHLETE
                 </span>
               </div>
               <p className="text-xs text-slate-500 flex items-center gap-2 mt-0.5 font-medium">
-                <span>📞 +91-9871674886</span>
-                <span>•</span>
                 <span>📍 Chattarpur, Delhi</span>
               </p>
             </div>
@@ -274,10 +272,9 @@ function AccountContent() {
                 <span className="text-[10px] bg-[#00C853] text-white font-extrabold px-2 py-0.5 rounded-full">DEFAULT</span>
               </div>
               <div className="text-xs text-slate-700 space-y-1">
-                <p className="font-bold text-slate-900">Vikram Sharma</p>
+                <p className="font-bold text-slate-900">Athlete</p>
                 <p>House 42, Ward 3, Main Market</p>
                 <p>Chattarpur, Delhi - 110074</p>
-                <p className="text-slate-500">Phone: +91-9871674886</p>
               </div>
             </div>
           </TabsContent>
@@ -287,14 +284,6 @@ function AccountContent() {
             <div className="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 max-w-lg shadow-sm">
               <h3 className="text-sm font-bold text-slate-900 uppercase border-b border-slate-100 pb-2">Profile Information</h3>
               <div className="space-y-3 text-xs">
-                <div>
-                  <label className="text-slate-500 block font-semibold mb-1">Full Name</label>
-                  <Input value="Vikram Sharma" readOnly className="bg-slate-50" />
-                </div>
-                <div>
-                  <label className="text-slate-500 block font-semibold mb-1">Mobile Number</label>
-                  <Input value="+91-9871674886" readOnly className="bg-slate-50" />
-                </div>
                 <div>
                   <label className="text-slate-500 block font-semibold mb-1">Academy / Dojang</label>
                   <Input value="Delhi Taekwondo Academy (Chattarpur)" readOnly className="bg-slate-50" />
