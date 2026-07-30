@@ -2,44 +2,54 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 0 0% 98%;
     --foreground: 222 47% 11%;
+    --primary: 145 100% 39%;
+    --primary-foreground: 0 0% 100%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 147 100% 36%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 354 78% 56%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 147 100% 36%;
-    --radius: 0.75rem;
+    --border: 214.3 31.8% 91.4%;
+  }
+
+  body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
   }
 }
 
-@theme {
-  --color-viper-black: #0f172a;
-  --color-viper-slate: #f8fafc;
-  --color-viper-card: #ffffff;
-  --color-viper-green: #00c853;
-  --color-viper-green-dark: #009624;
-  --color-viper-red: #e53935;
-  --color-viper-gray: #e2e8f0;
+.bebas-font {
+  font-family: var(--font-bebas), sans-serif;
+  letter-spacing: 0.05em;
 }
 
-body {
-  background-color: #f8fafc;
-  color: #0f172a;
-  font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
-  overflow-x: hidden;
+/* Luxury Utility Classes */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.emerald-glow {
+  box-shadow: 0 10px 30px -10px rgba(0, 200, 83, 0.25);
+}
+
+.hero-grid-pattern {
+  background-image: radial-gradient(rgba(0, 200, 83, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.gradient-text-emerald {
+  background: linear-gradient(135deg, #0F172A 0%, #00C853 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Custom Scrollbar */
@@ -47,43 +57,12 @@ body {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #F1F5F9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #00c853;
-}
-
-.glass-header {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-}
-
-.viper-gradient-text {
-  background: linear-gradient(135deg, #0f172a 0%, #00c853 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.viper-badge {
-  background: rgba(0, 200, 83, 0.1);
-  border: 1px solid rgba(0, 200, 83, 0.3);
-  color: #008137;
-}
-
-.bebas-font {
-  font-family: var(--font-bebas), sans-serif;
+  background: #00C853;
 }

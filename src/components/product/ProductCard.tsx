@@ -3,168 +3,212 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Product } from "@/types/product";
 import { formatINR } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
+import { QuickViewModal } from "./QuickViewModal";
+import { SizeGuideModal } from "./SizeGuideModal";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Heart, ShoppingBag, Eye, Star, ShieldCheck } from "lucide-react";
+import {
+  Heart,
+  Eye,
+  Ruler,
+  ShoppingBag,
+  ShieldCheck,
+  Check,
+  Star
+} from "lucide-react";
 import { toast } from "sonner";
-import { QuickViewModal } from "@/components/product/QuickViewModal";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const initialSize = product.availableSizes?.[0] || 170;
+  const [selectedSize, setSelectedSize] = useState<number>(initialSize);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+
   const addItem = useCartStore((state) => state.addItem);
   const { toggleWishlist, isInWishlist } = useWishlistStore();
-  const isFavorite = isInWishlist(product.id);
-  const [quickViewOpen, setQuickViewOpen] = useState(false);
+
+  const isWishlisted = isInWishlist(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    const defaultSize = product.availableSizes.includes(170) ? 170 : product.availableSizes[0];
-    addItem(product, defaultSize, 1);
-    toast.success(`Added ${product.name} (${defaultSize}cm) to Cart!`);
+    addItem(product, selectedSize, 1);
+    toast.success(`Added ${product.name} (${selectedSize} cm) to cart!`);
   };
 
-  const handleWishlistToggle = (e: React.MouseEvent) => {
+  const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
     toggleWishlist(product);
-    if (!isFavorite) {
-      toast.success(`Added ${product.name} to Wishlist!`);
+    if (!isWishlisted) {
+      toast.success(`Added to Wishlist!`);
     } else {
-      toast.info(`Removed ${product.name} from Wishlist`);
+      toast.info(`Removed from Wishlist.`);
     }
   };
 
-  const discountPercentage = Math.round(
-    ((product.originalPrice - product.price) / product.originalPrice) * 100
-  );
-
   return (
     <>
-      <motion.div
-        whileHover={{ y: -6 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="group relative bg-white rounded-3xl border border-slate-200 overflow-hidden flex flex-col justify-between hover:border-[#00C853] hover:shadow-xl transition-all duration-300 shadow-sm"
-      >
-        {/* Top Badges & Image */}
-        <div className="relative aspect-[4/5] bg-slate-100 overflow-hidden">
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+      <div className="group relative bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:border-emerald-200 transition-all duration-300 flex flex-col justify-between">
+        
+        <div>
+          {/* Image & Badge Area */}
+          <div className="relative h-64 sm:h-72 w-full bg-slate-50 overflow-hidden">
+            
+            <Link href={`/product/${product.slug}`} className="block w-full h-full">
+              <Image
+                src={product.images[0] || "/images/kpnp-dobok-1.jpg"}
+                alt={product.name}
+                fill
+                className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
+              />
+            </Link>
 
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
-            {product.isWTApproved && (
-              <Badge variant="wtApproved" className="text-[10px] py-1 px-2.5 flex items-center gap-1 shadow-sm bg-white/90 backdrop-blur-md text-[#008137] border-emerald-300 font-extrabold">
-                <ShieldCheck className="w-3 h-3 text-[#00C853]" /> WT Approved
-              </Badge>
-            )}
-            {product.isBestSeller && (
-              <Badge variant="default" className="text-[10px] bg-slate-900 text-white font-extrabold">
-                BESTSELLER
-              </Badge>
-            )}
-            {discountPercentage > 0 && (
-              <Badge variant="destructive" className="text-[10px]">
-                {discountPercentage}% OFF
-              </Badge>
-            )}
+            {/* Badges Overlay */}
+            <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+              {product.isNewArrival && (
+                <span className="bg-[#00C853] text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider">
+                  NEW
+                </span>
+              )}
+              {product.isBestSeller && (
+                <span className="bg-slate-900 text-amber-400 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider flex items-center gap-1">
+                  <Star className="w-3 h-3 fill-amber-400" /> BESTSELLER
+                </span>
+              )}
+              <span className="bg-white/90 backdrop-blur-md text-slate-800 border border-slate-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-[#00C853]" /> WT APPROVED
+              </span>
+            </div>
+
+            {/* Quick Action Buttons (Wishlist & Quick View) */}
+            <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
+              <button
+                onClick={handleToggleWishlist}
+                className={`p-2.5 rounded-full backdrop-blur-md transition-all shadow-md ${
+                  isWishlisted
+                    ? "bg-red-500 text-white"
+                    : "bg-white/90 text-slate-700 hover:bg-white hover:text-red-500"
+                }`}
+                title="Save to Wishlist"
+              >
+                <Heart className={`w-4 h-4 ${isWishlisted ? "fill-white" : ""}`} />
+              </button>
+
+              <button
+                onClick={() => setIsQuickViewOpen(true)}
+                className="p-2.5 rounded-full bg-white/90 text-slate-700 hover:bg-white hover:text-[#00C853] backdrop-blur-md transition-all shadow-md"
+                title="Quick View"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Size Selector Strip at Bottom of Image */}
+            <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-md border border-slate-200/80 p-2 rounded-2xl shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-between gap-1 z-10">
+              <span className="text-[10px] font-bold text-slate-500 uppercase pl-1 hidden sm:inline">Size:</span>
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+                {(product.availableSizes || [160, 170, 180, 190]).map((sz) => (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => setSelectedSize(sz)}
+                    className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${
+                      selectedSize === sz
+                        ? "bg-[#00C853] text-white"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}
+                  >
+                    {sz} cm
+                  </button>
+                ))}
+              </div>
+            </div>
+
           </div>
 
-          {/* Wishlist Button */}
-          <button
-            onClick={handleWishlistToggle}
-            className={`absolute top-3 right-3 p-2.5 rounded-full z-10 transition-all ${
-              isFavorite
-                ? "bg-[#E53935] text-white shadow-md"
-                : "bg-white/80 text-slate-600 hover:text-slate-900 hover:bg-white backdrop-blur-md shadow-sm"
-            }`}
-            aria-label="Add to Wishlist"
-          >
-            <Heart className={`w-4 h-4 ${isFavorite ? "fill-white" : ""}`} />
-          </button>
-
-          {/* Hover Quick View Overlay */}
-          <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                setQuickViewOpen(true);
-              }}
-              className="bg-white/95 text-slate-900 hover:bg-white text-xs font-bold gap-1.5 backdrop-blur-sm shadow-md"
-            >
-              <Eye className="w-3.5 h-3.5 text-[#00C853]" /> Quick View
-            </Button>
-          </div>
-        </div>
-
-        {/* Content Section */}
-        <div className="p-5 flex-1 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-              <span className="font-bold text-slate-500">{product.category}</span>
-              <div className="flex items-center gap-1 text-amber-500 font-bold">
+          {/* Product Info Section */}
+          <div className="p-5 space-y-3">
+            
+            {/* Category & Rating */}
+            <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
+              <span className="uppercase text-[10px] tracking-wider text-emerald-700 font-extrabold">
+                {product.category}
+              </span>
+              <div className="flex items-center gap-1 text-amber-500 font-mono font-bold">
                 <Star className="w-3.5 h-3.5 fill-amber-400" />
                 <span>{product.rating}</span>
                 <span className="text-slate-400">({product.reviewCount})</span>
               </div>
             </div>
 
-            <Link href={`/product/${product.slug}`}>
-              <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-[#00C853] transition-colors line-clamp-2 leading-snug">
-                {product.name}
-              </h3>
-            </Link>
+            {/* Title */}
+            <h3 className="text-sm font-black text-slate-900 line-clamp-2 leading-tight hover:text-[#00C853] transition-colors">
+              <Link href={`/product/${product.slug}`}>{product.name}</Link>
+            </h3>
 
-            <p className="text-xs text-slate-500 line-clamp-2 mt-2 leading-relaxed">
-              {product.description}
-            </p>
-          </div>
-
-          <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-lg font-black text-[#00C853]">
-                  {formatINR(product.price)}
+            {/* Price Row */}
+            <div className="flex items-baseline gap-2 pt-1">
+              <span className="text-lg font-black text-slate-900 font-mono">
+                {formatINR(product.price)}
+              </span>
+              {product.originalPrice && (
+                <span className="text-xs text-slate-400 line-through font-mono">
+                  {formatINR(product.originalPrice)}
                 </span>
-                {product.originalPrice > product.price && (
-                  <span className="text-xs text-slate-400 line-through">
-                    {formatINR(product.originalPrice)}
-                  </span>
-                )}
-              </div>
-              <span className="text-[10px] text-slate-500 block font-medium">Free Shipping above ₹999</span>
+              )}
+              {product.originalPrice && (
+                <span className="text-[10px] font-extrabold text-[#008137] bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                  SAVE {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                </span>
+              )}
             </div>
 
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleAddToCart}
-              className="px-3.5 text-xs font-extrabold gap-1.5 shadow-md bg-[#00C853] hover:bg-[#00b248] text-white"
-            >
-              <ShoppingBag className="w-3.5 h-3.5" /> Add
-            </Button>
           </div>
         </div>
-      </motion.div>
 
-      {/* Quick View Modal */}
+        {/* Action Button Footer */}
+        <div className="p-5 pt-0 space-y-2">
+          
+          <div className="flex items-center justify-between text-[11px]">
+            <button
+              onClick={() => setIsSizeGuideOpen(true)}
+              className="text-slate-500 hover:text-slate-900 underline flex items-center gap-1 font-semibold"
+            >
+              <Ruler className="w-3.5 h-3.5 text-[#00C853]" /> Size Chart Guide
+            </button>
+            <span className="text-emerald-700 font-extrabold flex items-center gap-1">
+              <Check className="w-3.5 h-3.5 text-[#00C853]" /> IN STOCK
+            </span>
+          </div>
+
+          <Button
+            onClick={handleAddToCart}
+            className="w-full text-xs font-black uppercase tracking-wider h-11 bg-slate-900 hover:bg-[#00C853] text-white hover:text-white rounded-xl transition-all shadow-md flex items-center justify-center gap-2 group/btn"
+          >
+            <ShoppingBag className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+            <span>ADD TO CART • {selectedSize} CM</span>
+          </Button>
+
+        </div>
+
+      </div>
+
+      {/* Modals */}
       <QuickViewModal
         product={product}
-        isOpen={quickViewOpen}
-        onClose={() => setQuickViewOpen(false)}
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+      />
+
+      <SizeGuideModal
+        open={isSizeGuideOpen}
+        onOpenChange={setIsSizeGuideOpen}
       />
     </>
   );
