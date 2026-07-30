@@ -47,12 +47,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${bebasNeue.variable} ${outfit.variable}`}>
-      <body className="bg-[#F8FAFC] text-[#0F172A] min-h-screen flex flex-col antialiased">
+      <body className="bg-[#080C14] text-[#F8FAFC] min-h-screen flex flex-col antialiased">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
         <FloatingWhatsApp />
-        <Toaster position="bottom-left" theme="light" richColors />
+        <Toaster position="bottom-left" theme="dark" richColors />
       </body>
     </html>
   );

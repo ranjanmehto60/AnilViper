@@ -54,11 +54,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <>
-      <div className="group relative bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:border-emerald-200 transition-all duration-300 flex flex-col justify-between">
+      <div className="group relative bg-[#0F172A] border border-slate-800 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:border-[#00E676]/50 transition-all duration-300 flex flex-col justify-between text-white">
         
         <div>
           {/* Image & Badge Area */}
-          <div className="relative h-64 sm:h-72 w-full bg-slate-50 overflow-hidden">
+          <div className="relative h-64 sm:h-72 w-full bg-[#0B101D] overflow-hidden">
             
             <Link href={`/product/${product.slug}`} className="block w-full h-full">
               <Image
@@ -72,17 +72,17 @@ export function ProductCard({ product }: ProductCardProps) {
             {/* Badges Overlay */}
             <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
               {product.isNewArrival && (
-                <span className="bg-[#00C853] text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider">
+                <span className="bg-[#00E676] text-black text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider">
                   NEW
                 </span>
               )}
               {product.isBestSeller && (
-                <span className="bg-slate-900 text-amber-400 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider flex items-center gap-1">
+                <span className="bg-slate-950 border border-slate-700 text-amber-400 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider flex items-center gap-1">
                   <Star className="w-3 h-3 fill-amber-400" /> BESTSELLER
                 </span>
               )}
-              <span className="bg-white/90 backdrop-blur-md text-slate-800 border border-slate-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-[#00C853]" /> WT APPROVED
+              <span className="bg-slate-900/90 backdrop-blur-md text-slate-200 border border-slate-700 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-[#00E676]" /> WT APPROVED
               </span>
             </div>
 
@@ -93,7 +93,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 className={`p-2.5 rounded-full backdrop-blur-md transition-all shadow-md ${
                   isWishlisted
                     ? "bg-red-500 text-white"
-                    : "bg-white/90 text-slate-700 hover:bg-white hover:text-red-500"
+                    : "bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-red-400 border border-slate-700"
                 }`}
                 title="Save to Wishlist"
               >
@@ -102,7 +102,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
               <button
                 onClick={() => setIsQuickViewOpen(true)}
-                className="p-2.5 rounded-full bg-white/90 text-slate-700 hover:bg-white hover:text-[#00C853] backdrop-blur-md transition-all shadow-md"
+                className="p-2.5 rounded-full bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-[#00E676] border border-slate-700 backdrop-blur-md transition-all shadow-md"
                 title="Quick View"
               >
                 <Eye className="w-4 h-4" />
@@ -110,8 +110,8 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
 
             {/* Size Selector Strip at Bottom of Image */}
-            <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-md border border-slate-200/80 p-2 rounded-2xl shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-between gap-1 z-10">
-              <span className="text-[10px] font-bold text-slate-500 uppercase pl-1 hidden sm:inline">Size:</span>
+            <div className="absolute bottom-3 left-3 right-3 bg-slate-900/95 backdrop-blur-md border border-slate-700 p-2 rounded-2xl shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-between gap-1 z-10">
+              <span className="text-[10px] font-bold text-slate-400 uppercase pl-1 hidden sm:inline">Size:</span>
               <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                 {(product.availableSizes || [160, 170, 180, 190]).map((sz) => (
                   <button
@@ -120,8 +120,8 @@ export function ProductCard({ product }: ProductCardProps) {
                     onClick={() => setSelectedSize(sz)}
                     className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${
                       selectedSize === sz
-                        ? "bg-[#00C853] text-white"
-                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        ? "bg-[#00E676] text-black"
+                        : "bg-slate-800 text-slate-300 hover:bg-slate-700"
                     }`}
                   >
                     {sz} cm
@@ -136,11 +136,11 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="p-5 space-y-3">
             
             {/* Category & Rating */}
-            <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
-              <span className="uppercase text-[10px] tracking-wider text-emerald-700 font-extrabold">
+            <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
+              <span className="uppercase text-[10px] tracking-wider text-[#00E676] font-extrabold">
                 {product.category}
               </span>
-              <div className="flex items-center gap-1 text-amber-500 font-mono font-bold">
+              <div className="flex items-center gap-1 text-amber-400 font-mono font-bold">
                 <Star className="w-3.5 h-3.5 fill-amber-400" />
                 <span>{product.rating}</span>
                 <span className="text-slate-400">({product.reviewCount})</span>
@@ -148,13 +148,13 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
 
             {/* Title */}
-            <h3 className="text-sm font-black text-slate-900 line-clamp-2 leading-tight hover:text-[#00C853] transition-colors">
+            <h3 className="text-sm font-black text-white line-clamp-2 leading-tight hover:text-[#00E676] transition-colors">
               <Link href={`/product/${product.slug}`}>{product.name}</Link>
             </h3>
 
             {/* Price Row */}
             <div className="flex items-baseline gap-2 pt-1">
-              <span className="text-lg font-black text-slate-900 font-mono">
+              <span className="text-lg font-black text-white font-mono">
                 {formatINR(product.price)}
               </span>
               {product.originalPrice && (
@@ -163,7 +163,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 </span>
               )}
               {product.originalPrice && (
-                <span className="text-[10px] font-extrabold text-[#008137] bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                <span className="text-[10px] font-extrabold text-[#00E676] bg-[#00E676]/10 border border-[#00E676]/30 px-1.5 py-0.5 rounded">
                   SAVE {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
                 </span>
               )}
@@ -178,20 +178,20 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center justify-between text-[11px]">
             <button
               onClick={() => setIsSizeGuideOpen(true)}
-              className="text-slate-500 hover:text-slate-900 underline flex items-center gap-1 font-semibold"
+              className="text-slate-400 hover:text-white underline flex items-center gap-1 font-semibold"
             >
-              <Ruler className="w-3.5 h-3.5 text-[#00C853]" /> Size Chart Guide
+              <Ruler className="w-3.5 h-3.5 text-[#00E676]" /> Size Chart Guide
             </button>
-            <span className="text-emerald-700 font-extrabold flex items-center gap-1">
-              <Check className="w-3.5 h-3.5 text-[#00C853]" /> IN STOCK
+            <span className="text-[#00E676] font-extrabold flex items-center gap-1">
+              <Check className="w-3.5 h-3.5 text-[#00E676]" /> IN STOCK
             </span>
           </div>
 
           <Button
             onClick={handleAddToCart}
-            className="w-full text-xs font-black uppercase tracking-wider h-11 bg-slate-900 hover:bg-[#00C853] text-white hover:text-white rounded-xl transition-all shadow-md flex items-center justify-center gap-2 group/btn"
+            className="w-full text-xs font-black uppercase tracking-wider h-11 bg-[#00E676] hover:bg-[#00c853] text-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 group/btn neon-emerald-glow"
           >
-            <ShoppingBag className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+            <ShoppingBag className="w-4 h-4 group-hover/btn:scale-110 transition-transform stroke-[2.5]" />
             <span>ADD TO CART • {selectedSize} CM</span>
           </Button>
 
