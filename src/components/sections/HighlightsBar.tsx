@@ -35,7 +35,7 @@ export function HighlightsBar() {
             const Icon = item.icon;
             return (
               <div key={index} className="flex items-center gap-3.5 group">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#00C853] group-hover:bg-[#00C853] group-hover:text-white transition-all shrink-0 shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-[#FF3B30] group-hover:bg-[#FF3B30] group-hover:text-white transition-all shrink-0 shadow-sm">
                   <Icon className="w-6 h-6" />
                 </div>
                 <div>

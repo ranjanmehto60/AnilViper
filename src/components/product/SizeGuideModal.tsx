@@ -36,7 +36,7 @@ export function SizeGuideModal({ children, open, onOpenChange }: SizeGuideModalP
       <DialogContent className="max-w-2xl bg-white border-slate-200 text-slate-900 shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-black tracking-wider uppercase text-slate-900 flex items-center gap-2">
-            <Ruler className="w-5 h-5 text-[#00C853]" />
+            <Ruler className="w-5 h-5 text-[#FF3B30]" />
             KPNP & Viper Taekwondo Dobok Sizing Guide
           </DialogTitle>
         </DialogHeader>
@@ -50,7 +50,7 @@ export function SizeGuideModal({ children, open, onOpenChange }: SizeGuideModalP
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-100 text-slate-700 border-b border-slate-200 uppercase text-[11px]">
                 <tr>
-                  <th className="p-3 font-extrabold text-[#00C853]">Uniform Size</th>
+                  <th className="p-3 font-extrabold text-[#FF3B30]">Uniform Size</th>
                   <th className="p-3 font-bold">Athlete Height</th>
                   <th className="p-3 font-bold">Approx Weight</th>
                   <th className="p-3 font-bold">Age / Fit</th>
@@ -69,9 +69,9 @@ export function SizeGuideModal({ children, open, onOpenChange }: SizeGuideModalP
             </table>
           </div>
 
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-1.5 text-xs text-slate-800">
-            <h4 className="font-bold text-[#008137] flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#00C853]" /> Pro Tips for Perfect Fit:
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-1.5 text-xs text-slate-800">
+            <h4 className="font-bold text-[#FF6B61] flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-[#FF3B30]" /> Pro Tips for Perfect Fit:
             </h4>
             <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600">
               <li>Our KPNP Doboks undergo pre-shrunk washing so shrinkage is under 1.5%.</li>

@@ -41,7 +41,7 @@ export default function AboutPage() {
         
         {/* Header Hero Banner */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-extrabold text-[#00C853] uppercase tracking-widest bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full inline-flex items-center gap-1 shadow-sm">
+          <span className="text-xs font-extrabold text-[#FF3B30] uppercase tracking-widest bg-red-50 border border-red-200 px-3.5 py-1.5 rounded-full inline-flex items-center gap-1 shadow-sm">
             <Award className="w-3.5 h-3.5" /> BORN IN CHATTARPUR, DELHI
           </span>
 
@@ -65,7 +65,7 @@ export default function AboutPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4 right-4 text-white">
-              <p className="text-xs font-bold text-[#00E676] flex items-center gap-1">
+              <p className="text-xs font-bold text-[#FF3B30] flex items-center gap-1">
                 <MapPin className="w-4 h-4" /> Head Office & Warehouse: Chattarpur, Delhi
               </p>
             </div>
@@ -86,11 +86,11 @@ export default function AboutPage() {
 
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <h4 className="text-xl font-black text-[#00C853] bebas-font">OUR MISSION</h4>
+                <h4 className="text-xl font-black text-[#FF3B30] bebas-font">OUR MISSION</h4>
                 <p className="text-[11px] text-slate-500 font-medium">Make WT & KPNP Approved quality accessible to every young practitioner in India.</p>
               </div>
               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <h4 className="text-xl font-black text-[#00C853] bebas-font">OUR PROMISE</h4>
+                <h4 className="text-xl font-black text-[#FF3B30] bebas-font">OUR PROMISE</h4>
                 <p className="text-[11px] text-slate-500 font-medium">7-day easy exchanges & direct factory support via WhatsApp.</p>
               </div>
             </div>
@@ -113,7 +113,7 @@ export default function AboutPage() {
               <thead className="bg-slate-50 text-slate-700 uppercase tracking-wider border-b border-slate-200 text-xs">
                 <tr>
                   <th className="p-4 font-extrabold text-slate-500">Feature</th>
-                  <th className="p-4 font-black text-[#008137] bg-emerald-50 border-x border-emerald-100">
+                  <th className="p-4 font-black text-[#FF6B61] bg-red-50 border-x border-red-100">
                     🐍 KPNP / Viper Gears Dobok
                   </th>
                   <th className="p-4 font-extrabold text-slate-400">Normal / Generic Dobok</th>
@@ -123,8 +123,8 @@ export default function AboutPage() {
                 {comparisonData.map((row, idx) => (
                   <tr key={idx} className="hover:bg-slate-50 transition-colors">
                     <td className="p-4 font-bold text-slate-900">{row.feature}</td>
-                    <td className="p-4 font-extrabold text-slate-900 bg-emerald-50/50 border-x border-emerald-100 flex items-center gap-2">
-                      <Check className="w-4 h-4 text-[#00C853] shrink-0" />
+                    <td className="p-4 font-extrabold text-slate-900 bg-red-50/50 border-x border-red-100 flex items-center gap-2">
+                      <Check className="w-4 h-4 text-[#FF3B30] shrink-0" />
                       <span>{row.viper}</span>
                     </td>
                     <td className="p-4 text-slate-400 flex items-center gap-2">
@@ -147,12 +147,12 @@ export default function AboutPage() {
             We provide custom logo embroidery, academy discount pricing, and wholesale shipments for Taekwondo clubs across India.
           </p>
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button variant="default" size="lg" asChild className="text-xs font-black bg-[#00C853] hover:bg-[#00b248] text-white shadow-lg">
+            <Button variant="default" size="lg" asChild className="text-xs font-black bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg">
               <Link href="/contact">Inquire Bulk Dojang Pricing</Link>
             </Button>
             <a
               href="tel:+919871674886"
-              className="inline-flex items-center gap-2 text-xs font-bold text-[#00E676] hover:underline"
+              className="inline-flex items-center gap-2 text-xs font-bold text-[#FF3B30] hover:underline"
             >
               <PhoneCall className="w-4 h-4" /> Call +91-9871674886
             </a>

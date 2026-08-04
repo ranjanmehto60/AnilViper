@@ -21,7 +21,7 @@ export function NewsletterSection() {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 text-white relative overflow-hidden shadow-inner">
+    <section className="py-16 bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white relative overflow-hidden shadow-inner">
       <div className="container mx-auto px-4 max-w-4xl text-center space-y-4">
         
         <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 px-3.5 py-1 rounded-full text-xs font-bold text-white shadow-sm">
@@ -32,7 +32,7 @@ export function NewsletterSection() {
           GET 10% OFF YOUR FIRST TAEKWONDO UNIFORM
         </h2>
 
-        <p className="text-xs sm:text-sm text-emerald-100 max-w-lg mx-auto leading-relaxed">
+        <p className="text-xs sm:text-sm text-red-100 max-w-lg mx-auto leading-relaxed">
           Subscribe for exclusive dojang discounts, bulk academy offers, and early access to new KPNP & WT Approved competition gear drops.
         </p>
 
@@ -49,7 +49,7 @@ export function NewsletterSection() {
                 placeholder="Enter your email address..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 h-11 text-xs bg-white text-slate-900 border-white focus:ring-2 focus:ring-emerald-300"
+                className="pl-10 h-11 text-xs bg-white text-slate-900 border-white focus:ring-2 focus:ring-red-300"
               />
             </div>
             <Button type="submit" variant="default" className="h-11 px-6 text-xs font-black bg-slate-900 hover:bg-slate-800 text-white shadow-lg">

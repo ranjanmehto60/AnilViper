@@ -22,7 +22,7 @@ export function HeroSection() {
       <div className="absolute inset-0 hero-grid-pattern-dark opacity-40 pointer-events-none" />
 
       {/* Ambient Glow Orbs */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#00E676]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#FF3B30]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -31,8 +31,8 @@ export function HeroSection() {
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             
             {/* Top Badge */}
-            <div className="inline-flex items-center gap-2 bg-[#00E676]/10 border border-[#00E676]/30 px-4 py-1.5 rounded-full text-xs font-black text-[#00E676] shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-[#00E676] animate-pulse" />
+            <div className="inline-flex items-center gap-2 bg-[#FF3B30]/10 border border-[#FF3B30]/30 px-4 py-1.5 rounded-full text-xs font-black text-[#FF3B30] shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-[#FF3B30] animate-pulse" />
               <span>WT APPROVED • KPNP OFFICIAL DOBOK INDIA EDITION</span>
             </div>
 
@@ -40,7 +40,7 @@ export function HeroSection() {
             <div className="space-y-2">
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.05] uppercase">
                 DOMINATE THE <br className="hidden sm:block" />
-                <span className="text-[#00E676] drop-shadow-sm">MAT WITH PRECISION</span>
+                <span className="text-[#FF3B30] drop-shadow-sm">MAT WITH PRECISION</span>
               </h1>
               <p className="text-sm sm:text-base md:text-lg text-slate-300 font-medium max-w-xl mx-auto lg:mx-0 leading-relaxed pt-2">
                 Engineered for maximum speed, mobility, and championship durability. Crafted from ultra-lightweight <span className="font-bold text-white">220 GSM Jacquard Ripstop fabric</span> with classic India V-Neck detailing.
@@ -50,15 +50,15 @@ export function HeroSection() {
             {/* Key Feature Pills */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
               <div className="flex items-center gap-1.5 bg-[#0F172A] border border-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-[#00E676]" />
+                <CheckCircle2 className="w-4 h-4 text-[#FF3B30]" />
                 <span>220 GSM Ultra-Light</span>
               </div>
               <div className="flex items-center gap-1.5 bg-[#0F172A] border border-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-[#00E676]" />
+                <CheckCircle2 className="w-4 h-4 text-[#FF3B30]" />
                 <span>Moisture-Wicking Air Mesh</span>
               </div>
               <div className="flex items-center gap-1.5 bg-[#0F172A] border border-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-[#00E676]" />
+                <CheckCircle2 className="w-4 h-4 text-[#FF3B30]" />
                 <span>India Flag Back Embroidery</span>
               </div>
             </div>
@@ -68,7 +68,7 @@ export function HeroSection() {
               <Button
                 asChild
                 size="lg"
-                className="w-full sm:w-auto h-14 px-8 text-sm font-black bg-[#00E676] hover:bg-[#00c853] text-black rounded-2xl shadow-xl neon-emerald-glow transition-all hover:scale-105 gap-2 uppercase tracking-wider"
+                className="w-full sm:w-auto h-14 px-8 text-sm font-black bg-[#FF3B30] hover:bg-[#E12D25] text-black rounded-2xl shadow-xl neon-red-glow transition-all hover:scale-105 gap-2 uppercase tracking-wider"
               >
                 <Link href="/shop">
                   <span>SHOP KPNP INDIA EDITION</span>
@@ -130,21 +130,21 @@ export function HeroSection() {
 
                 {/* Floating Top Badge */}
                 <div className="absolute top-4 left-4 bg-slate-900/90 backdrop-blur-md border border-slate-700 px-3 py-1 rounded-full text-xs font-black text-white flex items-center gap-1.5 shadow-md">
-                  <ShieldCheck className="w-4 h-4 text-[#00E676]" />
+                  <ShieldCheck className="w-4 h-4 text-[#FF3B30]" />
                   <span>KPNP OFFICIAL</span>
                 </div>
 
                 {/* Floating Bottom Info Pill */}
                 <div className="absolute bottom-4 left-4 right-4 bg-slate-900/95 backdrop-blur-md border border-slate-800 p-4 rounded-xl shadow-lg flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-extrabold uppercase text-[#00E676] tracking-widest block">
+                    <span className="text-[10px] font-extrabold uppercase text-[#FF3B30] tracking-widest block">
                       FEATURED UNIFORM
                     </span>
                     <h3 className="text-xs font-black text-white uppercase">
                       KPNP Black V-Neck Dan Dobok
                     </h3>
                   </div>
-                  <span className="text-base font-black text-[#00E676] font-mono">
+                  <span className="text-base font-black text-[#FF3B30] font-mono">
                     ₹2,999
                   </span>
                 </div>
@@ -154,7 +154,7 @@ export function HeroSection() {
 
             {/* Floating Decorative Glass Card Top Right */}
             <div className="absolute -top-6 -right-6 hidden xl:flex items-center gap-3 bg-[#0F172A]/90 backdrop-blur-md border border-slate-800 p-3.5 rounded-2xl shadow-xl z-20">
-              <div className="w-10 h-10 rounded-xl bg-[#00E676]/20 text-[#00E676] flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-xl bg-[#FF3B30]/20 text-[#FF3B30] flex items-center justify-center font-bold">
                 <Zap className="w-5 h-5" />
               </div>
               <div className="text-left">

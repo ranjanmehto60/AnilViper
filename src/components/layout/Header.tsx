@@ -54,8 +54,8 @@ export function Header() {
     <>
       {/* Top Banner Bar */}
       <div className="bg-[#05080E] text-slate-300 py-2 px-4 text-center text-xs font-bold tracking-wider flex items-center justify-center gap-2 border-b border-slate-800/80">
-        <span className="inline-block w-2 h-2 rounded-full bg-[#00E676] animate-pulse" />
-        <span className="text-[#00E676] font-extrabold uppercase">WT & KPNP APPROVED:</span>
+        <span className="inline-block w-2 h-2 rounded-full bg-[#FF3B30] animate-pulse" />
+        <span className="text-[#FF3B30] font-extrabold uppercase">WT & KPNP APPROVED:</span>
         <span className="hidden sm:inline text-slate-200">
           Official KPNP Competition Taekwondo Doboks India Edition | Free Pan-India Shipping above ₹999
         </span>
@@ -81,7 +81,7 @@ export function Header() {
                       <Image src="/images/viper-logo.jpg" alt="Viper Logo" fill className="object-contain p-0.5" />
                     </div>
                     <span className="text-xl font-black tracking-widest text-white bebas-font">
-                      VIPER <span className="text-[#00E676]">GEARS</span>
+                      VIPER <span className="text-[#FF3B30]">GEARS</span>
                     </span>
                   </SheetTitle>
                 </SheetHeader>
@@ -91,7 +91,7 @@ export function Header() {
                       key={link.name}
                       href={link.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="text-sm font-bold uppercase tracking-wider text-slate-300 hover:text-[#00E676] py-2 border-b border-slate-800/60"
+                      className="text-sm font-bold uppercase tracking-wider text-slate-300 hover:text-[#FF3B30] py-2 border-b border-slate-800/60"
                     >
                       {link.name}
                     </Link>
@@ -100,7 +100,7 @@ export function Header() {
                     <Link
                       href="/admin/login"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2 text-xs font-bold text-[#00E676] bg-slate-900 border border-slate-800 p-3 rounded-xl"
+                      className="flex items-center gap-2 text-xs font-bold text-[#FF3B30] bg-slate-900 border border-slate-800 p-3 rounded-xl"
                     >
                       <Crown className="w-4 h-4 text-amber-400" /> Admin Portal
                     </Link>
@@ -112,7 +112,7 @@ export function Header() {
 
           {/* Logo Section */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-11 h-11 rounded-xl bg-slate-900 border border-slate-700 p-1 shadow-md group-hover:border-[#00E676]/60 transition-all duration-300 overflow-hidden">
+            <div className="relative w-11 h-11 rounded-xl bg-slate-900 border border-slate-700 p-1 shadow-md group-hover:border-[#FF3B30]/60 transition-all duration-300 overflow-hidden">
               <Image
                 src="/images/viper-logo.jpg"
                 alt="Viper Gears Official Brand Logo"
@@ -123,7 +123,7 @@ export function Header() {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-2xl font-black tracking-widest text-white leading-none bebas-font">
-                  VIPER <span className="text-[#00E676]">GEARS</span>
+                  VIPER <span className="text-[#FF3B30]">GEARS</span>
                 </span>
               </div>
               <span className="text-[10px] tracking-widest text-slate-400 font-bold uppercase block mt-0.5">
@@ -138,7 +138,7 @@ export function Header() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-xs font-bold tracking-wider uppercase transition-colors relative py-1 text-slate-300 hover:text-[#00E676]"
+                className="text-xs font-bold tracking-wider uppercase transition-colors relative py-1 text-slate-300 hover:text-[#FF3B30]"
               >
                 {link.name}
               </Link>
@@ -151,7 +151,7 @@ export function Header() {
             {/* Search Trigger */}
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="p-2.5 text-slate-300 hover:text-[#00E676] hover:bg-slate-800/70 rounded-full transition-colors relative"
+              className="p-2.5 text-slate-300 hover:text-[#FF3B30] hover:bg-slate-800/70 rounded-full transition-colors relative"
               aria-label="Search Products"
             >
               <Search className="w-5 h-5" />
@@ -160,7 +160,7 @@ export function Header() {
             {/* Wishlist Button */}
             <Link
               href="/account?tab=wishlist"
-              className="p-2.5 text-slate-300 hover:text-[#00E676] hover:bg-slate-800/70 rounded-full transition-colors relative hidden sm:flex"
+              className="p-2.5 text-slate-300 hover:text-[#FF3B30] hover:bg-slate-800/70 rounded-full transition-colors relative hidden sm:flex"
               aria-label="Wishlist"
             >
               <Heart className="w-5 h-5" />
@@ -174,7 +174,7 @@ export function Header() {
             {/* User Account */}
             <Link
               href="/account"
-              className="p-2.5 text-slate-300 hover:text-[#00E676] hover:bg-slate-800/70 rounded-full transition-colors"
+              className="p-2.5 text-slate-300 hover:text-[#FF3B30] hover:bg-slate-800/70 rounded-full transition-colors"
               aria-label="User Account"
             >
               <User className="w-5 h-5" />
@@ -192,7 +192,7 @@ export function Header() {
             {/* Cart Drawer Trigger */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 bg-[#00E676] hover:bg-[#00c853] text-black rounded-full transition-all duration-300 shadow-md neon-emerald-glow"
+              className="relative p-2.5 bg-[#FF3B30] hover:bg-[#E12D25] text-black rounded-full transition-all duration-300 shadow-md neon-red-glow"
               aria-label="Shopping Cart"
             >
               <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
@@ -216,7 +216,7 @@ export function Header() {
                 placeholder="Search KPNP Dobok, Black Belt, Junior Kids..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-400 px-4 py-3 rounded-xl text-xs focus:outline-none focus:border-[#00E676]"
+                className="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-400 px-4 py-3 rounded-xl text-xs focus:outline-none focus:border-[#FF3B30]"
                 autoFocus
               />
               <button
@@ -230,7 +230,7 @@ export function Header() {
               {searchQuery.trim() && (
                 <div className="absolute top-14 left-0 right-0 bg-[#0F172A] border border-slate-800 rounded-xl shadow-2xl p-2 z-50 max-h-80 overflow-y-auto space-y-1">
                   {filteredProducts.length === 0 ? (
-                    <div className="p-3 text-xs text-slate-400 text-center">No uniforms found matching "{searchQuery}"</div>
+                    <div className="p-3 text-xs text-slate-400 text-center">No uniforms found matching &quot;{searchQuery}&quot;</div>
                   ) : (
                     filteredProducts.map((product) => (
                       <Link
@@ -244,7 +244,7 @@ export function Header() {
                         </div>
                         <div className="flex-1">
                           <h4 className="font-bold text-white line-clamp-1">{product.name}</h4>
-                          <span className="text-[#00E676] font-mono font-bold">₹{product.price}</span>
+                          <span className="text-[#FF3B30] font-mono font-bold">₹{product.price}</span>
                         </div>
                       </Link>
                     ))

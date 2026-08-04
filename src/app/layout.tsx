@@ -47,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${bebasNeue.variable} ${outfit.variable}`}>
-      <body className="bg-[#080C14] text-[#F8FAFC] min-h-screen flex flex-col antialiased">
+      <body className="bg-background text-foreground min-h-screen flex flex-col antialiased">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

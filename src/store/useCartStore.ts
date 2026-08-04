@@ -19,6 +19,8 @@ interface CartState {
   getItemCount: () => number;
 }
 
+export const MAX_QUANTITY_PER_LINE = 10;
+
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
@@ -34,12 +36,15 @@ export const useCartStore = create<CartState>()(
 
           if (existingIndex > -1) {
             const updatedItems = [...state.items];
-            updatedItems[existingIndex].quantity += quantity;
+            updatedItems[existingIndex].quantity = Math.min(
+              MAX_QUANTITY_PER_LINE,
+              updatedItems[existingIndex].quantity + quantity
+            );
             return { items: updatedItems };
           }
 
           return {
-            items: [...state.items, { product, selectedSize, quantity }],
+            items: [...state.items, { product, selectedSize, quantity: Math.min(MAX_QUANTITY_PER_LINE, quantity) }],
           };
         });
       },
@@ -57,7 +62,7 @@ export const useCartStore = create<CartState>()(
           const updatedItems = state.items
             .map((item) => {
               if (item.product.id === productId && item.selectedSize === selectedSize) {
-                const newQty = item.quantity + delta;
+                const newQty = Math.min(MAX_QUANTITY_PER_LINE, item.quantity + delta);
                 return newQty > 0 ? { ...item, quantity: newQty } : null;
               }
               return item;

@@ -74,7 +74,7 @@ export function CartDrawer({ children, isOpen, onClose }: CartDrawerProps) {
         {/* Header */}
         <Header className="px-6 py-5 border-b border-slate-800 bg-[#0B101D]">
           <Title className="flex items-center gap-2.5 text-lg font-black tracking-wider uppercase text-white">
-            <ShoppingBag className="w-5 h-5 text-[#00E676]" />
+            <ShoppingBag className="w-5 h-5 text-[#FF3B30]" />
             <span>Shopping Cart ({itemCount})</span>
           </Title>
         </Header>
@@ -94,7 +94,7 @@ export function CartDrawer({ children, isOpen, onClose }: CartDrawerProps) {
             <Button
               asChild
               onClick={() => handleOpenChange(false)}
-              className="bg-[#00E676] hover:bg-[#00c853] text-black font-black text-xs uppercase tracking-wider px-6 h-11 rounded-xl shadow-md"
+              className="bg-[#FF3B30] hover:bg-[#E12D25] text-black font-black text-xs uppercase tracking-wider px-6 h-11 rounded-xl shadow-md"
             >
               <Link href="/shop">Start Shopping</Link>
             </Button>
@@ -122,7 +122,7 @@ export function CartDrawer({ children, isOpen, onClose }: CartDrawerProps) {
                       <h4 className="text-xs font-bold text-white line-clamp-1">
                         {item.product.name}
                       </h4>
-                      <p className="text-[11px] text-[#00E676] font-bold mt-0.5">
+                      <p className="text-[11px] text-[#FF3B30] font-bold mt-0.5">
                         Size: {item.selectedSize} cm
                       </p>
                     </div>
@@ -164,8 +164,8 @@ export function CartDrawer({ children, isOpen, onClose }: CartDrawerProps) {
               {/* Promo Code Input */}
               <div className="pt-2">
                 {discountCode ? (
-                  <div className="flex items-center justify-between p-3 bg-[#00E676]/10 border border-[#00E676]/30 rounded-xl text-xs">
-                    <div className="flex items-center gap-2 text-[#00E676] font-bold">
+                  <div className="flex items-center justify-between p-3 bg-[#FF3B30]/10 border border-[#FF3B30]/30 rounded-xl text-xs">
+                    <div className="flex items-center gap-2 text-[#FF3B30] font-bold">
                       <Tag className="w-4 h-4" />
                       <span>CODE: {discountCode} ({useCartStore.getState().discountPercentage}% OFF)</span>
                     </div>
@@ -200,20 +200,20 @@ export function CartDrawer({ children, isOpen, onClose }: CartDrawerProps) {
                   <span className="font-mono text-white">{formatINR(subtotal)}</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-[#00E676] font-bold">
+                  <div className="flex justify-between text-[#FF3B30] font-bold">
                     <span>Discount</span>
                     <span className="font-mono">-{formatINR(discount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-slate-400">
                   <span>Pan-India Express Shipping</span>
-                  <span className="font-mono text-[#00E676]">
+                  <span className="font-mono text-[#FF3B30]">
                     {shipping === 0 ? "FREE" : formatINR(shipping)}
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-black text-white pt-2 border-t border-slate-800">
                   <span>Total</span>
-                  <span className="font-mono text-[#00E676]">{formatINR(total)}</span>
+                  <span className="font-mono text-[#FF3B30]">{formatINR(total)}</span>
                 </div>
               </div>
 
@@ -221,7 +221,7 @@ export function CartDrawer({ children, isOpen, onClose }: CartDrawerProps) {
                 <Button
                   asChild
                   onClick={() => handleOpenChange(false)}
-                  className="w-full bg-[#00E676] hover:bg-[#00c853] text-black font-black text-xs uppercase tracking-wider h-12 rounded-xl shadow-lg flex items-center justify-center gap-2 neon-emerald-glow"
+                  className="w-full bg-[#FF3B30] hover:bg-[#E12D25] text-black font-black text-xs uppercase tracking-wider h-12 rounded-xl shadow-lg flex items-center justify-center gap-2 neon-red-glow"
                 >
                   <Link href="/checkout">
                     <span>PROCEED TO CHECKOUT</span>
@@ -230,7 +230,7 @@ export function CartDrawer({ children, isOpen, onClose }: CartDrawerProps) {
                 </Button>
 
                 <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#00E676]" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#FF3B30]" />
                   <span>Razorpay 100% Encrypted Payment</span>
                 </div>
               </div>

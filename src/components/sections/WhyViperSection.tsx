@@ -33,7 +33,7 @@ export function WhyViperSection() {
         
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
-          <span className="text-xs font-extrabold text-[#00C853] uppercase tracking-widest bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full shadow-sm">
+          <span className="text-xs font-extrabold text-[#FF3B30] uppercase tracking-widest bg-red-50 border border-red-200 px-3.5 py-1.5 rounded-full shadow-sm">
             ENGINEERED FOR CHAMPIONS
           </span>
           <h2 className="text-4xl sm:text-5xl font-black text-slate-900 uppercase tracking-tight bebas-font">
@@ -55,7 +55,7 @@ export function WhyViperSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.15 }}
-                className="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between group hover:border-[#00C853] transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between group hover:border-[#FF3B30] transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 <div className="space-y-4">
                   <div className="relative h-64 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
@@ -65,7 +65,7 @@ export function WhyViperSection() {
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute top-3 left-3 w-10 h-10 rounded-xl bg-white/90 backdrop-blur-md flex items-center justify-center text-[#00C853] border border-slate-200 shadow-md">
+                    <div className="absolute top-3 left-3 w-10 h-10 rounded-xl bg-white/90 backdrop-blur-md flex items-center justify-center text-[#FF3B30] border border-slate-200 shadow-md">
                       <Icon className="w-5 h-5" />
                     </div>
                   </div>

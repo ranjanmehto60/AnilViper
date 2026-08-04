@@ -6,16 +6,16 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { SizeGuideModal } from "@/components/product/SizeGuideModal";
-import { ShieldCheck, ArrowRight, Ruler, Award, Sparkles } from "lucide-react";
+import { ShieldCheck, ArrowRight, Ruler, Sparkles } from "lucide-react";
 
 export function HeroSection() {
   const [sizeModalOpen, setSizeModalOpen] = React.useState(false);
 
   return (
     <>
-      <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-gradient-to-b from-white via-slate-50 to-emerald-50/30 py-12 lg:py-20 border-b border-slate-200/80">
+      <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-gradient-to-b from-white via-slate-50 to-red-50/30 py-12 lg:py-20 border-b border-slate-200/80">
         {/* Background Ambient Elements */}
-        <div className="absolute top-1/4 right-10 w-96 h-96 bg-emerald-200/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 right-10 w-96 h-96 bg-red-200/30 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-10 left-10 w-72 h-72 bg-blue-100/40 rounded-full blur-3xl pointer-events-none" />
 
         <div className="container mx-auto px-4 relative z-10">
@@ -29,15 +29,15 @@ export function HeroSection() {
               className="lg:col-span-7 space-y-6 text-center lg:text-left"
             >
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-1.5 rounded-full text-xs font-extrabold text-[#00C853] shadow-sm">
-                <ShieldCheck className="w-4 h-4 text-[#00C853]" />
+              <div className="inline-flex items-center gap-2 bg-red-50 border border-red-200 px-4 py-1.5 rounded-full text-xs font-extrabold text-[#FF3B30] shadow-sm">
+                <ShieldCheck className="w-4 h-4 text-[#FF3B30]" />
                 <span>OFFICIAL KPNP & WT APPROVED TAEKWONDO UNIFORMS</span>
               </div>
 
               {/* Main Headline */}
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 uppercase leading-[0.95] bebas-font">
                 ELEVATE YOUR PERFORMANCE WITH <br />
-                <span className="text-[#00C853]">KPNP INDIA EDITION</span>
+                <span className="text-[#FF3B30]">KPNP INDIA EDITION</span>
               </h1>
 
               {/* Subheading */}
@@ -47,15 +47,15 @@ export function HeroSection() {
 
               {/* Stats badges */}
               <div className="grid grid-cols-3 gap-4 pt-2 max-w-lg mx-auto lg:mx-0 text-left">
-                <div className="border-l-3 border-[#00C853] pl-3.5">
+                <div className="border-l-3 border-[#FF3B30] pl-3.5">
                   <span className="text-xl font-black text-slate-900 block leading-none">210 GSM</span>
                   <span className="text-[11px] text-slate-500 font-semibold">Moisture-Wicking</span>
                 </div>
-                <div className="border-l-3 border-[#00C853] pl-3.5">
+                <div className="border-l-3 border-[#FF3B30] pl-3.5">
                   <span className="text-xl font-black text-slate-900 block leading-none">INDIA FLAG</span>
                   <span className="text-[11px] text-slate-500 font-semibold">National Pride Patch</span>
                 </div>
-                <div className="border-l-3 border-[#00C853] pl-3.5">
+                <div className="border-l-3 border-[#FF3B30] pl-3.5">
                   <span className="text-xl font-black text-slate-900 block leading-none">100% WT</span>
                   <span className="text-[11px] text-slate-500 font-semibold">World Certified</span>
                 </div>
@@ -67,7 +67,7 @@ export function HeroSection() {
                   variant="default"
                   size="lg"
                   asChild
-                  className="w-full sm:w-auto text-sm gap-2 bg-[#00C853] hover:bg-[#00b248] text-white font-extrabold shadow-lg shadow-emerald-500/20"
+                  className="w-full sm:w-auto text-sm gap-2 bg-[#FF3B30] hover:bg-[#D92D20] text-white font-extrabold shadow-lg shadow-red-500/20"
                 >
                   <Link href="/product/kpnp-competition-taekwondo-dobok-india-edition">
                     Buy KPNP India Edition <ArrowRight className="w-5 h-5" />
@@ -80,7 +80,7 @@ export function HeroSection() {
                   onClick={() => setSizeModalOpen(true)}
                   className="w-full sm:w-auto text-sm gap-2 border-slate-300 text-slate-700 hover:bg-slate-100"
                 >
-                  <Ruler className="w-4 h-4 text-[#00C853]" /> Height Sizing Guide
+                  <Ruler className="w-4 h-4 text-[#FF3B30]" /> Height Sizing Guide
                 </Button>
               </div>
             </motion.div>
@@ -104,7 +104,7 @@ export function HeroSection() {
                 {/* Overlay Card */}
                 <div className="absolute bottom-5 left-5 right-5 p-4 rounded-2xl glass-card bg-white/95 border border-slate-200/80 shadow-xl space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-[#00C853] uppercase tracking-wider flex items-center gap-1">
+                    <span className="text-xs font-black text-[#FF3B30] uppercase tracking-wider flex items-center gap-1">
                       <Sparkles className="w-4 h-4" /> KPNP Official Gear
                     </span>
                     <span className="text-[10px] bg-[#E53935] text-white font-extrabold px-2.5 py-0.5 rounded-full">

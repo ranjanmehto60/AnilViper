@@ -11,15 +11,15 @@ export default function ShippingPolicyPage() {
         <nav className="flex items-center gap-2 text-xs text-zinc-400">
           <Link href="/" className="hover:text-white">Home</Link>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-[#00E676] font-semibold">Shipping Policy</span>
+          <span className="text-[#FF3B30] font-semibold">Shipping Policy</span>
         </nav>
 
         <h1 className="text-4xl font-black text-white uppercase bebas-font flex items-center gap-3">
-          <Truck className="w-8 h-8 text-[#00E676]" /> PAN-INDIA SHIPPING POLICY
+          <Truck className="w-8 h-8 text-[#FF3B30]" /> PAN-INDIA SHIPPING POLICY
         </h1>
 
         <div className="space-y-4 text-xs leading-relaxed border-t border-zinc-800 pt-6">
-          <div className="bg-emerald-950/40 border border-emerald-500/30 p-4 rounded-xl text-emerald-300 font-bold">
+          <div className="bg-red-950/40 border border-red-500/30 p-4 rounded-xl text-red-300 font-bold">
             ⚡ FREE Express Shipping across India on all orders over ₹999!
           </div>
 

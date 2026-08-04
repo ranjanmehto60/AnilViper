@@ -17,7 +17,7 @@ export function GalleryPreview() {
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-12 gap-4">
           <div>
-            <span className="text-xs font-extrabold text-[#00C853] uppercase tracking-widest bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 w-fit shadow-sm">
+            <span className="text-xs font-extrabold text-[#FF3B30] uppercase tracking-widest bg-red-50 border border-red-200 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 w-fit shadow-sm">
               <Camera className="w-3.5 h-3.5" /> VIPER ACTION GALLERY
             </span>
             <h2 className="text-4xl sm:text-5xl font-black text-slate-900 uppercase tracking-tight bebas-font mt-2">
@@ -45,14 +45,14 @@ export function GalleryPreview() {
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent opacity-80 group-hover:opacity-95 transition-opacity" />
 
               <div className="absolute bottom-4 left-4 right-4 text-white">
-                <span className="text-[10px] bg-[#00C853] text-white font-extrabold px-2.5 py-0.5 rounded-full uppercase">
+                <span className="text-[10px] bg-[#FF3B30] text-white font-extrabold px-2.5 py-0.5 rounded-full uppercase">
                   {item.category}
                 </span>
-                <h3 className="text-sm font-bold mt-1.5 leading-snug group-hover:text-[#00E676] transition-colors">
+                <h3 className="text-sm font-bold mt-1.5 leading-snug group-hover:text-[#FF3B30] transition-colors">
                   {item.title}
                 </h3>
                 <p className="text-[11px] text-slate-300 flex items-center gap-1 mt-0.5">
-                  <MapPin className="w-3 h-3 text-[#00E676]" /> {item.location}
+                  <MapPin className="w-3 h-3 text-[#FF3B30]" /> {item.location}
                 </p>
               </div>
             </Link>

@@ -22,7 +22,7 @@ export default function GalleryPage() {
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <span className="text-xs font-extrabold text-[#00C853] uppercase tracking-widest bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 shadow-sm">
+          <span className="text-xs font-extrabold text-[#FF3B30] uppercase tracking-widest bg-red-50 border border-red-200 px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 shadow-sm">
             <Camera className="w-3.5 h-3.5" /> ACTION PHOTO SHOWCASE
           </span>
           <h1 className="text-4xl sm:text-6xl font-black text-slate-900 uppercase tracking-tight bebas-font">
@@ -40,7 +40,7 @@ export default function GalleryPage() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                   selectedCategory === cat
-                    ? "bg-[#00C853] text-white shadow-md shadow-emerald-500/20"
+                    ? "bg-[#FF3B30] text-white shadow-md shadow-red-500/20"
                     : "bg-white text-slate-600 border border-slate-200 hover:text-slate-900 shadow-sm"
                 }`}
               >
@@ -67,14 +67,14 @@ export default function GalleryPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-95 transition-opacity" />
 
               <div className="absolute bottom-4 left-4 right-4 text-white">
-                <span className="text-[10px] bg-[#00C853] text-white font-extrabold px-2.5 py-0.5 rounded-full uppercase">
+                <span className="text-[10px] bg-[#FF3B30] text-white font-extrabold px-2.5 py-0.5 rounded-full uppercase">
                   {item.category}
                 </span>
-                <h3 className="text-sm font-bold mt-1.5 group-hover:text-[#00E676] transition-colors">
+                <h3 className="text-sm font-bold mt-1.5 group-hover:text-[#FF3B30] transition-colors">
                   {item.title}
                 </h3>
                 <p className="text-[11px] text-slate-300 flex items-center gap-1 mt-0.5">
-                  <MapPin className="w-3 h-3 text-[#00E676]" /> {item.location}
+                  <MapPin className="w-3 h-3 text-[#FF3B30]" /> {item.location}
                 </p>
               </div>
             </div>
@@ -95,12 +95,12 @@ export default function GalleryPage() {
                   />
                 </div>
                 <div className="p-6 bg-white border-t border-slate-200 space-y-1">
-                  <span className="text-xs font-extrabold text-[#00C853] uppercase">
+                  <span className="text-xs font-extrabold text-[#FF3B30] uppercase">
                     {lightboxItem.category}
                   </span>
                   <h3 className="text-lg font-black text-slate-900">{lightboxItem.title}</h3>
                   <p className="text-xs text-slate-500 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-[#00C853]" /> {lightboxItem.location}
+                    <MapPin className="w-3.5 h-3.5 text-[#FF3B30]" /> {lightboxItem.location}
                   </p>
                 </div>
               </div>

@@ -11,6 +11,7 @@ Viper Gears is a fast, mobile-first, modern D2C e-commerce platform built for Ta
 ## 🚀 Tech Stack
 
 - **Framework**: Next.js 15 (App Router, TypeScript)
+- **Runtime**: Node.js 22.5+ (uses the built-in SQLite database for inventory)
 - **Styling**: Tailwind CSS v4
 - **UI Components**: `shadcn/ui` (built on Radix UI primitives)
 - **E-Commerce Elements**: `@storefront-ui/react` (ProductCard, Rating, Price, Filters)
@@ -69,6 +70,10 @@ Viper Gears is a fast, mobile-first, modern D2C e-commerce platform built for Ta
 9. **Legal Policies (`/privacy-policy`, `/terms`, `/shipping-policy`, `/return-policy`)**:
    - Full compliance content tailored for Indian D2C Taekwondo e-commerce.
 
+10. **Admin Inventory (`/admin/inventory`)**:
+   - Admin-only inventory management for each dress and height size.
+   - SQLite-backed quantities, reorder thresholds, low-stock indicators, and CRUD actions.
+
 ---
 
 ## 🛠️ Local Development Setup
@@ -84,6 +89,8 @@ Viper Gears is a fast, mobile-first, modern D2C e-commerce platform built for Ta
    ```
 
 3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+The inventory database is created automatically at `.data/viper-gears.sqlite` on first use. The `.data` directory is ignored by Git so local inventory records stay out of commits. For a multi-instance production deployment, move this SQLite database to a managed shared database or persistent volume.
 
 ---
 

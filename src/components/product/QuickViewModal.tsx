@@ -23,7 +23,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   const [selectedSize, setSelectedSize] = useState<number>(
     product.availableSizes.includes(170) ? 170 : product.availableSizes[0]
   );
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity] = useState<number>(1);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
 
@@ -48,8 +48,8 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               />
               <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
                 {product.isWTApproved && (
-                  <Badge variant="wtApproved" className="text-[10px] bg-white/90 text-[#008137] border-emerald-300 font-extrabold shadow-sm">
-                    <ShieldCheck className="w-3 h-3 text-[#00C853] mr-1" /> WT Approved
+                  <Badge variant="wtApproved" className="text-[10px] bg-white/90 text-[#FF6B61] border-red-300 font-extrabold shadow-sm">
+                    <ShieldCheck className="w-3 h-3 text-[#FF3B30] mr-1" /> WT Approved
                   </Badge>
                 )}
               </div>
@@ -58,7 +58,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
             {/* Product Info */}
             <div className="p-6 flex flex-col justify-between space-y-4">
               <div>
-                <span className="text-xs font-extrabold text-[#00C853] uppercase tracking-wider">
+                <span className="text-xs font-extrabold text-[#FF3B30] uppercase tracking-wider">
                   {product.category}
                 </span>
 
@@ -73,11 +73,15 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                   </div>
                   <span className="text-slate-400">({product.reviewCount} Reviews)</span>
                   <span className="text-slate-300">|</span>
-                  <span className="text-emerald-600 font-bold">In Stock</span>
+                  {product.inStock ? (
+                    <span className="text-[#FF3B30] font-bold">In Stock</span>
+                  ) : (
+                    <span className="text-red-600 font-bold">Out of Stock</span>
+                  )}
                 </div>
 
                 <div className="flex items-baseline gap-2.5 mt-3">
-                  <span className="text-xl font-black text-[#00C853]">
+                  <span className="text-xl font-black text-[#FF3B30]">
                     {formatINR(product.price)}
                   </span>
                   {product.originalPrice > product.price && (
@@ -97,7 +101,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     <span className="font-bold text-slate-800">Select Height Size (cm):</span>
                     <button
                       onClick={() => setSizeGuideOpen(true)}
-                      className="text-[#00C853] hover:underline font-bold flex items-center gap-1"
+                      className="text-[#FF3B30] hover:underline font-bold flex items-center gap-1"
                     >
                       <Ruler className="w-3.5 h-3.5" /> Size Chart
                     </button>
@@ -110,7 +114,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                         onClick={() => setSelectedSize(size)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${
                           selectedSize === size
-                            ? "bg-[#00C853] text-white border-[#00C853] shadow-md shadow-emerald-500/20"
+                            ? "bg-[#FF3B30] text-white border-[#FF3B30] shadow-md shadow-red-500/20"
                             : "bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300"
                         }`}
                       >
@@ -126,9 +130,10 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 <Button
                   variant="default"
                   onClick={handleAddToCart}
-                  className="w-full text-xs font-black gap-2 bg-[#00C853] hover:bg-[#00b248] text-white shadow-md"
+                  disabled={!product.inStock}
+                  className="w-full text-xs font-black gap-2 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ShoppingBag className="w-4 h-4" /> Add To Cart
+                  <ShoppingBag className="w-4 h-4" /> {product.inStock ? "Add To Cart" : "Out of Stock"}
                 </Button>
 
                 <Button

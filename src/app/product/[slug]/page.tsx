@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, notFound } from "next/navigation";
 import { PRODUCTS } from "@/data/products";
 import { REVIEWS } from "@/data/reviews";
 import { formatINR } from "@/lib/utils";
@@ -31,6 +31,7 @@ import {
   Plus,
   Minus,
   CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,18 +40,22 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const slug = params?.slug as string;
 
-  const product = PRODUCTS.find((p) => p.slug === slug) || PRODUCTS[0];
+  const product = PRODUCTS.find((p) => p.slug === slug);
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<number>(
-    product.availableSizes.includes(170) ? 170 : product.availableSizes[0]
+    product?.availableSizes.includes(170) ? 170 : (product?.availableSizes[0] ?? 170)
   );
   const [quantity, setQuantity] = useState<number>(1);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   const addItem = useCartStore((state) => state.addItem);
   const { toggleWishlist, isInWishlist } = useWishlistStore();
-  const isFavorite = isInWishlist(product.id);
+  const isFavorite = product ? isInWishlist(product.id) : false;
+
+  if (!product) {
+    notFound();
+  }
 
   const discountPercentage = Math.round(
     ((product.originalPrice - product.price) / product.originalPrice) * 100
@@ -114,7 +119,7 @@ export default function ProductDetailPage() {
             <ChevronRight className="w-3 h-3" />
             <Link href="/shop" className="hover:text-slate-900 transition-colors">Shop Catalog</Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-[#00C853] font-bold truncate max-w-xs">{product.name}</span>
+            <span className="text-[#FF3B30] font-bold truncate max-w-xs">{product.name}</span>
           </nav>
 
           {/* Product Detail Grid */}
@@ -132,9 +137,14 @@ export default function ProductDetailPage() {
                 />
 
                 <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+                  {!product.inStock && (
+                    <Badge variant="destructive" className="text-xs bg-red-600 border-red-500 text-white">
+                      OUT OF STOCK
+                    </Badge>
+                  )}
                   {product.isWTApproved && (
-                    <Badge variant="wtApproved" className="text-xs py-1 px-3 bg-white/90 text-[#008137] border-emerald-300 font-extrabold shadow-sm">
-                      <ShieldCheck className="w-4 h-4 text-[#00C853] mr-1" /> WT Approved
+                    <Badge variant="wtApproved" className="text-xs py-1 px-3 bg-white/90 text-[#FF6B61] border-red-300 font-extrabold shadow-sm">
+                      <ShieldCheck className="w-4 h-4 text-[#FF3B30] mr-1" /> WT Approved
                     </Badge>
                   )}
                   {discountPercentage > 0 && (
@@ -166,7 +176,7 @@ export default function ProductDetailPage() {
                       onClick={() => setActiveImageIndex(idx)}
                       className={`relative w-20 h-20 bg-white rounded-2xl overflow-hidden border-2 transition-all shrink-0 ${
                         activeImageIndex === idx
-                          ? "border-[#00C853] ring-2 ring-emerald-500/20 shadow-md"
+                          ? "border-[#FF3B30] ring-2 ring-red-500/20 shadow-md"
                           : "border-slate-200 opacity-70 hover:opacity-100"
                       }`}
                     >
@@ -180,7 +190,7 @@ export default function ProductDetailPage() {
             {/* Right Column: Details & Purchasing Controls */}
             <div className="lg:col-span-6 space-y-6">
               <div>
-                <span className="text-xs font-extrabold text-[#00C853] uppercase tracking-widest bg-emerald-50 border border-emerald-200 px-3.5 py-1 rounded-full">
+                <span className="text-xs font-extrabold text-[#FF3B30] uppercase tracking-widest bg-red-50 border border-red-200 px-3.5 py-1 rounded-full">
                   {product.category}
                 </span>
 
@@ -196,14 +206,20 @@ export default function ProductDetailPage() {
                   </div>
                   <span className="text-slate-400">({product.reviewCount} Verified Reviews)</span>
                   <span className="text-slate-300">|</span>
-                  <span className="text-[#00C853] font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> In Stock & Ready to Ship
-                  </span>
+                  {product.inStock ? (
+                    <span className="text-[#FF3B30] font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> In Stock & Ready to Ship
+                    </span>
+                  ) : (
+                    <span className="text-red-600 font-bold flex items-center gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5" /> Currently Out of Stock
+                    </span>
+                  )}
                 </div>
 
                 {/* Price Display */}
                 <div className="flex items-baseline gap-3 mt-4">
-                  <span className="text-3xl font-black text-[#00C853]">
+                  <span className="text-3xl font-black text-[#FF3B30]">
                     {formatINR(product.price)}
                   </span>
                   {product.originalPrice > product.price && (
@@ -223,11 +239,11 @@ export default function ProductDetailPage() {
               <div className="space-y-3 pt-2 border-t border-slate-200">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-extrabold text-slate-900 uppercase tracking-wider">
-                    Select Height Size (cm): <span className="text-[#00C853]">{selectedSize} cm</span>
+                    Select Height Size (cm): <span className="text-[#FF3B30]">{selectedSize} cm</span>
                   </span>
                   <button
                     onClick={() => setSizeGuideOpen(true)}
-                    className="text-[#00C853] hover:underline font-extrabold flex items-center gap-1"
+                    className="text-[#FF3B30] hover:underline font-extrabold flex items-center gap-1"
                   >
                     <Ruler className="w-4 h-4" /> Height Size Chart
                   </button>
@@ -240,7 +256,7 @@ export default function ProductDetailPage() {
                       onClick={() => setSelectedSize(size)}
                       className={`px-4 py-2.5 rounded-xl text-xs font-black border transition-all ${
                         selectedSize === size
-                          ? "bg-[#00C853] text-white border-[#00C853] shadow-md shadow-emerald-500/20 scale-105"
+                          ? "bg-[#FF3B30] text-white border-[#FF3B30] shadow-md shadow-red-500/20 scale-105"
                           : "bg-white text-slate-700 border-slate-200 hover:border-slate-300"
                       }`}
                     >
@@ -276,16 +292,18 @@ export default function ProductDetailPage() {
                     variant="outline"
                     size="lg"
                     onClick={handleAddToCart}
-                    className="text-xs font-extrabold gap-2 h-12 border-slate-300 text-slate-900 hover:bg-slate-100"
+                    disabled={!product.inStock}
+                    className="text-xs font-extrabold gap-2 h-12 border-slate-300 text-slate-900 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ShoppingBag className="w-4 h-4 text-[#00C853]" /> Add To Cart
+                    <ShoppingBag className="w-4 h-4 text-[#FF3B30]" /> {product.inStock ? "Add To Cart" : "Out of Stock"}
                   </Button>
 
                   <Button
                     variant="default"
                     size="lg"
                     onClick={handleBuyNow}
-                    className="text-xs font-black gap-2 h-12 bg-[#00C853] hover:bg-[#00b248] text-white shadow-lg shadow-emerald-500/20"
+                    disabled={!product.inStock}
+                    className="text-xs font-black gap-2 h-12 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Zap className="w-4 h-4 fill-white" /> Buy Now (Direct Checkout)
                   </Button>
@@ -354,7 +372,7 @@ export default function ProductDetailPage() {
                   <p className="text-xs text-slate-700 italic">&quot;{rev.comment}&quot;</p>
                   <div className="text-xs font-bold text-slate-900 flex items-center gap-1">
                     {rev.author}
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00C853]" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#FF3B30]" />
                   </div>
                 </div>
               ))}

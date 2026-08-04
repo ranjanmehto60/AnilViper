@@ -3,7 +3,6 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { formatINR } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -20,71 +19,130 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+interface AccountOrder {
+  id: string;
+  date: string;
+  status: string;
+  total: number;
+  items: unknown[];
+  courier: string | null;
+  tracking: string | null;
+  paymentStatus: string;
+}
+
 function AccountContent() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") || "orders";
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loggedInPhone, setLoggedInPhone] = useState("");
   const [phoneInput, setPhoneInput] = useState("");
   const [otpInput, setOtpInput] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [accountOrders, setAccountOrders] = useState<AccountOrder[]>([]);
+  const [ordersLoaded, setOrdersLoaded] = useState(false);
 
   const { items: wishlistItems } = useWishlistStore();
 
   useEffect(() => {
-    const saved = localStorage.getItem("viper_user_logged_in");
-    if (saved === "true") {
-      setIsLoggedIn(true);
-    }
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.loggedIn) {
+          setIsLoggedIn(true);
+          setLoggedInPhone(data.phone || "");
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!isLoggedIn || ordersLoaded) return;
+    fetch("/api/account/orders", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.orders)) {
+          setAccountOrders(data.orders);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setOrdersLoaded(true));
+  }, [isLoggedIn, ordersLoaded]);
+
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!/^[0-9]{10}$/.test(phoneInput)) {
+    if (!/^[6-9]\d{9}$/.test(phoneInput)) {
       toast.error("Please enter a valid 10-digit mobile number.");
       return;
     }
-    setOtpSent(true);
-    toast.success(`OTP 8888 sent to +91-${phoneInput}`);
-  };
-
-  const handleVerifyOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (otpInput === "8888" || otpInput.length === 4) {
-      setIsLoggedIn(true);
-      localStorage.setItem("viper_user_logged_in", "true");
-      toast.success("Logged in successfully! Welcome back athlete.");
-    } else {
-      toast.error("Invalid OTP! Enter '8888'");
+    setIsSendingOtp(true);
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: phoneInput }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Unable to send OTP.");
+        return;
+      }
+      setOtpSent(true);
+      if (data.devOtp) {
+        toast.info(`Dev mode: your OTP is ${data.devOtp} (not sent via SMS — add Twilio env vars).`);
+      } else {
+        toast.success(`OTP sent to +91-${phoneInput}`);
+      }
+    } catch {
+      toast.error("Network error while sending OTP.");
+    } finally {
+      setIsSendingOtp(false);
     }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem("viper_user_logged_in");
-    toast.info("Logged out of Viper Gears");
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^\d{6}$/.test(otpInput)) {
+      toast.error("Enter the 6-digit OTP sent to your phone.");
+      return;
+    }
+    setIsVerifying(true);
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: phoneInput, otp: otpInput }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Invalid OTP. Please try again.");
+        return;
+      }
+      setIsLoggedIn(true);
+      setLoggedInPhone(phoneInput);
+      setOrdersLoaded(false);
+      toast.success("Logged in successfully! Welcome back athlete.");
+    } catch {
+      toast.error("Network error while verifying OTP.");
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
-  const mockOrders = [
-    {
-      id: "ORD_VIPER_948102",
-      date: "18 July 2026",
-      status: "Delivered",
-      total: 2999,
-      item: "KPNP Competition Taekwondo Dobok – India Edition (170 cm)",
-      courier: "Delhivery Air",
-      tracking: "DLV9817264821",
-    },
-    {
-      id: "ORD_VIPER_884192",
-      date: "02 June 2026",
-      status: "Shipped",
-      total: 1899,
-      item: "Viper WT Sparring Arm & Shin Guards Combo (180 cm)",
-      courier: "Shiprocket Express",
-      tracking: "SR881920194",
-    },
-  ];
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/me", { method: "POST" });
+    } catch {
+      // session cookie will still expire server-side
+    }
+    setIsLoggedIn(false);
+    setLoggedInPhone("");
+    setAccountOrders([]);
+    setOrdersLoaded(false);
+    toast.info("Logged out of Viper Gears");
+  };
 
   if (!isLoggedIn) {
     return (
@@ -127,19 +185,19 @@ function AccountContent() {
                   </div>
                 </div>
 
-                <Button type="submit" variant="default" size="lg" className="w-full text-xs font-black h-11 bg-[#00C853] hover:bg-[#00b248] text-white shadow-md">
-                  Send OTP Code
+                <Button type="submit" variant="default" size="lg" disabled={isSendingOtp} className="w-full text-xs font-black h-11 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-md">
+                  {isSendingOtp ? "Sending OTP..." : "Send OTP Code"}
                 </Button>
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} className="space-y-4">
                 <div className="space-y-1 text-left">
-                  <label className="text-xs font-bold text-slate-700 uppercase">Enter 4-Digit OTP (Use 8888) *</label>
+                  <label className="text-xs font-bold text-slate-700 uppercase">Enter 6-Digit OTP *</label>
                   <div className="relative">
                     <KeyRound className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
                     <Input
-                      placeholder="8888"
-                      maxLength={4}
+                      placeholder="Enter 6-digit OTP"
+                      maxLength={6}
                       value={otpInput}
                       onChange={(e) => setOtpInput(e.target.value)}
                       className="pl-10 h-11 text-xs font-mono text-center tracking-widest text-lg"
@@ -148,8 +206,8 @@ function AccountContent() {
                   </div>
                 </div>
 
-                <Button type="submit" variant="default" size="lg" className="w-full text-xs font-black h-11 bg-[#00C853] hover:bg-[#00b248] text-white shadow-md">
-                  Verify & Log In
+                <Button type="submit" variant="default" size="lg" disabled={isVerifying} className="w-full text-xs font-black h-11 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-md">
+                  {isVerifying ? "Verifying..." : "Verify & Log In"}
                 </Button>
 
                 <button
@@ -179,18 +237,18 @@ function AccountContent() {
         {/* Header User Profile Banner */}
         <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-[#00C853] flex items-center justify-center text-[#00C853] text-2xl font-black shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-red-50 border-2 border-[#FF3B30] flex items-center justify-center text-[#FF3B30] text-2xl font-black shadow-sm">
               VS
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-black text-slate-900 uppercase">Athlete Account</h1>
-                <span className="bg-emerald-50 text-[#008137] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-200">
+                <span className="bg-red-50 text-[#FF6B61] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-200">
                   BLACK BELT ATHLETE
                 </span>
               </div>
               <p className="text-xs text-slate-500 flex items-center gap-2 mt-0.5 font-medium">
-                <span>📍 Chattarpur, Delhi</span>
+                <span>Logged in as +91-{loggedInPhone || "••••••••••"}</span>
               </p>
             </div>
           </div>
@@ -209,7 +267,7 @@ function AccountContent() {
         <Tabs defaultValue={initialTab} className="w-full">
           <TabsList className="w-full justify-start bg-white border border-slate-200 p-1.5 rounded-2xl h-auto shadow-sm">
             <TabsTrigger value="orders" className="gap-2 py-2.5">
-              <Package className="w-4 h-4" /> My Orders ({mockOrders.length})
+              <Package className="w-4 h-4" /> My Orders ({accountOrders.length})
             </TabsTrigger>
             <TabsTrigger value="wishlist" className="gap-2 py-2.5">
               <Heart className="w-4 h-4" /> Saved Wishlist ({wishlistItems.length})
@@ -224,29 +282,47 @@ function AccountContent() {
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-4 pt-4">
-            {mockOrders.map((order) => (
-              <div key={order.id} className="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
-                  <div>
-                    <span className="text-xs font-mono text-[#00C853] font-bold">{order.id}</span>
-                    <span className="text-xs text-slate-500 ml-3 font-medium">Placed on {order.date}</span>
-                  </div>
-                  <span className={`text-xs font-extrabold px-3 py-1 rounded-full w-fit ${
-                    order.status === "Delivered" ? "bg-emerald-50 text-[#008137] border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200"
-                  }`}>
-                    Status: {order.status}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center text-xs">
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-sm">{order.item}</h4>
-                    <p className="text-slate-500 mt-0.5">Courier: {order.courier} (Tracking: {order.tracking})</p>
-                  </div>
-                  <span className="text-base font-black text-[#00C853]">{formatINR(order.total)}</span>
-                </div>
+            {accountOrders.length === 0 ? (
+              <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center text-xs text-slate-500 shadow-sm">
+                No orders yet. Place an order from the shop and it will appear here.
               </div>
-            ))}
+            ) : (
+              accountOrders.map((order) => (
+                <div key={order.id} className="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+                    <div>
+                      <span className="text-xs font-mono text-[#FF3B30] font-bold">{order.id}</span>
+                      <span className="text-xs text-slate-500 ml-3 font-medium">Placed on {order.date}</span>
+                    </div>
+                    <span className={`text-xs font-extrabold px-3 py-1 rounded-full w-fit ${
+                      order.status === "Delivered" ? "bg-red-50 text-[#FF6B61] border border-red-200" : "bg-amber-50 text-amber-700 border border-amber-200"
+                    }`}>
+                      Status: {order.status}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {(order.items as { name: string; size: number; quantity: number; lineTotal: number }[]).map((item, index) => (
+                      <div key={index} className="flex justify-between items-center text-xs">
+                        <div>
+                          <h4 className="font-bold text-slate-900 text-sm">{item.name}</h4>
+                          <p className="text-slate-500 mt-0.5">Size: {item.size} cm × {item.quantity}</p>
+                        </div>
+                        <span className="font-bold text-slate-900">{formatINR(item.lineTotal)}</span>
+                      </div>
+                    ))}
+                    {order.tracking && (
+                      <p className="text-xs text-slate-500 pt-1">Courier: {order.courier} (Tracking: {order.tracking})</p>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs border-t border-slate-100 pt-3">
+                    <span className="text-slate-500 font-semibold">Payment: {order.paymentStatus}</span>
+                    <span className="text-base font-black text-[#FF3B30]">{formatINR(order.total)}</span>
+                  </div>
+                </div>
+              ))
+            )}
           </TabsContent>
 
           {/* Wishlist Tab */}
@@ -269,7 +345,7 @@ function AccountContent() {
             <div className="bg-white border border-slate-200 rounded-3xl p-6 space-y-3 max-w-lg shadow-sm">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-slate-900 uppercase">Default Delivery Address</h3>
-                <span className="text-[10px] bg-[#00C853] text-white font-extrabold px-2 py-0.5 rounded-full">DEFAULT</span>
+                <span className="text-[10px] bg-[#FF3B30] text-white font-extrabold px-2 py-0.5 rounded-full">DEFAULT</span>
               </div>
               <div className="text-xs text-slate-700 space-y-1">
                 <p className="font-bold text-slate-900">Athlete</p>

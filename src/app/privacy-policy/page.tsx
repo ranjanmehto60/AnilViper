@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ChevronRight, ShieldCheck } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 export default function PrivacyPolicyPage() {
   return (
@@ -11,7 +11,7 @@ export default function PrivacyPolicyPage() {
         <nav className="flex items-center gap-2 text-xs text-zinc-400">
           <Link href="/" className="hover:text-white">Home</Link>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-[#00E676] font-semibold">Privacy Policy</span>
+          <span className="text-[#FF3B30] font-semibold">Privacy Policy</span>
         </nav>
 
         <h1 className="text-4xl font-black text-white uppercase bebas-font">

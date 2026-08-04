@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
 import { formatINR } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,16 +13,24 @@ import {
   Truck,
   CreditCard,
   CheckCircle2,
-  Lock,
   ChevronRight,
   ArrowRight,
   MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const checkoutSchema = z.object({
+  fullName: z.string().trim().min(2, "Please enter your full name"),
+  phone: z.string().trim().regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number"),
+  street: z.string().trim().min(5, "Enter your street / house address"),
+  city: z.string().trim().min(2, "Enter your city"),
+  state: z.string().trim().min(2, "Enter your state"),
+  pincode: z.string().trim().regex(/^\d{6}$/, "Enter a valid 6-digit pincode"),
+});
 
 export default function CheckoutPage() {
-  const router = useRouter();
-  const { items, getSubtotal, getShippingFee, getDiscountAmount, getTotal, clearCart } = useCartStore();
+  const { items, discountCode, getSubtotal, getShippingFee, getDiscountAmount, getTotal, clearCart } = useCartStore();
 
   const subtotal = getSubtotal();
   const shipping = getShippingFee();
@@ -38,12 +45,12 @@ export default function CheckoutPage() {
   } | null>(null);
 
   const [formData, setFormData] = useState({
-    fullName: "Vikram Sharma",
-    phone: "9871674886",
-    street: "House 42, Ward 3, Main Market",
-    city: "Chattarpur, Delhi",
-    state: "Delhi",
-    pincode: "110074",
+    fullName: "",
+    phone: "",
+    street: "",
+    city: "",
+    state: "",
+    pincode: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,20 +59,18 @@ export default function CheckoutPage() {
 
   const handleStep1Next = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.phone || !formData.street || !formData.pincode) {
-      toast.error("Please fill in all required shipping address fields.");
+    const result = checkoutSchema.safeParse(formData);
+    if (!result.success) {
+      const firstError = result.error.issues[0]?.message;
+      toast.error(firstError || "Please fill in all required shipping address fields.");
       return;
     }
     setStep(2);
   };
 
-  const handlePaymentSuccess = (paymentId: string) => {
+  const handlePaymentSuccess = (orderId: string, paymentId: string) => {
     setRazorpayOpen(false);
-    const mockOrderId = `ORD_VIPER_${Math.floor(100000 + Math.random() * 900000)}`;
-    setOrderComplete({
-      orderId: mockOrderId,
-      paymentId: paymentId,
-    });
+    setOrderComplete({ orderId, paymentId });
     clearCart();
     toast.success("Order Placed Successfully! Confirmation sent via SMS & WhatsApp.");
   };
@@ -74,7 +79,7 @@ export default function CheckoutPage() {
     return (
       <div className="bg-[#F8FAFC] py-20 min-h-screen text-slate-900">
         <div className="container mx-auto px-4 max-w-lg text-center space-y-6 bg-white border border-slate-200 rounded-3xl p-8 shadow-xl">
-          <div className="w-20 h-20 bg-emerald-50 border border-emerald-200 rounded-full flex items-center justify-center mx-auto text-[#00C853]">
+          <div className="w-20 h-20 bg-red-50 border border-red-200 rounded-full flex items-center justify-center mx-auto text-[#FF3B30]">
             <CheckCircle2 className="w-10 h-10" />
           </div>
           <h1 className="text-3xl font-black text-slate-900 uppercase bebas-font">ORDER CONFIRMED!</h1>
@@ -84,12 +89,12 @@ export default function CheckoutPage() {
 
           <div className="bg-slate-50 p-4 rounded-2xl text-xs space-y-1.5 text-left border border-slate-200">
             <p className="text-slate-500">Order ID: <span className="font-mono text-slate-900 font-bold">{orderComplete.orderId}</span></p>
-            <p className="text-slate-500">Payment ID: <span className="font-mono text-[#00C853] font-bold">{orderComplete.paymentId}</span></p>
+            <p className="text-slate-500">Payment ID: <span className="font-mono text-[#FF3B30] font-bold">{orderComplete.paymentId}</span></p>
             <p className="text-slate-500">Delivery Address: <span className="text-slate-800">{formData.street}, {formData.city} - {formData.pincode}</span></p>
-            <p className="text-slate-500">Status: <span className="text-[#00C853] font-bold">Processing Dispatch (Shiprocket / Delhivery)</span></p>
+            <p className="text-slate-500">Status: <span className="text-[#FF3B30] font-bold">Processing Dispatch (Shiprocket / Delhivery)</span></p>
           </div>
 
-          <Button variant="default" size="lg" asChild className="w-full text-xs font-black bg-[#00C853] hover:bg-[#00b248] text-white">
+          <Button variant="default" size="lg" asChild className="w-full text-xs font-black bg-[#FF3B30] hover:bg-[#D92D20] text-white">
             <Link href="/account">View Order Status in Account</Link>
           </Button>
         </div>
@@ -107,22 +112,22 @@ export default function CheckoutPage() {
           <ChevronRight className="w-3 h-3" />
           <Link href="/cart" className="hover:text-slate-900">Cart</Link>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-[#00C853] font-bold">3-Step Checkout</span>
+          <span className="text-[#FF3B30] font-bold">3-Step Checkout</span>
         </nav>
 
         {/* Stepper Header */}
         <div className="flex items-center justify-between max-w-2xl mx-auto pb-4 border-b border-slate-200">
-          <div className={`flex items-center gap-2 text-xs font-bold ${step >= 1 ? "text-[#00C853]" : "text-slate-400"}`}>
+          <div className={`flex items-center gap-2 text-xs font-bold ${step >= 1 ? "text-[#FF3B30]" : "text-slate-400"}`}>
             <span className="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-xs">1</span>
             <span>Shipping Address</span>
           </div>
           <div className="w-12 h-0.5 bg-slate-200" />
-          <div className={`flex items-center gap-2 text-xs font-bold ${step >= 2 ? "text-[#00C853]" : "text-slate-400"}`}>
+          <div className={`flex items-center gap-2 text-xs font-bold ${step >= 2 ? "text-[#FF3B30]" : "text-slate-400"}`}>
             <span className="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-xs">2</span>
             <span>Review Order</span>
           </div>
           <div className="w-12 h-0.5 bg-slate-200" />
-          <div className={`flex items-center gap-2 text-xs font-bold ${step >= 3 ? "text-[#00C853]" : "text-slate-400"}`}>
+          <div className={`flex items-center gap-2 text-xs font-bold ${step >= 3 ? "text-[#FF3B30]" : "text-slate-400"}`}>
             <span className="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-xs">3</span>
             <span>Razorpay Payment</span>
           </div>
@@ -142,7 +147,7 @@ export default function CheckoutPage() {
               {step === 1 && (
                 <form onSubmit={handleStep1Next} className="space-y-4">
                   <h2 className="text-lg font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-[#00C853]" /> Step 1: Pan-India Delivery Address
+                    <MapPin className="w-5 h-5 text-[#FF3B30]" /> Step 1: Pan-India Delivery Address
                   </h2>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -176,7 +181,7 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <Button type="submit" variant="default" size="lg" className="w-full text-xs font-black gap-2 h-12 mt-4 bg-[#00C853] hover:bg-[#00b248] text-white shadow-lg shadow-emerald-500/20">
+                  <Button type="submit" variant="default" size="lg" className="w-full text-xs font-black gap-2 h-12 mt-4 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg shadow-red-500/20">
                     Continue To Order Summary <ArrowRight className="w-4 h-4" />
                   </Button>
                 </form>
@@ -187,9 +192,9 @@ export default function CheckoutPage() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center pb-3 border-b border-slate-200">
                     <h2 className="text-lg font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                      <Truck className="w-5 h-5 text-[#00C853]" /> Step 2: Review Order Details
+                      <Truck className="w-5 h-5 text-[#FF3B30]" /> Step 2: Review Order Details
                     </h2>
-                    <button onClick={() => setStep(1)} className="text-xs text-[#00C853] hover:underline font-bold">
+                    <button onClick={() => setStep(1)} className="text-xs text-[#FF3B30] hover:underline font-bold">
                       Edit Address
                     </button>
                   </div>
@@ -212,7 +217,7 @@ export default function CheckoutPage() {
                             <p className="text-[11px] text-slate-500">Size: {item.selectedSize}cm | Qty: {item.quantity}</p>
                           </div>
                         </div>
-                        <span className="font-bold text-[#00C853]">{formatINR(item.product.price * item.quantity)}</span>
+                        <span className="font-bold text-[#FF3B30]">{formatINR(item.product.price * item.quantity)}</span>
                       </div>
                     ))}
                   </div>
@@ -222,7 +227,7 @@ export default function CheckoutPage() {
                       variant="default"
                       size="lg"
                       onClick={() => setRazorpayOpen(true)}
-                      className="w-full text-xs font-black gap-2 h-12 bg-[#00C853] hover:bg-[#00b248] text-white shadow-lg shadow-emerald-500/20"
+                      className="w-full text-xs font-black gap-2 h-12 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg shadow-red-500/20"
                     >
                       <CreditCard className="w-4 h-4" /> Pay {formatINR(total)} via Razorpay
                     </Button>
@@ -244,26 +249,26 @@ export default function CheckoutPage() {
                   <span className="text-slate-900 font-bold">{formatINR(subtotal)}</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-[#00C853]">
+                  <div className="flex justify-between text-[#FF3B30]">
                     <span>Discount</span>
                     <span>-{formatINR(discount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span>Pan-India Shipping</span>
-                  <span className="text-[#00C853] font-bold">
+                  <span className="text-[#FF3B30] font-bold">
                     {shipping === 0 ? "FREE" : formatINR(shipping)}
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-black text-slate-900 pt-3 border-t border-slate-200">
                   <span>Total (Incl. GST)</span>
-                  <span className="text-[#00C853] text-xl">{formatINR(total)}</span>
+                  <span className="text-[#FF3B30] text-xl">{formatINR(total)}</span>
                 </div>
               </div>
 
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-2 text-xs text-slate-800">
-                <h4 className="font-bold text-[#008137] flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-[#00C853]" /> 100% Viper Buyer Protection:
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 space-y-2 text-xs text-slate-800">
+                <h4 className="font-bold text-[#FF6B61] flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#FF3B30]" /> 100% Viper Buyer Protection:
                 </h4>
                 <ul className="space-y-1 text-[11px] text-slate-600">
                   <li>• 7-Day hassle-free return & size exchange</li>
@@ -284,6 +289,13 @@ export default function CheckoutPage() {
         totalAmount={total}
         customerName={formData.fullName}
         customerPhone={formData.phone}
+        items={items.map((item) => ({
+          productId: item.product.id,
+          size: item.selectedSize,
+          quantity: item.quantity,
+        }))}
+        address={{ ...formData }}
+        discountCode={discountCode}
         onSuccess={handlePaymentSuccess}
       />
     </div>

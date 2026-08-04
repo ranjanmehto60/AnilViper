@@ -11,11 +11,11 @@ export default function ReturnPolicyPage() {
         <nav className="flex items-center gap-2 text-xs text-zinc-400">
           <Link href="/" className="hover:text-white">Home</Link>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-[#00E676] font-semibold">Return & Refund Policy</span>
+          <span className="text-[#FF3B30] font-semibold">Return & Refund Policy</span>
         </nav>
 
         <h1 className="text-4xl font-black text-white uppercase bebas-font flex items-center gap-3">
-          <RefreshCw className="w-8 h-8 text-[#00E676]" /> 7-DAY RETURN & EXCHANGE POLICY
+          <RefreshCw className="w-8 h-8 text-[#FF3B30]" /> 7-DAY RETURN & EXCHANGE POLICY
         </h1>
 
         <div className="space-y-4 text-xs leading-relaxed border-t border-zinc-800 pt-6">
@@ -33,7 +33,7 @@ export default function ReturnPolicyPage() {
 
           <h2 className="text-base font-bold text-white uppercase">3. How to Initiate a Return</h2>
           <p>
-            Simply WhatsApp our Chattarpur Delhi customer care team at <a href="https://wa.me/919871674886" className="text-[#00E676] font-bold underline">+91-9871674886</a> with your Order ID and photo of the item. We will arrange reverse pick-up from your doorstep.
+            Simply WhatsApp our Chattarpur Delhi customer care team at <a href="https://wa.me/919871674886" className="text-[#FF3B30] font-bold underline">+91-9871674886</a> with your Order ID and photo of the item. We will arrange reverse pick-up from your doorstep.
           </p>
         </div>
       </div>

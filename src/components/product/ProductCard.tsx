@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   ShieldCheck,
   Check,
+  X,
   Star
 } from "lucide-react";
 import { toast } from "sonner";
@@ -54,7 +55,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <>
-      <div className="group relative bg-[#0F172A] border border-slate-800 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:border-[#00E676]/50 transition-all duration-300 flex flex-col justify-between text-white">
+      <div className="group relative bg-[#0F172A] border border-slate-800 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:border-[#FF3B30]/50 transition-all duration-300 flex flex-col justify-between text-white">
         
         <div>
           {/* Image & Badge Area */}
@@ -71,8 +72,13 @@ export function ProductCard({ product }: ProductCardProps) {
 
             {/* Badges Overlay */}
             <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+              {!product.inStock && (
+                <span className="bg-red-600 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider">
+                  OUT OF STOCK
+                </span>
+              )}
               {product.isNewArrival && (
-                <span className="bg-[#00E676] text-black text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider">
+                <span className="bg-[#FF3B30] text-black text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider">
                   NEW
                 </span>
               )}
@@ -82,7 +88,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 </span>
               )}
               <span className="bg-slate-900/90 backdrop-blur-md text-slate-200 border border-slate-700 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-[#00E676]" /> WT APPROVED
+                <ShieldCheck className="w-3 h-3 text-[#FF3B30]" /> WT APPROVED
               </span>
             </div>
 
@@ -102,7 +108,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
               <button
                 onClick={() => setIsQuickViewOpen(true)}
-                className="p-2.5 rounded-full bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-[#00E676] border border-slate-700 backdrop-blur-md transition-all shadow-md"
+                className="p-2.5 rounded-full bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-[#FF3B30] border border-slate-700 backdrop-blur-md transition-all shadow-md"
                 title="Quick View"
               >
                 <Eye className="w-4 h-4" />
@@ -120,7 +126,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     onClick={() => setSelectedSize(sz)}
                     className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${
                       selectedSize === sz
-                        ? "bg-[#00E676] text-black"
+                        ? "bg-[#FF3B30] text-black"
                         : "bg-slate-800 text-slate-300 hover:bg-slate-700"
                     }`}
                   >
@@ -137,7 +143,7 @@ export function ProductCard({ product }: ProductCardProps) {
             
             {/* Category & Rating */}
             <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-              <span className="uppercase text-[10px] tracking-wider text-[#00E676] font-extrabold">
+              <span className="uppercase text-[10px] tracking-wider text-[#FF3B30] font-extrabold">
                 {product.category}
               </span>
               <div className="flex items-center gap-1 text-amber-400 font-mono font-bold">
@@ -148,7 +154,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
 
             {/* Title */}
-            <h3 className="text-sm font-black text-white line-clamp-2 leading-tight hover:text-[#00E676] transition-colors">
+            <h3 className="text-sm font-black text-white line-clamp-2 leading-tight hover:text-[#FF3B30] transition-colors">
               <Link href={`/product/${product.slug}`}>{product.name}</Link>
             </h3>
 
@@ -163,7 +169,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 </span>
               )}
               {product.originalPrice && (
-                <span className="text-[10px] font-extrabold text-[#00E676] bg-[#00E676]/10 border border-[#00E676]/30 px-1.5 py-0.5 rounded">
+                <span className="text-[10px] font-extrabold text-[#FF3B30] bg-[#FF3B30]/10 border border-[#FF3B30]/30 px-1.5 py-0.5 rounded">
                   SAVE {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
                 </span>
               )}
@@ -180,19 +186,28 @@ export function ProductCard({ product }: ProductCardProps) {
               onClick={() => setIsSizeGuideOpen(true)}
               className="text-slate-400 hover:text-white underline flex items-center gap-1 font-semibold"
             >
-              <Ruler className="w-3.5 h-3.5 text-[#00E676]" /> Size Chart Guide
+              <Ruler className="w-3.5 h-3.5 text-[#FF3B30]" /> Size Chart Guide
             </button>
-            <span className="text-[#00E676] font-extrabold flex items-center gap-1">
-              <Check className="w-3.5 h-3.5 text-[#00E676]" /> IN STOCK
+            <span className={product.inStock ? "text-[#FF3B30] font-extrabold flex items-center gap-1" : "text-red-500 font-extrabold flex items-center gap-1"}>
+              {product.inStock ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-[#FF3B30]" /> IN STOCK
+                </>
+              ) : (
+                <>
+                  <X className="w-3.5 h-3.5" /> OUT OF STOCK
+                </>
+              )}
             </span>
           </div>
 
           <Button
             onClick={handleAddToCart}
-            className="w-full text-xs font-black uppercase tracking-wider h-11 bg-[#00E676] hover:bg-[#00c853] text-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 group/btn neon-emerald-glow"
+            disabled={!product.inStock}
+            className="w-full text-xs font-black uppercase tracking-wider h-11 bg-[#FF3B30] hover:bg-[#E12D25] text-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 group/btn neon-red-glow disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ShoppingBag className="w-4 h-4 group-hover/btn:scale-110 transition-transform stroke-[2.5]" />
-            <span>ADD TO CART • {selectedSize} CM</span>
+            <span>{product.inStock ? `ADD TO CART • ${selectedSize} CM` : "OUT OF STOCK"}</span>
           </Button>
 
         </div>

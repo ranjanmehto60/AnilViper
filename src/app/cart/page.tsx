@@ -49,7 +49,7 @@ export default function CartPage() {
         <nav className="flex items-center gap-2 text-xs text-slate-500">
           <Link href="/" className="hover:text-slate-900 transition-colors">Home</Link>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-[#00C853] font-bold">Shopping Cart</span>
+          <span className="text-[#FF3B30] font-bold">Shopping Cart</span>
         </nav>
 
         <h1 className="text-4xl sm:text-5xl font-black text-slate-900 uppercase tracking-tight bebas-font">
@@ -65,7 +65,7 @@ export default function CartPage() {
             <p className="text-xs text-slate-500">
               Explore our KPNP India competition doboks, black belt uniforms, and sparring gear.
             </p>
-            <Button variant="default" size="lg" asChild className="text-xs font-black bg-[#00C853] hover:bg-[#00b248] text-white">
+            <Button variant="default" size="lg" asChild className="text-xs font-black bg-[#FF3B30] hover:bg-[#D92D20] text-white">
               <Link href="/shop">Explore Shop Catalog</Link>
             </Button>
           </div>
@@ -90,7 +90,7 @@ export default function CartPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-[#00C853] uppercase">
+                      <span className="text-[10px] font-extrabold text-[#FF3B30] uppercase">
                         {item.product.category}
                       </span>
                       <h3 className="text-sm font-bold text-slate-900 leading-snug max-w-md">
@@ -99,7 +99,7 @@ export default function CartPage() {
                       <p className="text-xs text-slate-500">
                         Height Size: <span className="font-bold text-slate-900">{item.selectedSize} cm</span>
                       </p>
-                      <span className="text-sm font-black text-[#00C853] block sm:hidden">
+                      <span className="text-sm font-black text-[#FF3B30] block sm:hidden">
                         {formatINR(item.product.price)}
                       </span>
                     </div>
@@ -122,7 +122,7 @@ export default function CartPage() {
                       </button>
                     </div>
 
-                    <span className="text-base font-black text-[#00C853] hidden sm:block">
+                    <span className="text-base font-black text-[#FF3B30] hidden sm:block">
                       {formatINR(item.product.price * item.quantity)}
                     </span>
 
@@ -146,9 +146,9 @@ export default function CartPage() {
 
               {/* Promo Code Form */}
               {discountCode ? (
-                <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 px-3 py-2.5 rounded-xl text-xs">
-                  <span className="text-[#008137] font-bold flex items-center gap-1.5">
-                    <Tag className="w-3.5 h-3.5 text-[#00C853]" /> Code {discountCode} (-{formatINR(discount)})
+                <div className="flex items-center justify-between bg-red-50 border border-red-200 px-3 py-2.5 rounded-xl text-xs">
+                  <span className="text-[#FF6B61] font-bold flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-[#FF3B30]" /> Code {discountCode} (-{formatINR(discount)})
                   </span>
                   <button onClick={removeDiscountCode} className="text-slate-500 hover:text-slate-900 underline">
                     Remove
@@ -174,7 +174,7 @@ export default function CartPage() {
                   <span className="text-slate-900 font-bold">{formatINR(subtotal)}</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-[#00C853]">
+                  <div className="flex justify-between text-[#FF3B30]">
                     <span>Discount</span>
                     <span>-{formatINR(discount)}</span>
                   </div>
@@ -182,23 +182,23 @@ export default function CartPage() {
                 <div className="flex justify-between">
                   <span>Pan-India Shipping</span>
                   <span className="text-slate-900 font-bold">
-                    {shipping === 0 ? <span className="text-[#00C853]">FREE</span> : formatINR(shipping)}
+                    {shipping === 0 ? <span className="text-[#FF3B30]">FREE</span> : formatINR(shipping)}
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-black text-slate-900 pt-3 border-t border-slate-200">
                   <span>Total Amount</span>
-                  <span className="text-[#00C853] text-xl">{formatINR(total)}</span>
+                  <span className="text-[#FF3B30] text-xl">{formatINR(total)}</span>
                 </div>
               </div>
 
-              <Button variant="default" size="lg" asChild className="w-full text-xs font-black gap-2 h-12 bg-[#00C853] hover:bg-[#00b248] text-white shadow-lg shadow-emerald-500/20">
+              <Button variant="default" size="lg" asChild className="w-full text-xs font-black gap-2 h-12 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg shadow-red-500/20">
                 <Link href="/checkout">
                   Proceed To Checkout <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
 
-              <div className="flex items-center justify-center gap-1.5 text-[11px] text-emerald-700 font-bold pt-2">
-                <ShieldCheck className="w-4 h-4 text-[#00C853]" /> 100% Secure Razorpay Checkout
+              <div className="flex items-center justify-center gap-1.5 text-[11px] text-red-700 font-bold pt-2">
+                <ShieldCheck className="w-4 h-4 text-[#FF3B30]" /> 100% Secure Razorpay Checkout
               </div>
             </div>
 

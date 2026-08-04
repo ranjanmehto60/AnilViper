@@ -1,48 +1,44 @@
 import { NextResponse } from "next/server";
-import twilio from "twilio";
+import { generateOtp } from "@/lib/store-db";
+import { isAllowedAdminIdentifier } from "@/lib/auth";
+import { formatIndianPhone, hasTwilioCredentials, sendSms } from "@/lib/twilio";
+
+export const runtime = "nodejs";
+
+const ADMIN_OTP_PHONE = "9871674886";
 
 export async function POST(req: Request) {
+  let body: { identifier?: unknown };
   try {
-    const { phone, otp } = await req.json();
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 
-    const accountSid = process.env.TWILIO_ACCOUNT_SID?.trim();
-    const authToken = process.env.TWILIO_AUTH_TOKEN?.trim();
-    const twilioPhone = process.env.TWILIO_PHONE_NUMBER?.trim();
+  const identifier = typeof body.identifier === "string" ? body.identifier.trim() : "";
+  if (!identifier || !isAllowedAdminIdentifier(identifier)) {
+    return NextResponse.json({ error: "Access denied: identifier is not authorized." }, { status: 403 });
+  }
 
-    if (!accountSid || !authToken || !twilioPhone) {
-      console.error("Missing Twilio credentials in process.env");
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Vercel Environment Variables missing! Please add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER in Vercel and Redeploy.",
-        },
-        { status: 400 }
-      );
-    }
+  const { code, rateLimited } = generateOtp("admin", identifier);
 
-    const client = twilio(accountSid, authToken);
-
-    // Format target Indian phone number: +919871674886
-    const cleanDigits = phone.replace(/\D/g, "");
-    const targetPhone = cleanDigits.length === 10 ? `+91${cleanDigits}` : `+${cleanDigits}`;
-
-    const message = await client.messages.create({
-      body: `Your Viper Gears Store Admin OTP verification code is: ${otp}. Valid for 10 minutes.`,
-      from: twilioPhone,
-      to: targetPhone,
-    });
-
-    console.log("Twilio SMS sent successfully, SID:", message.sid);
-    return NextResponse.json({ success: true, sid: message.sid });
-  } catch (error: any) {
-    console.error("Twilio SMS Error:", error);
+  if (rateLimited) {
     return NextResponse.json(
-      {
-        success: false,
-        error: error?.message || "Failed to send SMS via Twilio",
-        code: error?.code,
-      },
-      { status: 500 }
+      { error: "Please wait at least 60 seconds before requesting a new OTP." },
+      { status: 429 }
     );
   }
+
+  const devMode = !hasTwilioCredentials();
+  if (devMode) {
+    console.log(`[admin-otp] Dev mode: OTP for ${identifier} is ${code}`);
+  } else {
+    const phone = identifier.replace(/\D/g, "").length >= 10 ? formatIndianPhone(identifier) : formatIndianPhone(ADMIN_OTP_PHONE);
+    const result = await sendSms(phone, `Your Viper Gears Store Admin OTP is ${code}. Valid for 10 minutes.`);
+    if (!result.ok) {
+      return NextResponse.json({ success: false, error: result.error, code: result.code }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ success: true, ...(devMode ? { devOtp: code } : {}) });
 }

@@ -46,7 +46,7 @@ export function PincodeChecker() {
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
       <div className="flex items-center gap-2 text-xs font-extrabold text-slate-900 uppercase tracking-wider">
-        <Truck className="w-4 h-4 text-[#00C853]" />
+        <Truck className="w-4 h-4 text-[#FF3B30]" />
         Check Delivery Availability & COD
       </div>
 
@@ -70,12 +70,12 @@ export function PincodeChecker() {
         <div
           className={`p-3 rounded-xl text-xs flex items-start gap-2.5 border ${
             status.available
-              ? "bg-emerald-50 border-emerald-200 text-slate-800"
+              ? "bg-red-50 border-red-200 text-slate-800"
               : "bg-red-50 border-red-200 text-red-700"
           }`}
         >
           {status.available ? (
-            <CheckCircle2 className="w-4 h-4 text-[#00C853] shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-4 h-4 text-[#FF3B30] shrink-0 mt-0.5" />
           ) : (
             <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
           )}

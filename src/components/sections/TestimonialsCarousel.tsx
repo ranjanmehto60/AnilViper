@@ -25,7 +25,7 @@ export function TestimonialsCarousel() {
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-12 gap-4">
           <div>
-            <span className="text-xs font-extrabold text-[#00C853] uppercase tracking-widest bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full shadow-sm">
+            <span className="text-xs font-extrabold text-[#FF3B30] uppercase tracking-widest bg-red-50 border border-red-200 px-3.5 py-1.5 rounded-full shadow-sm">
               ATHLETE & COACH REVIEWS
             </span>
             <h2 className="text-4xl sm:text-5xl font-black text-slate-900 uppercase tracking-tight bebas-font mt-2">
@@ -63,7 +63,7 @@ export function TestimonialsCarousel() {
                 key={rev.id}
                 className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.33%] pl-4"
               >
-                <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 h-full flex flex-col justify-between space-y-4 hover:border-[#00C853] transition-colors shadow-sm">
+                <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 h-full flex flex-col justify-between space-y-4 hover:border-[#FF3B30] transition-colors shadow-sm">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1 text-amber-400">
@@ -93,7 +93,7 @@ export function TestimonialsCarousel() {
                     <div>
                       <h4 className="text-xs font-extrabold text-slate-900 flex items-center gap-1">
                         {rev.author}
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#00C853]" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#FF3B30]" />
                       </h4>
                       <span className="text-[10px] text-slate-500 block">{rev.role}</span>
                     </div>

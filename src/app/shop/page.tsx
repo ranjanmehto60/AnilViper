@@ -90,11 +90,11 @@ function ShopContent() {
     <div className="space-y-6 text-slate-700">
       <div className="flex items-center justify-between pb-3 border-b border-slate-200">
         <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-          <Filter className="w-4 h-4 text-[#00C853]" /> Catalog Filters
+          <Filter className="w-4 h-4 text-[#FF3B30]" /> Catalog Filters
         </h3>
         <button
           onClick={resetFilters}
-          className="text-xs text-slate-500 hover:text-[#00C853] transition-colors flex items-center gap-1 font-semibold"
+          className="text-xs text-slate-500 hover:text-[#FF3B30] transition-colors flex items-center gap-1 font-semibold"
         >
           <RotateCcw className="w-3.5 h-3.5" /> Reset
         </button>
@@ -112,7 +112,7 @@ function ShopContent() {
               onClick={() => setSelectedCategory(cat)}
               className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
                 selectedCategory === cat
-                  ? "bg-[#00C853] text-white shadow-md shadow-emerald-500/20"
+                  ? "bg-[#FF3B30] text-white shadow-md shadow-red-500/20"
                   : "hover:bg-slate-100 text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -135,7 +135,7 @@ function ShopContent() {
               onClick={() => setSelectedSize(selectedSize === size ? null : size)}
               className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                 selectedSize === size
-                  ? "bg-[#00C853] text-white border-[#00C853]"
+                  ? "bg-[#FF3B30] text-white border-[#FF3B30]"
                   : "bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-300"
               }`}
             >
@@ -149,7 +149,7 @@ function ShopContent() {
       <div className="space-y-3">
         <div className="flex justify-between items-center text-xs">
           <label className="font-bold text-slate-900 uppercase tracking-wider">Max Price</label>
-          <span className="text-[#00C853] font-black">{formatINR(maxPrice)}</span>
+          <span className="text-[#FF3B30] font-black">{formatINR(maxPrice)}</span>
         </div>
         <input
           type="range"
@@ -158,7 +158,7 @@ function ShopContent() {
           step="100"
           value={maxPrice}
           onChange={(e) => setMaxPrice(Number(e.target.value))}
-          className="w-full accent-[#00C853] bg-slate-200 cursor-pointer"
+          className="w-full accent-[#FF3B30] bg-slate-200 cursor-pointer"
         />
         <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
           <span>₹500</span>
@@ -173,7 +173,7 @@ function ShopContent() {
             type="checkbox"
             checked={wtOnly}
             onChange={(e) => setWtOnly(e.target.checked)}
-            className="w-4 h-4 rounded accent-[#00C853]"
+            className="w-4 h-4 rounded accent-[#FF3B30]"
           />
           <span>Show WT Approved Only</span>
         </label>
@@ -189,7 +189,7 @@ function ShopContent() {
         <nav className="flex items-center gap-2 text-xs text-slate-500 mb-6">
           <Link href="/" className="hover:text-slate-900 transition-colors">Home</Link>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-[#00C853] font-bold">Shop Catalog</span>
+          <span className="text-[#FF3B30] font-bold">Shop Catalog</span>
         </nav>
 
         {/* Header Title */}
@@ -218,7 +218,7 @@ function ShopContent() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="h-10 px-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:ring-2 focus:ring-[#00C853]"
+              className="h-10 px-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:ring-2 focus:ring-[#FF3B30]"
             >
               <option value="featured">Sort by: Featured</option>
               <option value="price-low">Price: Low to High</option>
@@ -231,7 +231,7 @@ function ShopContent() {
               <SheetRoot>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="sm" className="h-10 px-3 gap-1.5 text-xs font-bold border-slate-300">
-                    <SlidersHorizontal className="w-4 h-4 text-[#00C853]" /> Filters
+                    <SlidersHorizontal className="w-4 h-4 text-[#FF3B30]" /> Filters
                   </Button>
                 </SheetTrigger>
                 <Content side="left" className="bg-white border-r border-slate-200 w-80 p-6 overflow-y-auto">
@@ -258,7 +258,7 @@ function ShopContent() {
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
                   No Taekwondo gear matching your selected filters. Try broadening your height size or price parameters.
                 </p>
-                <Button variant="default" onClick={resetFilters} size="sm" className="text-xs bg-[#00C853] hover:bg-[#00b248] text-white">
+                <Button variant="default" onClick={resetFilters} size="sm" className="text-xs bg-[#FF3B30] hover:bg-[#D92D20] text-white">
                   Reset All Filters
                 </Button>
               </div>

@@ -38,7 +38,7 @@ export default function ContactPage() {
     },
   });
 
-  const onSubmit = async (data: ContactFormValues) => {
+  const onSubmit = async () => {
     await new Promise((res) => setTimeout(res, 800));
     setSubmitted(true);
     toast.success("Thank you! Your message has been sent to our Chattarpur Delhi team.");
@@ -51,7 +51,7 @@ export default function ContactPage() {
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <span className="text-xs font-extrabold text-[#00C853] uppercase tracking-widest bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 shadow-sm">
+          <span className="text-xs font-extrabold text-[#FF3B30] uppercase tracking-widest bg-red-50 border border-red-200 px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 shadow-sm">
             <MessageSquare className="w-3.5 h-3.5" /> WE&apos;RE HERE TO HELP
           </span>
           <h1 className="text-4xl sm:text-6xl font-black text-slate-900 uppercase tracking-tight bebas-font">
@@ -77,13 +77,13 @@ export default function ContactPage() {
             </div>
 
             {submitted ? (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
-                <CheckCircle2 className="w-12 h-12 text-[#00C853] mx-auto" />
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center space-y-3">
+                <CheckCircle2 className="w-12 h-12 text-[#FF3B30] mx-auto" />
                 <h3 className="text-lg font-bold text-slate-900 uppercase">Inquiry Received!</h3>
                 <p className="text-xs text-slate-600 max-w-md mx-auto">
                   Thank you for reaching out to Viper Gears. One of our academy coordinators will call or WhatsApp you at your provided phone number shortly.
                 </p>
-                <Button variant="default" onClick={() => setSubmitted(false)} size="sm" className="text-xs bg-[#00C853] text-white">
+                <Button variant="default" onClick={() => setSubmitted(false)} size="sm" className="text-xs bg-[#FF3B30] text-white">
                   Send Another Inquiry
                 </Button>
               </div>
@@ -120,7 +120,7 @@ export default function ContactPage() {
                     <label className="text-xs font-bold text-slate-700 uppercase">Inquiry Subject *</label>
                     <select
                       {...register("subject")}
-                      className="w-full h-11 px-3.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:ring-2 focus:ring-[#00C853]"
+                      className="w-full h-11 px-3.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:ring-2 focus:ring-[#FF3B30]"
                     >
                       <option value="Bulk Academy Order">Bulk Academy / Dojang Order</option>
                       <option value="Uniform Size Guidance">Uniform Size Guidance</option>
@@ -136,7 +136,7 @@ export default function ContactPage() {
                     rows={4}
                     placeholder="Tell us your quantity requirements, sizes needed, or academy details..."
                     {...register("message")}
-                    className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C853]"
+                    className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF3B30]"
                   />
                   {errors.message && (
                     <p className="text-[11px] text-red-500 font-semibold">{errors.message.message}</p>
@@ -148,7 +148,7 @@ export default function ContactPage() {
                   variant="default"
                   size="lg"
                   disabled={isSubmitting}
-                  className="w-full text-xs font-black gap-2 h-12 bg-[#00C853] hover:bg-[#00b248] text-white shadow-lg shadow-emerald-500/20"
+                  className="w-full text-xs font-black gap-2 h-12 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg shadow-red-500/20"
                 >
                   <Send className="w-4 h-4" /> Send Message
                 </Button>
@@ -165,7 +165,7 @@ export default function ContactPage() {
 
               <div className="space-y-4 text-xs">
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#00C853] shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-[#FF3B30] shrink-0">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
@@ -178,19 +178,19 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#00C853] shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-[#FF3B30] shrink-0">
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900 uppercase">Phone & WhatsApp:</h4>
-                    <a href="tel:+919871674886" className="text-[#00C853] font-extrabold hover:underline">
+                    <a href="tel:+919871674886" className="text-[#FF3B30] font-extrabold hover:underline">
                       +91-9871674886
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#00C853] shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-[#FF3B30] shrink-0">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div>
@@ -206,13 +206,13 @@ export default function ContactPage() {
               <div className="pt-4 border-t border-slate-100 space-y-2">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Follow Viper Gears:</h4>
                 <div className="flex gap-3">
-                  <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:text-[#00C853] hover:bg-slate-200 transition-colors">
+                  <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:text-[#FF3B30] hover:bg-slate-200 transition-colors">
                     <Instagram className="w-4 h-4" />
                   </a>
-                  <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:text-[#00C853] hover:bg-slate-200 transition-colors">
+                  <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:text-[#FF3B30] hover:bg-slate-200 transition-colors">
                     <Facebook className="w-4 h-4" />
                   </a>
-                  <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:text-[#00C853] hover:bg-slate-200 transition-colors">
+                  <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:text-[#FF3B30] hover:bg-slate-200 transition-colors">
                     <Youtube className="w-4 h-4" />
                   </a>
                 </div>

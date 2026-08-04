@@ -30,8 +30,8 @@ export default function HomePage() {
           
           <div className="flex flex-col sm:flex-row items-center justify-between mb-12 gap-4">
             <div>
-              <span className="text-xs font-bold text-[#00E676] uppercase tracking-widest bg-emerald-950/60 border border-emerald-500/30 px-3.5 py-1 rounded-full flex items-center gap-1.5 w-fit">
-                <Flame className="w-3.5 h-3.5 fill-[#00E676]" /> TOP CHAMPIONSHIP GEAR
+              <span className="text-xs font-bold text-[#FF3B30] uppercase tracking-widest bg-red-950/60 border border-red-500/30 px-3.5 py-1 rounded-full flex items-center gap-1.5 w-fit">
+                <Flame className="w-3.5 h-3.5 fill-[#FF3B30]" /> TOP CHAMPIONSHIP GEAR
               </span>
               <h2 className="text-4xl sm:text-5xl font-black text-white uppercase tracking-tight bebas-font mt-2">
                 FEATURED DOBOKS & SPARRING ARMOR
