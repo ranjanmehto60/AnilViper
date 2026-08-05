@@ -66,7 +66,8 @@ export async function computePricing(
 
   const percent = getDiscountPercent(discountCode);
   const discount = Math.round((subtotal * percent) / 100);
-  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  const isTestProductInCart = items.some((it) => it.productId === "test-gateway-sample-1-rupee");
+  const shipping = (subtotal >= FREE_SHIPPING_THRESHOLD || isTestProductInCart) ? 0 : SHIPPING_FEE;
   const total = Math.max(0, subtotal - discount + shipping);
 
   return {

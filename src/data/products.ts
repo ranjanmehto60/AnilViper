@@ -2,6 +2,33 @@ import { Product } from "@/types/product";
 
 export const PRODUCTS: Product[] = [
   {
+    id: "test-gateway-sample-1-rupee",
+    name: "⚡ Test Gateway Sample Item (₹1 Payment Test)",
+    slug: "test-gateway-sample-item-1-rupee",
+    category: "Test Product",
+    price: 1,
+    originalPrice: 99,
+    rating: 5.0,
+    reviewCount: 99,
+    isWTApproved: true,
+    isBestSeller: true,
+    isNewArrival: true,
+    inStock: true,
+    images: [
+      "/images/kpnp-dobok-1.jpg",
+      "/images/kpnp-dobok-2.jpg",
+    ],
+    description: "Sample product priced at ₹1 specifically for testing Razorpay live/test payment gateway transactions and Shiprocket delivery orders.",
+    fabricSpecs: "Test Sample Specification",
+    weightGsm: 100,
+    availableSizes: [140, 150, 160, 170, 180, 190, 200],
+    features: [
+      "Priced at exactly ₹1 for live payment testing.",
+      "Supports instant Razorpay checkout via UPI, Cards, and Netbanking.",
+      "Triggers automatic Shiprocket delivery AWB generation upon payment."
+    ]
+  },
+  {
     id: "kpnp-comp-india-black-belt",
     name: "KPNP Competition Taekwondo Dobok – India Edition (Black V-Neck)",
     slug: "kpnp-competition-taekwondo-dobok-india-edition",
