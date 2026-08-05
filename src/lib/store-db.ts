@@ -2,10 +2,13 @@ import "server-only";
 
 import { mkdirSync } from "node:fs";
 import path from "node:path";
+import os from "node:os";
 import { DatabaseSync } from "node:sqlite";
 import { createHash, randomBytes, randomInt } from "node:crypto";
 
-const dataDirectory = path.join(process.cwd(), ".data");
+const dataDirectory = process.env.VERCEL || process.env.NODE_ENV === "production"
+  ? path.join(os.tmpdir(), "viper-gears-data")
+  : path.join(process.cwd(), ".data");
 const databasePath = path.join(dataDirectory, "viper-gears.sqlite");
 
 let database: DatabaseSync | undefined;
