@@ -69,6 +69,17 @@ export function RazorpayCheckoutModal({
     setIsProcessing(true);
 
     try {
+      // Helper function to safely parse JSON responses without throwing JSON syntax errors
+      const parseJsonResponse = async (res: Response) => {
+        const text = await res.text();
+        if (!text || text.trim() === "") return {};
+        try {
+          return JSON.parse(text);
+        } catch {
+          return { error: text };
+        }
+      };
+
       // Step 1: Create Razorpay Order via Backend API
       const createResponse = await fetch("/api/payments/create-razorpay-order", {
         method: "POST",
@@ -76,7 +87,7 @@ export function RazorpayCheckoutModal({
         body: JSON.stringify({ items, address, discountCode }),
       });
 
-      const created = await createResponse.json();
+      const created = await parseJsonResponse(createResponse);
       if (!createResponse.ok) {
         throw new Error(created.error || "Unable to initialize payment.");
       }
@@ -119,7 +130,7 @@ export function RazorpayCheckoutModal({
                 }),
               });
 
-              const verifiedData = await verifyResponse.json();
+              const verifiedData = await parseJsonResponse(verifyResponse);
               if (!verifyResponse.ok) {
                 throw new Error(verifiedData.error || "Payment verification failed.");
               }
@@ -156,7 +167,7 @@ export function RazorpayCheckoutModal({
           }),
         });
 
-        const verifiedData = await verifyResponse.json();
+        const verifiedData = await parseJsonResponse(verifyResponse);
         if (!verifyResponse.ok) {
           throw new Error(verifiedData.error || "Payment processing failed.");
         }

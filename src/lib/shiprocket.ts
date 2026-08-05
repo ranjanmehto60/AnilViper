@@ -5,6 +5,16 @@ const SHIPROCKET_API_BASE = "https://apiv2.shiprocket.in/v1/external";
 let cachedToken: string | null = null;
 let tokenExpiresAt = 0;
 
+async function safeJsonResponse(response: Response) {
+  const text = await response.text();
+  if (!text || !text.trim()) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { error: text };
+  }
+}
+
 export function isShiprocketConfigured(): boolean {
   return Boolean(process.env.SHIPROCKET_EMAIL && process.env.SHIPROCKET_PASSWORD);
 }
@@ -35,7 +45,7 @@ export async function getShiprocketToken(): Promise<string | null> {
       return null;
     }
 
-    const data = await response.json();
+    const data = await safeJsonResponse(response);
     if (data.token) {
       cachedToken = data.token;
       // Shiprocket token valid for ~10 days. Cache for 9 days.
@@ -97,7 +107,7 @@ export async function checkShiprocketServiceability(
       cache: "no-store",
     });
 
-    const data = await response.json();
+    const data = await safeJsonResponse(response);
 
     if (data.status === 200 && data.data?.available_courier_companies?.length > 0) {
       const bestCourier = data.data.available_courier_companies[0];
@@ -204,7 +214,7 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
+    const data = await safeJsonResponse(response);
 
     if (response.ok && data.order_id) {
       const shiprocketOrderId = data.order_id;
@@ -262,7 +272,7 @@ export async function assignShiprocketAWB(shipmentId: number): Promise<{
       body: JSON.stringify({ shipment_id: shipmentId }),
     });
 
-    const data = await response.json();
+    const data = await safeJsonResponse(response);
     if (data.status === 200 && data.response?.data?.awb_code) {
       return {
         awb: data.response.data.awb_code,
@@ -295,7 +305,7 @@ export async function getShiprocketTracking(awb: string) {
       cache: "no-store",
     });
 
-    const data = await response.json();
+    const data = await safeJsonResponse(response);
     return data.tracking_data || data;
   } catch {
     return { status: "Tracking details unavailable" };

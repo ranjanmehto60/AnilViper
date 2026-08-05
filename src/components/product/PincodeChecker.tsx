@@ -33,7 +33,13 @@ export function PincodeChecker() {
 
     try {
       const res = await fetch(`/api/shipping/check-serviceability?pincode=${cleanPin}`);
-      const data = await res.json();
+      const text = await res.text();
+      let data: { available?: boolean; courierName?: string; message?: string; estimatedDays?: string; etd?: string; error?: string } = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { error: text || "Invalid response format" };
+      }
 
       if (!res.ok) {
         throw new Error(data.error || "Pincode serviceability check failed.");
