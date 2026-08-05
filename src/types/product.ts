@@ -3,7 +3,8 @@ export type CategoryType =
   | "Advanced Competition Dobok" 
   | "Kids Dobok" 
   | "Black Belt Dobok" 
-  | "Belts & Accessories";
+  | "Belts & Accessories"
+  | "Test Product";
 
 export interface Product {
   id: string;
