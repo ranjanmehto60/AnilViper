@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { CartDrawer } from "@/components/cart/CartDrawer";
-import { PRODUCTS } from "@/data/products";
+import { Product } from "@/types/product";
 import {
   ShoppingBag,
   Heart,
@@ -30,9 +30,19 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
 
   const cartItemCount = useCartStore((state) => state.getItemCount());
   const wishlistCount = useWishlistStore((state) => state.items.length);
+
+  useEffect(() => {
+    fetch("/api/products", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.products)) setProducts(data.products);
+      })
+      .catch(() => {});
+  }, []);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -43,7 +53,7 @@ export function Header() {
   ];
 
   const filteredProducts = searchQuery.trim()
-    ? PRODUCTS.filter(
+    ? products.filter(
         (p) =>
           p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.category.toLowerCase().includes(searchQuery.toLowerCase())

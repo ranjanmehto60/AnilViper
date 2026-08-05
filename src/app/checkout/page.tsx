@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/store/useCartStore";
@@ -16,6 +16,7 @@ import {
   ChevronRight,
   ArrowRight,
   MapPin,
+  PauseCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -39,10 +40,24 @@ export default function CheckoutPage() {
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [razorpayOpen, setRazorpayOpen] = useState(false);
+  const [ordersPaused, setOrdersPaused] = useState(false);
+  const [pauseMessage, setPauseMessage] = useState("");
   const [orderComplete, setOrderComplete] = useState<{
     orderId: string;
     paymentId: string;
   } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/store-status", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (data) {
+          setOrdersPaused(Boolean(data.ordersPaused));
+          if (data.message) setPauseMessage(String(data.message));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -115,6 +130,21 @@ export default function CheckoutPage() {
           <span className="text-[#FF3B30] font-bold">3-Step Checkout</span>
         </nav>
 
+        {/* Orders Paused Banner */}
+        {ordersPaused && (
+          <div className="bg-[#FF3B30]/10 border border-[#FF3B30]/40 text-[#FF3B30] rounded-2xl p-4 flex items-center gap-3">
+            <PauseCircle className="w-5 h-5 shrink-0" />
+            <div>
+              <p className="text-xs font-black uppercase tracking-wider">
+                Orders are temporarily paused
+              </p>
+              <p className="text-xs text-slate-700 font-medium mt-0.5">
+                {pauseMessage || "We are currently not accepting new orders. Please check back soon."}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Stepper Header */}
         <div className="flex items-center justify-between max-w-2xl mx-auto pb-4 border-b border-slate-200">
           <div className={`flex items-center gap-2 text-xs font-bold ${step >= 1 ? "text-[#FF3B30]" : "text-slate-400"}`}>
@@ -181,7 +211,7 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <Button type="submit" variant="default" size="lg" className="w-full text-xs font-black gap-2 h-12 mt-4 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg shadow-red-500/20">
+                  <Button type="submit" variant="default" size="lg" disabled={ordersPaused} className="w-full text-xs font-black gap-2 h-12 mt-4 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
                     Continue To Order Summary <ArrowRight className="w-4 h-4" />
                   </Button>
                 </form>
@@ -227,7 +257,8 @@ export default function CheckoutPage() {
                       variant="default"
                       size="lg"
                       onClick={() => setRazorpayOpen(true)}
-                      className="w-full text-xs font-black gap-2 h-12 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg shadow-red-500/20"
+                      disabled={ordersPaused}
+                      className="w-full text-xs font-black gap-2 h-12 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <CreditCard className="w-4 h-4" /> Pay {formatINR(total)} via Razorpay
                     </Button>

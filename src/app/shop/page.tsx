@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useMemo, Suspense } from "react";
+import React, { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { PRODUCTS } from "@/data/products";
 import { ProductCard } from "@/components/product/ProductCard";
-import { CategoryType } from "@/types/product";
+import { PauseBanner } from "@/components/store/PauseBanner";
+import { CategoryType, Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatINR } from "@/lib/utils";
@@ -15,6 +15,7 @@ import {
   RotateCcw,
   Check,
   Filter,
+  Loader2,
 } from "lucide-react";
 import {
   Sheet as SheetRoot,
@@ -27,6 +28,8 @@ function ShopContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") as CategoryType | null;
 
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | "All">(
     initialCategory || "All"
   );
@@ -47,8 +50,18 @@ function ShopContent() {
 
   const availableSizes = [110, 120, 130, 140, 150, 160, 170, 180, 190, 200];
 
+  useEffect(() => {
+    fetch("/api/products", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.products)) setProducts(data.products);
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
+
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((product) => {
+    return products.filter((product) => {
       if (selectedCategory !== "All" && product.category !== selectedCategory) {
         return false;
       }
@@ -75,7 +88,7 @@ function ShopContent() {
       if (sortBy === "rating") return b.rating - a.rating;
       return 0;
     });
-  }, [selectedCategory, selectedSize, maxPrice, wtOnly, sortBy, searchQuery]);
+  }, [products, selectedCategory, selectedSize, maxPrice, wtOnly, sortBy, searchQuery]);
 
   const resetFilters = () => {
     setSelectedCategory("All");
@@ -185,6 +198,8 @@ function ShopContent() {
     <div className="bg-[#F8FAFC] min-h-screen py-10">
       <div className="container mx-auto px-4">
         
+        <PauseBanner />
+
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-slate-500 mb-6">
           <Link href="/" className="hover:text-slate-900 transition-colors">Home</Link>
@@ -252,7 +267,11 @@ function ShopContent() {
 
           {/* Product Grid */}
           <div className="lg:col-span-9">
-            {filteredProducts.length === 0 ? (
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20 text-sm text-slate-500">
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading catalog...
+              </div>
+            ) : filteredProducts.length === 0 ? (
               <div className="text-center py-20 bg-white border border-slate-200 rounded-3xl p-8 space-y-4 shadow-sm">
                 <h3 className="text-lg font-bold text-slate-900 uppercase tracking-wider">No Products Found</h3>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">

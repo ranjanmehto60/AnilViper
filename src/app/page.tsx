@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { HighlightsBar } from "@/components/sections/HighlightsBar";
 import { WhyViperSection } from "@/components/sections/WhyViperSection";
@@ -8,13 +8,27 @@ import { TestimonialsCarousel } from "@/components/sections/TestimonialsCarousel
 import { GalleryPreview } from "@/components/sections/GalleryPreview";
 import { NewsletterSection } from "@/components/sections/NewsletterSection";
 import { ProductCard } from "@/components/product/ProductCard";
-import { PRODUCTS } from "@/data/products";
+import { PauseBanner } from "@/components/store/PauseBanner";
+import { Product } from "@/types/product";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Flame } from "lucide-react";
+import { ArrowRight, Flame, Loader2 } from "lucide-react";
 
 export default function HomePage() {
-  const featuredProducts = PRODUCTS.slice(0, 8);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/products", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.products)) setProducts(data.products);
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const featuredProducts = products.slice(0, 8);
 
   return (
     <div className="space-y-0">
@@ -23,6 +37,9 @@ export default function HomePage() {
 
       {/* Highlights Bar */}
       <HighlightsBar />
+
+      {/* Pause Notice */}
+      <PauseBanner />
 
       {/* Featured Products Showcase */}
       <section className="py-20 bg-[#0E0E10] border-b border-zinc-800/80">
@@ -47,15 +64,21 @@ export default function HomePage() {
 
           {/* Product Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {isLoading ? (
+              <div className="col-span-full py-10 flex items-center justify-center text-sm text-zinc-400">
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading featured gear...
+              </div>
+            ) : (
+              featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            )}
           </div>
 
           <div className="mt-12 text-center">
             <Button variant="viperAccent" size="lg" asChild className="px-8 text-sm">
               <Link href="/shop">
-                View All {PRODUCTS.length} Products <ArrowRight className="w-5 h-5 ml-1" />
+                View All {products.length || ""} Products <ArrowRight className="w-5 h-5 ml-1" />
               </Link>
             </Button>
           </div>

@@ -1,4 +1,4 @@
-import { PRODUCTS } from "@/data/products";
+import { listProducts } from "@/lib/product-db";
 
 export const FREE_SHIPPING_THRESHOLD = 999;
 export const SHIPPING_FEE = 99;
@@ -31,19 +31,20 @@ export function getDiscountPercent(code: string | null | undefined): number {
   return PROMO_CODES[code.trim().toUpperCase()] ?? 0;
 }
 
-export function computePricing(
+export async function computePricing(
   lines: { productId: string; size: number; quantity: number }[],
   discountCode: string | null | undefined
-): { breakdown: PricingBreakdown; error: string | null } {
+): Promise<{ breakdown: PricingBreakdown; error: string | null }> {
   if (!Array.isArray(lines) || lines.length === 0) {
     return { breakdown: emptyBreakdown(), error: "Your cart is empty" };
   }
 
+  const products = listProducts();
   const items: PricingLine[] = [];
   let subtotal = 0;
 
   for (const line of lines) {
-    const product = PRODUCTS.find((p) => p.id === line.productId);
+    const product = products.find((p) => p.id === line.productId);
     if (!product) {
       return { breakdown: emptyBreakdown(), error: `Unknown product: ${line.productId}` };
     }

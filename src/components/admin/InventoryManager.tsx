@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAdminStore } from "@/store/useAdminStore";
+import { Product } from "@/types/product";
 import { InventoryItem } from "@/types/inventory";
 
 type InventoryDraft = { quantity: number; reorderLevel: number };
@@ -19,19 +19,35 @@ function statusFor(item: InventoryItem) {
 }
 
 export function InventoryManager() {
-  const { products } = useAdminStore();
+  const [products, setProducts] = useState<Product[]>([]);
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [drafts, setDrafts] = useState<Record<number, InventoryDraft>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState(products[0]?.id ?? "");
-  const [newSize, setNewSize] = useState(products[0]?.availableSizes[0] ?? 170);
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [newSize, setNewSize] = useState(170);
   const [newQuantity, setNewQuantity] = useState(0);
   const [newReorderLevel, setNewReorderLevel] = useState(3);
 
   const selectedProduct = products.find((product) => product.id === selectedProductId) ?? products[0];
+
+  const loadProducts = useCallback(async () => {
+    try {
+      const response = await fetch("/api/admin/products", { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to load products");
+      const loadedProducts = data.products as Product[];
+      setProducts(loadedProducts);
+      setSelectedProductId((current) => {
+        if (current && loadedProducts.some((product) => product.id === current)) return current;
+        return loadedProducts[0]?.id ?? "";
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to load products");
+    }
+  }, []);
 
   const loadInventory = useCallback(async () => {
     setIsLoading(true);
@@ -54,6 +70,10 @@ export function InventoryManager() {
       setIsLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   useEffect(() => {
     loadInventory();

@@ -45,12 +45,37 @@ function getDatabase() {
         payment_status TEXT NOT NULL,
         order_status TEXT NOT NULL,
         awb TEXT,
+        razorpay_order_id TEXT,
+        razorpay_payment_id TEXT,
+        shiprocket_order_id TEXT,
+        shipment_id TEXT,
+        courier_name TEXT,
         created_at INTEGER NOT NULL
       );
       CREATE TABLE IF NOT EXISTS sessions_cleanup (
         id INTEGER PRIMARY KEY AUTOINCREMENT
       );
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      );
     `);
+
+    // Ensure newly added columns exist in SQLite database if created in earlier schema
+    const alterColumns = [
+      "ALTER TABLE orders ADD COLUMN razorpay_order_id TEXT",
+      "ALTER TABLE orders ADD COLUMN razorpay_payment_id TEXT",
+      "ALTER TABLE orders ADD COLUMN shiprocket_order_id TEXT",
+      "ALTER TABLE orders ADD COLUMN shipment_id TEXT",
+      "ALTER TABLE orders ADD COLUMN courier_name TEXT",
+    ];
+    for (const statement of alterColumns) {
+      try {
+        database.exec(statement);
+      } catch {
+        // Column already exists
+      }
+    }
   }
 
   return database;
@@ -127,6 +152,37 @@ export function verifyOtp(scope: string, identifier: string, code: string): "ok"
 }
 
 // ---------------------------------------------------------------------------
+// Settings
+// ---------------------------------------------------------------------------
+
+const DEFAULT_PAUSE_MESSAGE = "We are currently not accepting new orders. Please check back soon.";
+
+export function getSetting(key: string, defaultValue: string | null = null): string | null {
+  const row = getDatabase()
+    .prepare("SELECT value FROM settings WHERE key = ?")
+    .get(key) as { value: string } | undefined;
+
+  return row ? row.value : defaultValue;
+}
+
+export function setSetting(key: string, value: string) {
+  getDatabase()
+    .prepare(`
+      INSERT INTO settings (key, value) VALUES (?, ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    `)
+    .run(key, value);
+}
+
+export function isOrdersPaused(): boolean {
+  return getSetting("orders_paused") === "1";
+}
+
+export function getPauseMessage(): string {
+  return getSetting("pause_message", DEFAULT_PAUSE_MESSAGE) ?? DEFAULT_PAUSE_MESSAGE;
+}
+
+// ---------------------------------------------------------------------------
 // Sessions
 // ---------------------------------------------------------------------------
 
@@ -187,6 +243,11 @@ export interface OrderRecord extends OrderRecordInput {
   paymentStatus: "PENDING" | "PAID";
   orderStatus: "Processing" | "Shipped" | "Delivered";
   awb: string | null;
+  razorpayOrderId?: string | null;
+  razorpayPaymentId?: string | null;
+  shiprocketOrderId?: string | null;
+  shipmentId?: string | null;
+  courierName?: string | null;
   createdAt: number;
 }
 
@@ -204,7 +265,12 @@ function mapOrderRow(row: Record<string, unknown>): OrderRecord {
     discountCode: row.discount_code === null ? null : String(row.discount_code),
     paymentStatus: String(row.payment_status) as "PENDING" | "PAID",
     orderStatus: String(row.order_status) as OrderRecord["orderStatus"],
-    awb: row.awb === null ? null : String(row.awb),
+    awb: row.awb ? String(row.awb) : null,
+    razorpayOrderId: row.razorpay_order_id ? String(row.razorpay_order_id) : null,
+    razorpayPaymentId: row.razorpay_payment_id ? String(row.razorpay_payment_id) : null,
+    shiprocketOrderId: row.shiprocket_order_id ? String(row.shiprocket_order_id) : null,
+    shipmentId: row.shipment_id ? String(row.shipment_id) : null,
+    courierName: row.courier_name ? String(row.courier_name) : null,
     createdAt: Number(row.created_at),
   };
 }
@@ -246,6 +312,13 @@ export function getOrderById(id: string): OrderRecord | null {
   return row ? mapOrderRow(row) : null;
 }
 
+export function getOrderByRazorpayOrderId(razorpayOrderId: string): OrderRecord | null {
+  const row = getDatabase()
+    .prepare("SELECT * FROM orders WHERE razorpay_order_id = ?")
+    .get(razorpayOrderId) as Record<string, unknown> | undefined;
+  return row ? mapOrderRow(row) : null;
+}
+
 export function listOrders(): OrderRecord[] {
   const rows = getDatabase().prepare("SELECT * FROM orders ORDER BY created_at DESC").all() as Record<string, unknown>[];
   return rows.map(mapOrderRow);
@@ -263,6 +336,59 @@ export function markOrderPaid(id: string): boolean {
     .prepare("UPDATE orders SET payment_status = 'PAID' WHERE id = ? AND payment_status = 'PENDING'")
     .run(id).changes;
   return changed > 0;
+}
+
+export function updateOrderPaymentAndShipping(
+  id: string,
+  data: {
+    paymentStatus?: "PENDING" | "PAID";
+    razorpayOrderId?: string | null;
+    razorpayPaymentId?: string | null;
+    shiprocketOrderId?: string | number | null;
+    shipmentId?: string | number | null;
+    awb?: string | null;
+    courierName?: string | null;
+    orderStatus?: OrderRecord["orderStatus"];
+  }
+): OrderRecord | null {
+  const current = getOrderById(id);
+  if (!current) return null;
+
+  const paymentStatus = data.paymentStatus ?? current.paymentStatus;
+  const razorpayOrderId = data.razorpayOrderId !== undefined ? data.razorpayOrderId : current.razorpayOrderId;
+  const razorpayPaymentId = data.razorpayPaymentId !== undefined ? data.razorpayPaymentId : current.razorpayPaymentId;
+  const shiprocketOrderId = data.shiprocketOrderId !== undefined ? String(data.shiprocketOrderId) : current.shiprocketOrderId;
+  const shipmentId = data.shipmentId !== undefined ? String(data.shipmentId) : current.shipmentId;
+  const awb = data.awb !== undefined ? data.awb : current.awb;
+  const courierName = data.courierName !== undefined ? data.courierName : current.courierName;
+  const orderStatus = data.orderStatus ?? current.orderStatus;
+
+  getDatabase()
+    .prepare(`
+      UPDATE orders SET
+        payment_status = ?,
+        razorpay_order_id = ?,
+        razorpay_payment_id = ?,
+        shiprocket_order_id = ?,
+        shipment_id = ?,
+        awb = ?,
+        courier_name = ?,
+        order_status = ?
+      WHERE id = ?
+    `)
+    .run(
+      paymentStatus,
+      razorpayOrderId ?? null,
+      razorpayPaymentId ?? null,
+      shiprocketOrderId ?? null,
+      shipmentId ?? null,
+      awb ?? null,
+      courierName ?? null,
+      orderStatus,
+      id
+    );
+
+  return getOrderById(id);
 }
 
 export function updateOrderStatus(

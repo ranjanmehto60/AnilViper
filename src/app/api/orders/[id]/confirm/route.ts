@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getOrderById, markOrderPaid } from "@/lib/store-db";
+import { getOrderById, getPauseMessage, isOrdersPaused, markOrderPaid } from "@/lib/store-db";
 import { decrementInventory, getStockLevel } from "@/lib/inventory-db";
 
 export const runtime = "nodejs";
@@ -19,6 +19,13 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
   }
   if (order.paymentStatus === "PAID") {
     return NextResponse.json({ success: true, alreadyPaid: true });
+  }
+
+  if (isOrdersPaused()) {
+    return NextResponse.json(
+      { error: getPauseMessage(), paused: true },
+      { status: 503 }
+    );
   }
 
   const items = JSON.parse(order.items) as StoredOrderLine[];

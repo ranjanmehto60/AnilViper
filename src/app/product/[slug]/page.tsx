@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter, notFound } from "next/navigation";
-import { PRODUCTS } from "@/data/products";
 import { REVIEWS } from "@/data/reviews";
 import { formatINR } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
@@ -14,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { SizeGuideModal } from "@/components/product/SizeGuideModal";
 import { PincodeChecker } from "@/components/product/PincodeChecker";
 import { ProductCard } from "@/components/product/ProductCard";
+import { Product } from "@/types/product";
 import {
   Accordion,
   AccordionContent,
@@ -32,6 +32,7 @@ import {
   Minus,
   CheckCircle2,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -40,18 +41,42 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const slug = params?.slug as string;
 
-  const product = PRODUCTS.find((p) => p.slug === slug);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const product = products.find((p) => p.slug === slug);
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [selectedSize, setSelectedSize] = useState<number>(
-    product?.availableSizes.includes(170) ? 170 : (product?.availableSizes[0] ?? 170)
-  );
+  const [selectedSize, setSelectedSize] = useState<number>(170);
   const [quantity, setQuantity] = useState<number>(1);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   const addItem = useCartStore((state) => state.addItem);
   const { toggleWishlist, isInWishlist } = useWishlistStore();
   const isFavorite = product ? isInWishlist(product.id) : false;
+
+  useEffect(() => {
+    fetch("/api/products", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.products)) setProducts(data.products);
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (!product) return;
+    setActiveImageIndex(0);
+    setSelectedSize(product.availableSizes.includes(170) ? 170 : product.availableSizes[0]);
+  }, [product, slug]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-[#F8FAFC] min-h-screen flex items-center justify-center text-slate-500 text-sm">
+        <Loader2 className="w-5 h-5 mr-2 animate-spin text-[#FF3B30]" /> Loading uniform details...
+      </div>
+    );
+  }
 
   if (!product) {
     notFound();
@@ -71,9 +96,11 @@ export default function ProductDetailPage() {
     router.push("/checkout");
   };
 
-  const relatedProducts = PRODUCTS.filter(
-    (p) => p.id !== product.id && (p.category === product.category || p.isWTApproved)
-  ).slice(0, 4);
+  const relatedProducts = products
+    .filter(
+      (p) => p.id !== product.id && (p.category === product.category || p.isWTApproved)
+    )
+    .slice(0, 4);
 
   const jsonLd = {
     "@context": "https://schema.org/",

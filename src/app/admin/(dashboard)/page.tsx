@@ -1,16 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { useAdminStore } from "@/store/useAdminStore";
 import { formatINR } from "@/lib/utils";
-import { Product, CategoryType } from "@/types/product";
+import { Product } from "@/types/product";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ProductForm } from "@/components/admin/ProductForm";
 import {
   Package,
   ShoppingBag,
@@ -23,6 +29,11 @@ import {
   Search,
   Boxes,
   ArrowRight,
+  Loader2,
+  PauseCircle,
+  PlayCircle,
+  Save,
+  Settings2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,26 +47,45 @@ interface ServerOrder {
   paymentStatus: "PENDING" | "PAID";
   orderStatus: "Processing" | "Shipped" | "Delivered";
   awb: string | null;
+  razorpayPaymentId?: string | null;
+  courierName?: string | null;
   createdAt: number;
 }
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { products, addProduct, updateProduct, deleteProduct, toggleStock } = useAdminStore();
 
   const [adminEmail, setAdminEmail] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [orders, setOrders] = useState<ServerOrder[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState<number>(0);
 
-  // New Product Form State
-  const [newTitle, setNewTitle] = useState("");
-  const [newCategory, setNewCategory] = useState<CategoryType>("Advanced Competition Dobok");
-  const [newPrice, setNewPrice] = useState<number>(2999);
-  const [newOriginalPrice, setNewOriginalPrice] = useState<number>(3999);
-  const [newDescription, setNewDescription] = useState("");
-  const [newImageUrl, setNewImageUrl] = useState("/images/kpnp-dobok-1.jpg");
+  // Settings state
+  const [ordersPaused, setOrdersPaused] = useState(false);
+  const [pauseMessage, setPauseMessage] = useState("");
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  const loadProducts = useCallback(async () => {
+    setIsLoadingProducts(true);
+    try {
+      const response = await fetch("/api/admin/products", { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to load products");
+      setProducts(data.products as Product[]);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to load products");
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   useEffect(() => {
     fetch("/api/admin/me", { cache: "no-store" })
@@ -71,6 +101,18 @@ export default function AdminDashboardPage() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.orders)) setOrders(data.orders);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/settings", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          setOrdersPaused(Boolean(data.ordersPaused));
+          setPauseMessage(String(data.message ?? ""));
+        }
       })
       .catch(() => {});
   }, []);
@@ -100,54 +142,118 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleCreateProduct = async (payload: Record<string, unknown>) => {
+    try {
+      const response = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to add product");
+      await loadProducts();
+      toast.success(`Successfully added ${payload.name} to website catalog!`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to add product");
+      throw error;
+    }
+  };
+
+  const handleUpdateProduct = async (id: string, payload: Record<string, unknown>) => {
+    try {
+      const response = await fetch(`/api/admin/products/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to update product");
+      await loadProducts();
+      setEditingProduct(null);
+      toast.success("Product updated in catalog!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to update product");
+      throw error;
+    }
+  };
+
+  const handleDeleteProduct = async (product: Product) => {
+    if (!window.confirm(`Remove "${product.name}" from the catalog? Its inventory rows will also be deleted.`)) {
+      return;
+    }
+    try {
+      const response = await fetch(`/api/admin/products/${product.id}`, { method: "DELETE" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to delete product");
+      await loadProducts();
+      toast.info(`Removed ${product.name} from catalog`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to delete product");
+    }
+  };
+
+  const handleToggleStock = async (product: Product) => {
+    try {
+      const response = await fetch(`/api/admin/products/${product.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inStock: !product.inStock }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to update stock status");
+      await loadProducts();
+      toast.info(`Stock status updated for ${product.name}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to update stock status");
+    }
+  };
+
+  const handleSavePrice = async (product: Product) => {
+    if (!Number.isFinite(editPrice) || editPrice <= 0) return;
+    try {
+      const response = await fetch(`/api/admin/products/${product.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ price: editPrice }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to update price");
+      await loadProducts();
+      setEditingPriceId(null);
+      toast.success("Updated product price in catalog!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to update price");
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const response = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ordersPaused, message: pauseMessage }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to save settings");
+      setOrdersPaused(Boolean(data.ordersPaused));
+      setPauseMessage(String(data.message ?? ""));
+      toast.success(ordersPaused ? "Store is now paused. New orders are blocked." : "Store is live again. Orders are being accepted.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to save settings");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   const totalRevenue = orders.reduce((acc, o) => acc + o.total, 0);
   const totalProducts = products.length;
   const inStockCount = products.filter((p) => p.inStock).length;
   const outOfStockCount = totalProducts - inStockCount;
 
-  const handleCreateProduct = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTitle || newPrice <= 0) {
-      toast.error("Please enter a valid product title and price.");
-      return;
-    }
-
-    const newProd: Product = {
-      id: `kpnp-custom-${Date.now()}`,
-      name: newTitle,
-      slug: newTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      category: newCategory,
-      price: Number(newPrice),
-      originalPrice: Number(newOriginalPrice),
-      rating: 5.0,
-      reviewCount: 1,
-      isWTApproved: true,
-      inStock: true,
-      images: [newImageUrl, "/images/kpnp-dobok-chest.jpg"],
-      description: newDescription || "Official KPNP Taekwondo Dobok engineered for elite competition performance.",
-      fabricSpecs: "Lightweight Moisture-Wicking Poly-Blend",
-      weightGsm: 210,
-      availableSizes: [140, 150, 160, 170, 180, 190, 200],
-      features: [
-        "Elite Performance Fabric: Moisture-wicking poly-blend weave.",
-        "National Pride Print: Official Indian Flag patch on sleeve.",
-        "Ergonomic Fit: 180-degree freedom of movement for kicking."
-      ]
-    };
-
-    addProduct(newProd);
-    toast.success(`Successfully added ${newTitle} to website catalog!`);
-    setNewTitle("");
-    setNewDescription("");
-  };
-
-  const handleSavePriceEdit = (id: string) => {
-    if (editPrice > 0) {
-      updateProduct(id, { price: Number(editPrice) });
-      toast.success("Updated product price in catalog!");
-      setEditingProductId(null);
-    }
-  };
+  const filteredProducts = products.filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="bg-[#F8FAFC] py-10 min-h-screen text-slate-900">
@@ -164,9 +270,11 @@ export default function AdminDashboardPage() {
                 <h1 className="text-xl sm:text-2xl font-black uppercase tracking-wider bebas-font text-white">
                   VIPER GEARS STORE ADMIN PANEL
                 </h1>
-                <Badge variant="wtApproved" className="bg-[#FF3B30] text-white border-0 font-extrabold text-[10px]">
-                  LIVE STORE
-                </Badge>
+                {ordersPaused && (
+                  <Badge className="bg-amber-500 text-white border-0 font-extrabold text-[10px]">
+                    ORDERS PAUSED
+                  </Badge>
+                )}
               </div>
               <p className="text-xs text-slate-300 mt-0.5">
                 Logged in as: <span className="font-mono text-[#FF3B30] font-bold">{adminEmail}</span>
@@ -245,7 +353,7 @@ export default function AdminDashboardPage() {
 
         {/* Dashboard Tabs */}
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="w-full justify-start bg-white border border-slate-200 p-1.5 rounded-2xl h-auto shadow-sm">
+          <TabsList className="w-full justify-start bg-white border border-slate-200 p-1.5 rounded-2xl h-auto shadow-sm overflow-x-auto">
             <TabsTrigger value="products" className="gap-2 py-2.5">
               <Package className="w-4 h-4" /> Manage Catalog ({products.length})
             </TabsTrigger>
@@ -254,6 +362,9 @@ export default function AdminDashboardPage() {
             </TabsTrigger>
             <TabsTrigger value="add" className="gap-2 py-2.5">
               <Plus className="w-4 h-4 text-[#FF3B30]" /> Add New Uniform
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2 py-2.5">
+              <Settings2 className="w-4 h-4 text-[#FF3B30]" /> Store Settings
             </TabsTrigger>
           </TabsList>
 
@@ -275,23 +386,24 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-700 uppercase border-b border-slate-200 font-extrabold">
-                    <tr>
-                      <th className="p-3">Uniform</th>
-                      <th className="p-3">Category</th>
-                      <th className="p-3">Selling Price</th>
-                      <th className="p-3">Stock Status</th>
-                      <th className="p-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {products
-                      .filter((p) =>
-                        p.name.toLowerCase().includes(searchQuery.toLowerCase())
-                      )
-                      .map((product) => (
+              {isLoadingProducts ? (
+                <div className="flex items-center justify-center py-16 text-xs text-slate-500">
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading catalog from database...
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-700 uppercase border-b border-slate-200 font-extrabold">
+                      <tr>
+                        <th className="p-3">Uniform</th>
+                        <th className="p-3">Category</th>
+                        <th className="p-3">Selling Price</th>
+                        <th className="p-3">Stock Status</th>
+                        <th className="p-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredProducts.map((product) => (
                         <tr key={product.id} className="hover:bg-slate-50 transition-colors">
                           <td className="p-3">
                             <div className="flex items-center gap-3">
@@ -315,7 +427,7 @@ export default function AdminDashboardPage() {
                           <td className="p-3 font-semibold text-slate-600">{product.category}</td>
 
                           <td className="p-3">
-                            {editingProductId === product.id ? (
+                            {editingPriceId === product.id ? (
                               <div className="flex items-center gap-1">
                                 <Input
                                   type="number"
@@ -325,7 +437,7 @@ export default function AdminDashboardPage() {
                                 />
                                 <Button
                                   size="sm"
-                                  onClick={() => handleSavePriceEdit(product.id)}
+                                  onClick={() => handleSavePrice(product)}
                                   className="h-8 px-2 bg-[#FF3B30] text-white text-[10px]"
                                 >
                                   Save
@@ -338,7 +450,7 @@ export default function AdminDashboardPage() {
                                 </span>
                                 <button
                                   onClick={() => {
-                                    setEditingProductId(product.id);
+                                    setEditingPriceId(product.id);
                                     setEditPrice(product.price);
                                   }}
                                   className="text-slate-400 hover:text-slate-900"
@@ -351,10 +463,7 @@ export default function AdminDashboardPage() {
 
                           <td className="p-3">
                             <button
-                              onClick={() => {
-                                toggleStock(product.id);
-                                toast.info(`Toggled stock status for ${product.name}`);
-                              }}
+                              onClick={() => handleToggleStock(product)}
                               className={`px-3 py-1 rounded-full text-[10px] font-extrabold border transition-all cursor-pointer ${
                                 product.inStock
                                   ? "bg-red-50 text-[#FF6B61] border-red-200"
@@ -366,23 +475,31 @@ export default function AdminDashboardPage() {
                           </td>
 
                           <td className="p-3 text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                deleteProduct(product.id);
-                                toast.info(`Removed ${product.name} from catalog`);
-                              }}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-2"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditingProduct(product)}
+                                className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 h-8 px-2"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteProduct(product)}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-2"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
-                  </tbody>
-                </table>
-              </div>
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </TabsContent>
 
@@ -458,8 +575,16 @@ export default function AdminDashboardPage() {
                           <span className="text-base font-black text-[#FF3B30]">{formatINR(order.total)}</span>
                         </div>
                         <div className="flex justify-between items-center pt-2 border-t border-slate-200">
+                          <span className="text-slate-500">Razorpay Payment ID:</span>
+                          <span className="font-mono text-slate-900 font-bold text-[11px]">{order.razorpayPaymentId || "Prepaid"}</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-1">
+                          <span className="text-slate-500">Courier Partner:</span>
+                          <span className="font-bold text-slate-900">{order.courierName || "Shiprocket Express"}</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-1">
                           <span className="text-slate-500">Shiprocket AWB Code:</span>
-                          <span className="font-mono text-slate-900 font-bold">{order.awb || "Not Dispatched"}</span>
+                          <span className="font-mono text-slate-900 font-bold">{order.awb || "Pending AWB"}</span>
                         </div>
                       </div>
                     </div>
@@ -475,90 +600,101 @@ export default function AdminDashboardPage() {
               <h3 className="text-lg font-black text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">
                 Add New Taekwondo Uniform to Website
               </h3>
+              <p className="text-xs text-slate-500 -mt-3">
+                Inventory rows are created automatically for every selected size. Set their stock on the Inventory page.
+              </p>
+              <ProductForm submitLabel="Add Uniform To Website" onSubmit={handleCreateProduct} />
+            </div>
+          </TabsContent>
 
-              <form onSubmit={handleCreateProduct} className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700 uppercase">Uniform Name / Title *</label>
-                  <Input
-                    placeholder="e.g. KPNP Elite Black Belt Dobok - Special Gold Edition"
-                    value={newTitle}
-                    onChange={(e) => setNewTitle(e.target.value)}
-                    required
-                  />
+          {/* TAB 4: STORE SETTINGS */}
+          <TabsContent value="settings" className="pt-4">
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6 shadow-sm">
+              <h3 className="text-lg font-black text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">
+                Store Order Settings
+              </h3>
+
+              <div className={`rounded-3xl border p-5 flex items-start gap-4 ${ordersPaused ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200"}`}>
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${ordersPaused ? "bg-amber-100 text-amber-600" : "bg-emerald-100 text-emerald-600"}`}>
+                  {ordersPaused ? <PauseCircle className="w-6 h-6" /> : <PlayCircle className="w-6 h-6" />}
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700 uppercase">Uniform Category *</label>
-                    <select
-                      value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value as CategoryType)}
-                      className="w-full h-11 px-3.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-bold"
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider">
+                        {ordersPaused ? "Orders are temporarily paused" : "Store is live and taking orders"}
+                      </h4>
+                      <p className="text-xs text-slate-600 mt-1">
+                        {ordersPaused
+                          ? "Customers will see a pause notice and cannot place new orders."
+                          : "Customers can place orders normally right now."}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setOrdersPaused(!ordersPaused)}
+                      className={`relative w-14 h-8 rounded-full transition-colors shrink-0 ${ordersPaused ? "bg-[#FF3B30]" : "bg-slate-300"}`}
+                      aria-label="Toggle pause orders"
                     >
-                      <option value="Advanced Competition Dobok">Advanced Competition Dobok</option>
-                      <option value="Black Belt Dobok">Black Belt Dobok</option>
-                      <option value="Kids Dobok">Kids Dobok</option>
-                      <option value="Beginner Dobok">Beginner Dobok</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700 uppercase">Selling Price (₹) *</label>
-                    <Input
-                      type="number"
-                      value={newPrice}
-                      onChange={(e) => setNewPrice(Number(e.target.value))}
-                      required
-                    />
+                      <span
+                        className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow transition-all ${ordersPaused ? "left-7" : "left-1"}`}
+                      />
+                    </button>
                   </div>
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700 uppercase">Original Price (₹) *</label>
-                    <Input
-                      type="number"
-                      value={newOriginalPrice}
-                      onChange={(e) => setNewOriginalPrice(Number(e.target.value))}
-                      required
-                    />
-                  </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 uppercase">
+                  Pause Notice Message (shown to customers)
+                </label>
+                <textarea
+                  rows={3}
+                  value={pauseMessage}
+                  onChange={(e) => setPauseMessage(e.target.value)}
+                  placeholder="We are currently not accepting new orders. Please check back soon."
+                  className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#FF3B30]"
+                />
+              </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700 uppercase">Image URL *</label>
-                    <Input
-                      value={newImageUrl}
-                      onChange={(e) => setNewImageUrl(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700 uppercase">Product Description *</label>
-                  <textarea
-                    rows={3}
-                    placeholder="Enter detailed description of uniform..."
-                    value={newDescription}
-                    onChange={(e) => setNewDescription(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#FF3B30]"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  variant="default"
-                  size="lg"
-                  className="w-full text-xs font-black gap-2 h-12 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg"
-                >
-                  <Plus className="w-4 h-4" /> Add Uniform To Website
-                </Button>
-              </form>
+              <Button
+                onClick={handleSaveSettings}
+                disabled={savingSettings}
+                variant="default"
+                size="lg"
+                className="w-full text-xs font-black gap-2 h-12 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg"
+              >
+                {savingSettings ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                Save Settings
+              </Button>
             </div>
           </TabsContent>
         </Tabs>
 
       </div>
+
+      {/* Edit Product Dialog */}
+      <Dialog open={editingProduct !== null} onOpenChange={(open) => { if (!open) setEditingProduct(null); }}>
+        <DialogContent className="max-w-2xl bg-white border-slate-200 text-slate-900">
+          <DialogHeader className="border-b border-slate-200 pb-4">
+            <DialogTitle className="text-base font-black uppercase tracking-wider text-slate-900">
+              Edit Uniform
+            </DialogTitle>
+          </DialogHeader>
+          {editingProduct && (
+            <ProductForm
+              key={editingProduct.id}
+              initial={editingProduct}
+              submitLabel="Save Changes"
+              onSubmit={(payload) => handleUpdateProduct(editingProduct.id, payload)}
+              onCancel={() => setEditingProduct(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

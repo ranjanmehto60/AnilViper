@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { formatINR } from "@/lib/utils";
 import { ShieldCheck, CheckCircle2, CreditCard, Smartphone, Building2, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
 
 interface CartOrderLine {
   productId: string;
@@ -48,31 +54,115 @@ export function RazorpayCheckoutModal({
   const [selectedMethod, setSelectedMethod] = useState<"upi" | "card" | "netbanking">("upi");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Load Razorpay SDK script dynamically
+  useEffect(() => {
+    if (typeof window !== "undefined" && !window.Razorpay) {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
   const handlePayNow = async () => {
     if (isProcessing || items.length === 0) return;
     setIsProcessing(true);
 
     try {
-      const createResponse = await fetch("/api/orders", {
+      // Step 1: Create Razorpay Order via Backend API
+      const createResponse = await fetch("/api/payments/create-razorpay-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items, address, discountCode }),
       });
+
       const created = await createResponse.json();
       if (!createResponse.ok) {
-        throw new Error(created.error || "Unable to create your order.");
+        throw new Error(created.error || "Unable to initialize payment.");
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const { orderId, razorpayOrderId, amount, currency, keyId } = created;
 
-      const confirmResponse = await fetch(`/api/orders/${created.orderId}/confirm`, { method: "POST" });
-      const confirmed = await confirmResponse.json();
-      if (!confirmResponse.ok) {
-        throw new Error(confirmed.error || "Payment could not be confirmed.");
+      // Step 2: Check if Razorpay JS SDK is loaded and Key ID is configured
+      if (window.Razorpay && keyId && !keyId.includes("mock")) {
+        onClose(); // Close modal while SDK opens
+
+        const options = {
+          key: keyId,
+          amount: amount,
+          currency: currency || "INR",
+          name: "Viper Gears India",
+          description: `Order ${orderId}`,
+          order_id: razorpayOrderId,
+          prefill: {
+            name: customerName,
+            contact: customerPhone,
+          },
+          theme: {
+            color: "#FF3B30",
+          },
+          handler: async function (response: {
+            razorpay_payment_id: string;
+            razorpay_order_id: string;
+            razorpay_signature: string;
+          }) {
+            toast.loading("Verifying payment & generating delivery shipment...", { id: "pay-verify" });
+            try {
+              const verifyResponse = await fetch("/api/payments/verify-razorpay-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  orderId,
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature,
+                }),
+              });
+
+              const verifiedData = await verifyResponse.json();
+              if (!verifyResponse.ok) {
+                throw new Error(verifiedData.error || "Payment verification failed.");
+              }
+
+              toast.dismiss("pay-verify");
+              onSuccess(orderId, response.razorpay_payment_id);
+            } catch (err) {
+              toast.dismiss("pay-verify");
+              toast.error(err instanceof Error ? err.message : "Payment verification failed.");
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              setIsProcessing(false);
+            },
+          },
+        };
+
+        const razorpayInstance = new window.Razorpay(options);
+        razorpayInstance.open();
+      } else {
+        // Dev Simulation Fallback when live keys are not set
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const paymentId = `pay_sim_${Math.floor(100000 + Math.random() * 900000)}`;
+
+        const verifyResponse = await fetch("/api/payments/verify-razorpay-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId,
+            razorpayOrderId,
+            razorpayPaymentId: paymentId,
+            razorpaySignature: "simulated_sig",
+          }),
+        });
+
+        const verifiedData = await verifyResponse.json();
+        if (!verifyResponse.ok) {
+          throw new Error(verifiedData.error || "Payment processing failed.");
+        }
+
+        onSuccess(orderId, paymentId);
       }
-
-      const paymentId = `pay_VIPER_${Math.floor(100000 + Math.random() * 900000)}`;
-      onSuccess(created.orderId, paymentId);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Payment failed. Please try again.");
     } finally {
@@ -89,7 +179,7 @@ export function RazorpayCheckoutModal({
               <Lock className="w-4 h-4 text-[#FF3B30]" /> Razorpay Gateway
             </DialogTitle>
             <span className="text-xs bg-red-50 text-[#FF6B61] font-bold px-2.5 py-0.5 rounded-full border border-red-200">
-              TEST MODE
+              SECURE CHECKOUT
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">

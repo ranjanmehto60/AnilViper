@@ -3,20 +3,23 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, Truck, CheckCircle2, AlertCircle } from "lucide-react";
+import { MapPin, Truck, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 export function PincodeChecker() {
   const [pincode, setPincode] = useState("");
+  const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{
     checked: boolean;
     available: boolean;
     message: string;
+    courierName?: string;
     deliveryTime?: string;
   } | null>(null);
 
-  const handleCheck = (e: React.FormEvent) => {
+  const handleCheck = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!/^\d{6}$/.test(pincode.trim())) {
+    const cleanPin = pincode.trim();
+    if (!/^\d{6}$/.test(cleanPin)) {
       setStatus({
         checked: true,
         available: false,
@@ -25,21 +28,40 @@ export function PincodeChecker() {
       return;
     }
 
-    const codeNum = parseInt(pincode.trim(), 10);
-    if (codeNum >= 110001 && codeNum <= 110096) {
+    setLoading(true);
+    setStatus(null);
+
+    try {
+      const res = await fetch(`/api/shipping/check-serviceability?pincode=${cleanPin}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Pincode serviceability check failed.");
+      }
+
+      if (data.available) {
+        setStatus({
+          checked: true,
+          available: true,
+          courierName: data.courierName,
+          message: data.message || `Delivery available to ${cleanPin}`,
+          deliveryTime: data.estimatedDays || data.etd || "2-4 Business Days",
+        });
+      } else {
+        setStatus({
+          checked: true,
+          available: false,
+          message: data.message || "Pincode is unserviceable.",
+        });
+      }
+    } catch (err) {
       setStatus({
         checked: true,
-        available: true,
-        message: "Express Same-Day / Next-Day Delivery available in Delhi NCR!",
-        deliveryTime: "1-2 Business Days (Shiprocket Local)",
+        available: false,
+        message: err instanceof Error ? err.message : "Unable to verify pincode.",
       });
-    } else {
-      setStatus({
-        checked: true,
-        available: true,
-        message: "Standard Air Express Delivery Available across India.",
-        deliveryTime: "3-5 Business Days (Delhivery Air)",
-      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,7 +69,7 @@ export function PincodeChecker() {
     <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
       <div className="flex items-center gap-2 text-xs font-extrabold text-slate-900 uppercase tracking-wider">
         <Truck className="w-4 h-4 text-[#FF3B30]" />
-        Check Delivery Availability & COD
+        Check Delivery Availability & Serviceability
       </div>
 
       <form onSubmit={handleCheck} className="flex gap-2">
@@ -61,8 +83,14 @@ export function PincodeChecker() {
             className="pl-9 h-10 text-xs bg-white border-slate-200 text-slate-900"
           />
         </div>
-        <Button type="submit" variant="secondary" size="sm" className="h-10 px-4 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white">
-          Check
+        <Button
+          type="submit"
+          disabled={loading}
+          variant="secondary"
+          size="sm"
+          className="h-10 px-4 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white gap-1.5"
+        >
+          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Check"}
         </Button>
       </form>
 
@@ -83,7 +111,7 @@ export function PincodeChecker() {
             <p className="font-bold">{status.message}</p>
             {status.deliveryTime && (
               <p className="text-[11px] text-slate-600 mt-0.5">
-                Estimated Delivery: <span className="font-extrabold text-slate-900">{status.deliveryTime}</span>
+                Courier Partner: <span className="font-bold text-slate-900">{status.courierName || "Shiprocket Express"}</span> • Estimated Delivery: <span className="font-extrabold text-slate-900">{status.deliveryTime}</span>
               </p>
             )}
           </div>

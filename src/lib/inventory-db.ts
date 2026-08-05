@@ -4,6 +4,8 @@ import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { PRODUCTS } from "@/data/products";
+import { listProducts } from "@/lib/product-db";
+import { Product } from "@/types/product";
 import { CreateInventoryItemInput, InventoryItem, UpdateInventoryItemInput } from "@/types/inventory";
 
 const dataDirectory = path.join(process.cwd(), ".data");
@@ -35,10 +37,12 @@ function getDatabase() {
       VALUES (?, ?, ?, ?, ?, ?)
     `);
     const now = new Date().toISOString();
+    const staticProductIds = new Set(PRODUCTS.map((product) => product.id));
 
-    for (const product of PRODUCTS) {
+    for (const product of listProducts()) {
       product.availableSizes.forEach((size, index) => {
-        seed.run(product.id, product.name, size, Math.max(0, 12 - index * 2), 3, now);
+        const quantity = staticProductIds.has(product.id) ? Math.max(0, 12 - index * 2) : 0;
+        seed.run(product.id, product.name, size, quantity, 3, now);
       });
     }
   }
@@ -101,6 +105,29 @@ export function updateInventory(id: number, input: UpdateInventoryItemInput): In
 export function deleteInventory(id: number): boolean {
   const result = getDatabase().prepare("DELETE FROM inventory WHERE id = ?").run(id);
   return result.changes > 0;
+}
+
+export function createInventoryForProduct(product: Product, defaultQuantity = 0, reorderLevel = 3): void {
+  const now = new Date().toISOString();
+  const seed = getDatabase().prepare(`
+    INSERT OR IGNORE INTO inventory
+      (product_id, product_name, size_cm, quantity, reorder_level, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `);
+
+  for (const size of product.availableSizes) {
+    seed.run(product.id, product.name, size, defaultQuantity, reorderLevel, now);
+  }
+}
+
+export function deleteInventoryByProduct(productId: string): void {
+  getDatabase().prepare("DELETE FROM inventory WHERE product_id = ?").run(productId);
+}
+
+export function renameInventoryProduct(productId: string, productName: string): void {
+  getDatabase()
+    .prepare("UPDATE inventory SET product_name = ? WHERE product_id = ?")
+    .run(productName, productId);
 }
 
 export function getStockLevel(productId: string, size: number): number {

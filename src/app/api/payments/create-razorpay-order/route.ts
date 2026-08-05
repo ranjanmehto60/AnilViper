@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { createOrder, getPauseMessage, isOrdersPaused, listOrders } from "@/lib/store-db";
+import { createOrder, getPauseMessage, isOrdersPaused, updateOrderPaymentAndShipping } from "@/lib/store-db";
 import { computePricing } from "@/lib/pricing";
 import { getStockLevel } from "@/lib/inventory-db";
-import { isAuthorizedAdmin } from "@/lib/admin-api";
+import { getRazorpayInstance, isRazorpayConfigured } from "@/lib/razorpay";
 
 export const runtime = "nodejs";
 
@@ -70,8 +70,8 @@ export async function POST(request: Request) {
         {
           error:
             available === 0
-              ? `"${item.name}" (${item.size} cm) is out of stock. Please remove it from your cart.`
-              : `Only ${available} unit${available === 1 ? "" : "s"} of "${item.name}" (${item.size} cm) left in stock.`,
+              ? `"${item.name}" (${item.size} cm) is out of stock.`
+              : `Only ${available} unit${available === 1 ? "" : "s"} of "${item.name}" (${item.size} cm) left.`,
         },
         { status: 409 }
       );
@@ -99,22 +99,48 @@ export async function POST(request: Request) {
     discountCode: breakdown.discountCode,
   });
 
+  const amountPaise = Math.round(breakdown.total * 100);
+  let razorpayOrderId = `order_sim_${Math.floor(100000 + Math.random() * 900000)}`;
+
+  if (isRazorpayConfigured()) {
+    const razorpay = getRazorpayInstance();
+    if (razorpay) {
+      try {
+        const rzpOrder = await razorpay.orders.create({
+          amount: amountPaise,
+          currency: "INR",
+          receipt: orderId,
+          notes: {
+            customerName: name,
+            phone: phoneDigits,
+          },
+        });
+        razorpayOrderId = rzpOrder.id;
+      } catch (err) {
+        console.error("[Razorpay Create Order Error]", err);
+        return NextResponse.json(
+          { error: "Failed to initialize payment gateway with Razorpay." },
+          { status: 500 }
+        );
+      }
+    }
+  }
+
+  // Update order with razorpayOrderId
+  updateOrderPaymentAndShipping(orderId, { razorpayOrderId });
+
   return NextResponse.json(
     {
       orderId: order.id,
-      total: order.total,
-      subtotal: order.subtotal,
-      discount: order.discount,
-      shipping: order.shipping,
-      paymentStatus: order.paymentStatus,
+      razorpayOrderId,
+      amount: amountPaise,
+      currency: "INR",
+      keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_mock",
+      customer: {
+        name,
+        phone: phoneDigits,
+      },
     },
     { status: 201 }
   );
-}
-
-export async function GET(request: Request) {
-  if (!isAuthorizedAdmin(request)) {
-    return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
-  }
-  return NextResponse.json({ orders: listOrders() });
 }
