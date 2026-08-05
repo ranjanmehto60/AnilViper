@@ -1,7 +1,7 @@
 import { listProducts } from "@/lib/product-db";
 
-export const FREE_SHIPPING_THRESHOLD = 999;
-export const SHIPPING_FEE = 99;
+export const FREE_SHIPPING_THRESHOLD = 0;
+export const SHIPPING_FEE = 0;
 
 const PROMO_CODES: Record<string, number> = {
   VIPER10: 10,

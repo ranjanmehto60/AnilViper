@@ -107,9 +107,7 @@ export const useCartStore = create<CartState>()(
       },
 
       getShippingFee: () => {
-        const subtotal = get().getSubtotal();
-        if (subtotal === 0) return 0;
-        return subtotal >= 999 ? 0 : 99;
+        return 0; // Free Shipping for testing
       },
 
       getTotal: () => {
