@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, Mail, MapPin, ShieldCheck, Truck, RefreshCw, Instagram, Facebook, Youtube } from "lucide-react";
+import { Phone, Mail, MapPin, ShieldCheck, Truck, Instagram, Facebook, Youtube } from "lucide-react";
 
 export function Footer() {
   return (

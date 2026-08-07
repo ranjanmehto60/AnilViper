@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ShieldCheck, Truck, RefreshCw, Users } from "lucide-react";
+import { ShieldCheck, Truck, Users } from "lucide-react";
 
 export function HighlightsBar() {
   const highlights = [
