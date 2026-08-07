@@ -12,13 +12,13 @@ export function HighlightsBar() {
     },
     {
       icon: Truck,
-      title: "Free Shipping Pan-India",
-      desc: "On all orders above ₹999",
+      title: "100% Free Pan-India Delivery",
+      desc: "Free express shipping on all orders",
     },
     {
-      icon: RefreshCw,
-      title: "Easy 7-Day Returns",
-      desc: "Hassle-free size exchange",
+      icon: ShieldCheck,
+      title: "WT & KPNP Approved",
+      desc: "Official competition fabric",
     },
     {
       icon: Users,

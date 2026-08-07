@@ -443,7 +443,7 @@ export default function CheckoutPage() {
                   <ShieldCheck className="w-4 h-4 text-[#FF3B30]" /> 100% Viper Buyer Protection:
                 </h4>
                 <ul className="space-y-1 text-[11px] text-slate-600">
-                  <li>• 7-Day hassle-free return & size exchange</li>
+                  <li>• 100% Free Express Delivery on all orders</li>
                   <li>• Shiprocket / Delhivery trackable dispatch</li>
                   <li>• Instant SMS & WhatsApp updates</li>
                 </ul>

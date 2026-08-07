@@ -6,7 +6,7 @@ import { MessageCircle } from "lucide-react";
 export function FloatingWhatsApp() {
   return (
     <a
-      href="https://wa.me/919871674886?text=Hi%20Viper%20Gears!%20I%20want%20to%20inquire%20about%20Taekwondo%20doboks%20and%20gear."
+      href="https://wa.me/919958419286?text=Hi%20Viper%20Gears!%20I%20want%20to%20inquire%20about%20Taekwondo%20doboks%20and%20gear."
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with Viper Gears on WhatsApp"

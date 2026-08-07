@@ -358,19 +358,19 @@ export default function ProductDetailPage() {
                 </AccordionItem>
 
                 <AccordionItem value="shipping">
-                  <AccordionTrigger>Pan-India Shipping Info</AccordionTrigger>
+                  <AccordionTrigger>100% Free Pan-India Shipping Info</AccordionTrigger>
                   <AccordionContent>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Orders dispatched within 24 hours from our Chattarpur, Delhi warehouse. Free express shipping on all orders over ₹999. Delhi NCR orders arrive within 1-2 days via Shiprocket Local; Rest of India arrives within 3-5 days via Delhivery Air.
+                      Orders dispatched within 24 hours from our Chattarpur, Delhi warehouse. Enjoy 100% Free Express Shipping on all orders across India. Delhi NCR orders arrive within 1-2 days; Rest of India arrives within 3-5 days via Delhivery Air & Shiprocket Express.
                     </p>
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="returns">
-                  <AccordionTrigger>7-Day Easy Exchange Policy</AccordionTrigger>
+                  <AccordionTrigger>100% Free Doorstep Delivery Guarantee</AccordionTrigger>
                   <AccordionContent>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Need a different height size? We offer hassle-free 7-day exchanges on all unused Doboks with original tags intact. Contact our Chattarpur WhatsApp team (+91-9871674886) for instant pick-up setup.
+                      Every order from Viper Gears includes 100% Free Pan-India Express Delivery directly to your home or Dojang. Need customer support or order tracking? Contact our Chattarpur WhatsApp team (+91-9958419286).
                     </p>
                   </AccordionContent>
                 </AccordionItem>

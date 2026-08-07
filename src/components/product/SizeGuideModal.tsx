@@ -76,7 +76,7 @@ export function SizeGuideModal({ children, open, onOpenChange }: SizeGuideModalP
             <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600">
               <li>Our KPNP Doboks undergo pre-shrunk washing so shrinkage is under 1.5%.</li>
               <li>Trousers feature an adjustable elastic waistband for comfort.</li>
-              <li>Need custom Dojang academy sizing or bulk orders? Call our Chattarpur team at +91-9871674886.</li>
+              <li>Need custom Dojang academy sizing or bulk orders? Call our Chattarpur team at +91-9958419286.</li>
             </ul>
           </div>
         </div>

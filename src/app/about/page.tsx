@@ -91,7 +91,7 @@ export default function AboutPage() {
               </div>
               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <h4 className="text-xl font-black text-[#FF3B30] bebas-font">OUR PROMISE</h4>
-                <p className="text-[11px] text-slate-500 font-medium">7-day easy exchanges & direct factory support via WhatsApp.</p>
+                <p className="text-[11px] text-slate-500 font-medium">100% Free Pan-India Express Delivery & direct factory support via WhatsApp.</p>
               </div>
             </div>
           </div>
@@ -151,10 +151,10 @@ export default function AboutPage() {
               <Link href="/contact">Inquire Bulk Dojang Pricing</Link>
             </Button>
             <a
-              href="tel:+919871674886"
+              href="tel:+919958419286"
               className="inline-flex items-center gap-2 text-xs font-bold text-[#FF3B30] hover:underline"
             >
-              <PhoneCall className="w-4 h-4" /> Call +91-9871674886
+              <PhoneCall className="w-4 h-4" /> Call +91-9958419286
             </a>
           </div>
         </div>

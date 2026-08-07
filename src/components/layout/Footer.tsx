@@ -31,11 +31,11 @@ export function Footer() {
           </div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-[#FF3B30]">
-              <RefreshCw className="w-5 h-5" />
+              <Truck className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">7-Day Easy Returns</h4>
-              <p className="text-[11px] text-slate-400">Hassle-free size exchange</p>
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">100% Free Delivery</h4>
+              <p className="text-[11px] text-slate-400">Free Pan-India Express shipping</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -77,8 +77,8 @@ export function Footer() {
               </p>
               <p className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#FF3B30] shrink-0" />
-                <a href="tel:+919871674886" className="hover:text-[#FF3B30] transition-colors font-semibold">
-                  +91-9871674886
+                <a href="tel:+919958419286" className="hover:text-[#FF3B30] transition-colors font-semibold">
+                  +91-9958419286
                 </a>
               </p>
               <p className="flex items-center gap-2">
@@ -164,7 +164,7 @@ export function Footer() {
                 <Link href="/shipping-policy" className="hover:text-[#FF3B30] transition-colors">Shipping & Delivery Policy</Link>
               </li>
               <li>
-                <Link href="/return-policy" className="hover:text-[#FF3B30] transition-colors">7-Day Refund & Return Policy</Link>
+                <Link href="/return-policy" className="hover:text-[#FF3B30] transition-colors">Order & Shipping Policy</Link>
               </li>
               <li>
                 <Link href="/account" className="hover:text-[#FF3B30] transition-colors">Order Tracking & History</Link>

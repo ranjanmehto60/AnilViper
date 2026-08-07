@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage() {
 
           <h2 className="text-base font-bold text-white uppercase">4. Contact Us</h2>
           <p>
-            For privacy inquiries or data requests, contact our Chattarpur Delhi office at +91-9871674886 or email contact@vipergears.in.
+            For privacy inquiries or data requests, contact our Chattarpur Delhi office at +91-9958419286 or email contact@vipergears.in.
           </p>
         </div>
       </div>

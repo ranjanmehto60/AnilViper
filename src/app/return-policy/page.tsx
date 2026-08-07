@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ChevronRight, RefreshCw } from "lucide-react";
+import { ChevronRight, Truck } from "lucide-react";
 
 export default function ReturnPolicyPage() {
   return (
@@ -11,29 +11,27 @@ export default function ReturnPolicyPage() {
         <nav className="flex items-center gap-2 text-xs text-zinc-400">
           <Link href="/" className="hover:text-white">Home</Link>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-[#FF3B30] font-semibold">Return & Refund Policy</span>
+          <span className="text-[#FF3B30] font-semibold">Shipping & Order Policy</span>
         </nav>
 
         <h1 className="text-4xl font-black text-white uppercase bebas-font flex items-center gap-3">
-          <RefreshCw className="w-8 h-8 text-[#FF3B30]" /> 7-DAY RETURN & EXCHANGE POLICY
+          <Truck className="w-8 h-8 text-[#FF3B30]" /> 100% FREE SHIPPING & ORDER POLICY
         </h1>
 
         <div className="space-y-4 text-xs leading-relaxed border-t border-zinc-800 pt-6">
-          <h2 className="text-base font-bold text-white uppercase">1. 7-Day Easy Size Exchange Guarantee</h2>
+          <h2 className="text-base font-bold text-white uppercase">1. 100% Free Pan-India Delivery</h2>
           <p>
-            We understand that getting the right Dobok height fit is crucial for Taekwondo athletes. If your uniform size is too small or too large, you can request a size exchange within 7 days of delivery.
+            Viper Gears provides 100% Free Express Shipping on all uniform and gear orders across India. Orders are dispatched within 24 hours from our Chattarpur, Delhi warehouse via Shiprocket & Delhivery.
           </p>
 
-          <h2 className="text-base font-bold text-white uppercase">2. Return Conditions</h2>
-          <ul className="list-disc list-inside space-y-1 text-zinc-400">
-            <li>The Dobok / Sparring gear must be unwashed, unworn, and unsoiled.</li>
-            <li>Original tags and Viper Gears brand packaging must be intact.</li>
-            <li>Custom embroidery orders are non-refundable unless a manufacturing defect exists.</li>
-          </ul>
-
-          <h2 className="text-base font-bold text-white uppercase">3. How to Initiate a Return</h2>
+          <h2 className="text-base font-bold text-white uppercase">2. Quality Guarantee & Damaged Goods Replacement</h2>
           <p>
-            Simply WhatsApp our Chattarpur Delhi customer care team at <a href="https://wa.me/919871674886" className="text-[#FF3B30] font-bold underline">+91-9871674886</a> with your Order ID and photo of the item. We will arrange reverse pick-up from your doorstep.
+            Every uniform is inspected for World Taekwondo (WT) competition fabric standards before dispatch. If your order arrives damaged, defective, or incorrect, we will immediately send a free replacement.
+          </p>
+
+          <h2 className="text-base font-bold text-white uppercase">3. Customer Care & Support</h2>
+          <p>
+            For any delivery queries or assistance, contact our Chattarpur Delhi customer care team via WhatsApp at <a href="https://wa.me/919958419286" className="text-[#FF3B30] font-bold underline">+91-9958419286</a> or call <a href="tel:+919958419286" className="text-[#FF3B30] font-bold underline">+91-9958419286</a> with your Order ID.
           </p>
         </div>
       </div>

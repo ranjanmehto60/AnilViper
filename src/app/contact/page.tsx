@@ -100,7 +100,7 @@ export default function ContactPage() {
 
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-700 uppercase">Phone Number (10 Digits) *</label>
-                    <Input placeholder="9871674886" maxLength={10} {...register("phone")} />
+                    <Input placeholder="9958419286" maxLength={10} {...register("phone")} />
                     {errors.phone && (
                       <p className="text-[11px] text-red-500 font-semibold">{errors.phone.message}</p>
                     )}
@@ -183,8 +183,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900 uppercase">Phone & WhatsApp:</h4>
-                    <a href="tel:+919871674886" className="text-[#FF3B30] font-extrabold hover:underline">
-                      +91-9871674886
+                    <a href="tel:+919958419286" className="text-[#FF3B30] font-extrabold hover:underline">
+                      +91-9958419286
                     </a>
                   </div>
                 </div>
