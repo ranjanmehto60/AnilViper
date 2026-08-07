@@ -31,18 +31,18 @@ export function HeroSection() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-red-50 border border-red-200 px-4 py-1.5 rounded-full text-xs font-extrabold text-[#FF3B30] shadow-sm">
                 <ShieldCheck className="w-4 h-4 text-[#FF3B30]" />
-                <span>OFFICIAL KPNP & WT APPROVED TAEKWONDO UNIFORMS</span>
+                <span>OFFICIAL WT APPROVED TAEKWONDO UNIFORMS</span>
               </div>
 
               {/* Main Headline */}
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 uppercase leading-[0.95] bebas-font">
                 ELEVATE YOUR PERFORMANCE WITH <br />
-                <span className="text-[#FF3B30]">KPNP INDIA EDITION</span>
+                <span className="text-[#FF3B30]">VIPER GEARS INDIA EDITION</span>
               </h1>
 
               {/* Subheading */}
               <p className="text-base sm:text-lg text-slate-700 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
-                Elevate your martial arts performance with the KPNP Official Taekwondo Uniform (Dobok). Designed for maximum agility, comfort, and durability with a classic black V-neck collar and bold Indian flag detailing.
+                Elevate your martial arts performance with the Viper Gears Official Taekwondo Uniform (Dobok). Designed for maximum agility, comfort, and durability with a classic black V-neck collar and bold Indian flag detailing.
               </p>
 
               {/* Stats badges */}
@@ -70,7 +70,7 @@ export function HeroSection() {
                   className="w-full sm:w-auto text-sm gap-2 bg-[#FF3B30] hover:bg-[#D92D20] text-white font-extrabold shadow-lg shadow-red-500/20"
                 >
                   <Link href="/product/kpnp-competition-taekwondo-dobok-india-edition">
-                    Buy KPNP India Edition <ArrowRight className="w-5 h-5" />
+                    Buy Viper Gears India Edition <ArrowRight className="w-5 h-5" />
                   </Link>
                 </Button>
 
@@ -95,7 +95,7 @@ export function HeroSection() {
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-slate-200 shadow-2xl bg-white group">
                 <Image
                   src="/images/kpnp-dobok-1.jpg"
-                  alt="KPNP Competition Taekwondo Dobok - India Edition"
+                  alt="Viper Gears Competition Taekwondo Dobok - India Edition"
                   fill
                   priority
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -105,13 +105,13 @@ export function HeroSection() {
                 <div className="absolute bottom-5 left-5 right-5 p-4 rounded-2xl glass-card bg-white/95 border border-slate-200/80 shadow-xl space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-black text-[#FF3B30] uppercase tracking-wider flex items-center gap-1">
-                      <Sparkles className="w-4 h-4" /> KPNP Official Gear
+                      <Sparkles className="w-4 h-4" /> Viper Gears Official
                     </span>
                     <span className="text-[10px] bg-[#E53935] text-white font-extrabold px-2.5 py-0.5 rounded-full">
                       India Edition
                     </span>
                   </div>
-                  <h3 className="text-sm font-bold text-slate-900">KPNP Official Black V-Neck Dobok</h3>
+                  <h3 className="text-sm font-bold text-slate-900">Viper Gears Black V-Neck Dobok</h3>
                   <p className="text-[11px] text-slate-500">Official Indian Flag Patch & WT emblem certified</p>
                 </div>
               </div>

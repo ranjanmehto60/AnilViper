@@ -37,7 +37,7 @@ export function SizeGuideModal({ children, open, onOpenChange }: SizeGuideModalP
         <DialogHeader>
           <DialogTitle className="text-xl font-black tracking-wider uppercase text-slate-900 flex items-center gap-2">
             <Ruler className="w-5 h-5 text-[#FF3B30]" />
-            KPNP & Viper Taekwondo Dobok Sizing Guide
+            Viper Gears Taekwondo Dobok Sizing Guide
           </DialogTitle>
         </DialogHeader>
 
@@ -74,7 +74,7 @@ export function SizeGuideModal({ children, open, onOpenChange }: SizeGuideModalP
               <CheckCircle2 className="w-4 h-4 text-[#FF3B30]" /> Pro Tips for Perfect Fit:
             </h4>
             <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600">
-              <li>Our KPNP Doboks undergo pre-shrunk washing so shrinkage is under 1.5%.</li>
+              <li>Our Viper Gears Doboks undergo pre-shrunk washing so shrinkage is under 1.5%.</li>
               <li>Trousers feature an adjustable elastic waistband for comfort.</li>
               <li>Need custom Dojang academy sizing or bulk orders? Call our Chattarpur team at +91-9958419286.</li>
             </ul>

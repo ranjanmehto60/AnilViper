@@ -88,7 +88,7 @@ export function CartDrawer({ children, isOpen, onClose }: CartDrawerProps) {
             <div className="space-y-1">
               <h3 className="text-base font-bold text-white uppercase">Your cart is empty</h3>
               <p className="text-xs text-slate-400 max-w-xs">
-                Explore our WT Approved KPNP Taekwondo Doboks India Edition and add gear to your cart.
+                Explore our WT Approved Viper Gears Taekwondo Doboks India Edition and add gear to your cart.
               </p>
             </div>
             <Button

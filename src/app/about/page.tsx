@@ -10,7 +10,7 @@ export default function AboutPage() {
   const comparisonData = [
     {
       feature: "Fabric Technology",
-      viper: "Lightweight Moisture-Wicking KPNP Poly-Blend",
+      viper: "Lightweight Moisture-Wicking Poly-Blend",
       normal: "Heavy 300+ GSM Stiff Canvas",
     },
     {
@@ -59,7 +59,7 @@ export default function AboutPage() {
           <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xl">
             <Image
               src="/images/kpnp-dobok-1.jpg"
-              alt="Viper Gears Chattarpur Delhi Workshop & KPNP Athlete"
+              alt="Viper Gears Chattarpur Delhi Workshop & Athlete"
               fill
               className="object-cover"
             />
@@ -81,13 +81,13 @@ export default function AboutPage() {
             </p>
 
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-              In 2024, our founders—national level Taekwondo masters based in Chattarpur, Delhi—partnered with world-leading technical manufacturers to bring official **KPNP Competition Taekwondo Doboks (India Edition)** to Indian practitioners.
+              In 2024, our founders—national level Taekwondo masters based in Chattarpur, Delhi—partnered with world-leading technical manufacturers to bring official **Viper Gears Competition Taekwondo Doboks (India Edition)** to Indian practitioners.
             </p>
 
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <h4 className="text-xl font-black text-[#FF3B30] bebas-font">OUR MISSION</h4>
-                <p className="text-[11px] text-slate-500 font-medium">Make WT & KPNP Approved quality accessible to every young practitioner in India.</p>
+                <p className="text-[11px] text-slate-500 font-medium">Make WT Approved quality accessible to every young practitioner in India.</p>
               </div>
               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <h4 className="text-xl font-black text-[#FF3B30] bebas-font">OUR PROMISE</h4>
@@ -104,7 +104,7 @@ export default function AboutPage() {
               VIPER GEARS VS NORMAL DOBOK
             </h2>
             <p className="text-xs text-slate-500">
-              See why over 500 Dojangs and championship coaches recommend Viper & KPNP uniforms.
+              See why over 500 Dojangs and championship coaches recommend Viper Gears uniforms.
             </p>
           </div>
 
@@ -114,7 +114,7 @@ export default function AboutPage() {
                 <tr>
                   <th className="p-4 font-extrabold text-slate-500">Feature</th>
                   <th className="p-4 font-black text-[#FF6B61] bg-red-50 border-x border-red-100">
-                    🐍 KPNP / Viper Gears Dobok
+                    🐍 Viper Gears Dobok
                   </th>
                   <th className="p-4 font-extrabold text-slate-400">Normal / Generic Dobok</th>
                 </tr>

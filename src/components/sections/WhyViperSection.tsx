@@ -37,7 +37,7 @@ export function WhyViperSection() {
             ENGINEERED FOR CHAMPIONS
           </span>
           <h2 className="text-4xl sm:text-5xl font-black text-slate-900 uppercase tracking-tight bebas-font">
-            WHY KPNP & VIPER GEARS EXCEL
+            WHY VIPER GEARS EXCELS
           </h2>
           <p className="text-xs sm:text-sm text-slate-600">
             Crafted for national and international Taekwondo championships to give Indian athletes a competitive edge.

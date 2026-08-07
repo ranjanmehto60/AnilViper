@@ -214,7 +214,7 @@ function ShopContent() {
               TAEKWONDO CATALOG
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Showing {filteredProducts.length} premium KPNP & WT Approved uniforms & gear
+              Showing {filteredProducts.length} premium WT Approved uniforms & gear
             </p>
           </div>
 

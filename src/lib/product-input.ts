@@ -115,7 +115,7 @@ export function sanitizeProductInput(body: Record<string, unknown>): SanitizedPr
 }
 
 export function buildProductId(): string {
-  return `kpnp-custom-${Date.now()}`;
+  return `viper-custom-${Date.now()}`;
 }
 
 export function buildProductSlug(name: string): string {

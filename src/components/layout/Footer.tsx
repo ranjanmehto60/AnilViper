@@ -122,7 +122,7 @@ export function Footer() {
             <ul className="space-y-2.5 text-xs">
               <li>
                 <Link href="/shop?category=Advanced+Competition+Dobok" className="hover:text-[#FF3B30] transition-colors">
-                  KPNP India Competition Dobok
+                  Viper Gears Competition Dobok
                 </Link>
               </li>
               <li>

@@ -7,8 +7,8 @@ export function HighlightsBar() {
   const highlights = [
     {
       icon: ShieldCheck,
-      title: "WT & KPNP Approved",
-      desc: "Official competition fabric",
+      title: "WT Approved Quality",
+      desc: "Official competition standards",
     },
     {
       icon: Truck,
@@ -17,8 +17,8 @@ export function HighlightsBar() {
     },
     {
       icon: ShieldCheck,
-      title: "WT & KPNP Approved",
-      desc: "Official competition fabric",
+      title: "Premium 210 GSM Fabric",
+      desc: "Lightweight & moisture-wicking",
     },
     {
       icon: Users,

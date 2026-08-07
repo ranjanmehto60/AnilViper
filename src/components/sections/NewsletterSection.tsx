@@ -33,7 +33,7 @@ export function NewsletterSection() {
         </h2>
 
         <p className="text-xs sm:text-sm text-red-100 max-w-lg mx-auto leading-relaxed">
-          Subscribe for exclusive dojang discounts, bulk academy offers, and early access to new KPNP & WT Approved competition gear drops.
+          Subscribe for exclusive dojang discounts, bulk academy offers, and early access to new WT Approved competition gear drops.
         </p>
 
         {subscribed ? (

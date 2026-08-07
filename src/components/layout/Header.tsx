@@ -65,11 +65,11 @@ export function Header() {
       {/* Top Banner Bar */}
       <div className="bg-[#05080E] text-slate-300 py-2 px-4 text-center text-xs font-bold tracking-wider flex items-center justify-center gap-2 border-b border-slate-800/80">
         <span className="inline-block w-2 h-2 rounded-full bg-[#FF3B30] animate-pulse" />
-        <span className="text-[#FF3B30] font-extrabold uppercase">WT & KPNP APPROVED:</span>
+        <span className="text-[#FF3B30] font-extrabold uppercase">WT APPROVED:</span>
         <span className="hidden sm:inline text-slate-200">
-          Official KPNP Competition Taekwondo Doboks India Edition | Free Pan-India Shipping above ₹999
+          Official Viper Gears Competition Taekwondo Doboks India Edition | 100% Free Pan-India Express Delivery
         </span>
-        <span className="sm:hidden text-slate-200">KPNP Competition Uniforms</span>
+        <span className="sm:hidden text-slate-200">Viper Gears Competition Uniforms</span>
       </div>
 
       {/* Main Glass Navigation Header */}
@@ -223,7 +223,7 @@ export function Header() {
             <div className="container mx-auto max-w-xl relative">
               <input
                 type="text"
-                placeholder="Search KPNP Dobok, Black Belt, Junior Kids..."
+                placeholder="Search Viper Dobok, Black Belt, Junior Kids..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-400 px-4 py-3 rounded-xl text-xs focus:outline-none focus:border-[#FF3B30]"

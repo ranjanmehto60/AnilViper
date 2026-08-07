@@ -63,7 +63,7 @@ export default function CartPage() {
             </div>
             <h2 className="text-xl font-bold text-slate-900 uppercase">Your Cart is Currently Empty</h2>
             <p className="text-xs text-slate-500">
-              Explore our KPNP India competition doboks, black belt uniforms, and sparring gear.
+              Explore our Viper Gears competition doboks, black belt uniforms, and sparring gear.
             </p>
             <Button variant="default" size="lg" asChild className="text-xs font-black bg-[#FF3B30] hover:bg-[#D92D20] text-white">
               <Link href="/shop">Explore Shop Catalog</Link>

@@ -33,7 +33,7 @@ export function HeroSection() {
             {/* Top Badge */}
             <div className="inline-flex items-center gap-2 bg-[#FF3B30]/10 border border-[#FF3B30]/30 px-4 py-1.5 rounded-full text-xs font-black text-[#FF3B30] shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-[#FF3B30] animate-pulse" />
-              <span>WT APPROVED • KPNP OFFICIAL DOBOK INDIA EDITION</span>
+              <span>WT APPROVED • VIPER GEARS DOBOK INDIA EDITION</span>
             </div>
 
             {/* Main Title */}
@@ -71,7 +71,7 @@ export function HeroSection() {
                 className="w-full sm:w-auto h-14 px-8 text-sm font-black bg-[#FF3B30] hover:bg-[#E12D25] text-black rounded-2xl shadow-xl neon-red-glow transition-all hover:scale-105 gap-2 uppercase tracking-wider"
               >
                 <Link href="/shop">
-                  <span>SHOP KPNP INDIA EDITION</span>
+                  <span>SHOP VIPER GEARS INDIA EDITION</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
@@ -119,7 +119,7 @@ export function HeroSection() {
               <div className="relative h-[380px] sm:h-[440px] w-full rounded-2xl overflow-hidden bg-slate-900">
                 <Image
                   src="/images/kpnp-dobok-1.jpg"
-                  alt="KPNP Competition Taekwondo Dobok India Edition"
+                  alt="Viper Gears Competition Taekwondo Dobok India Edition"
                   fill
                   className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
                   priority
@@ -131,7 +131,7 @@ export function HeroSection() {
                 {/* Floating Top Badge */}
                 <div className="absolute top-4 left-4 bg-slate-900/90 backdrop-blur-md border border-slate-700 px-3 py-1 rounded-full text-xs font-black text-white flex items-center gap-1.5 shadow-md">
                   <ShieldCheck className="w-4 h-4 text-[#FF3B30]" />
-                  <span>KPNP OFFICIAL</span>
+                  <span>VIPER GEARS OFFICIAL</span>
                 </div>
 
                 {/* Floating Bottom Info Pill */}
@@ -141,7 +141,7 @@ export function HeroSection() {
                       FEATURED UNIFORM
                     </span>
                     <h3 className="text-xs font-black text-white uppercase">
-                      KPNP Black V-Neck Dan Dobok
+                      Viper Gears Black V-Neck Dan Dobok
                     </h3>
                   </div>
                   <span className="text-base font-black text-[#FF3B30] font-mono">
