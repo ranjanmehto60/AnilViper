@@ -20,11 +20,19 @@ export function generateOAuthState(): { state: string; verifier: string; challen
 }
 
 export function buildRedirectUri(request: Request): string {
-  const origin =
-    new URL(request.url).origin ||
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-    "http://localhost:3000";
-  return `${origin.replace(/\/$/, "")}/api/admin/google/callback`;
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  const proto = request.headers.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
+
+  if (host) {
+    return `${proto}://${host}/api/admin/google/callback`;
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (appUrl) {
+    return `${appUrl.replace(/\/$/, "")}/api/admin/google/callback`;
+  }
+
+  return "http://localhost:3000/api/admin/google/callback";
 }
 
 export function buildGoogleAuthUrl(
