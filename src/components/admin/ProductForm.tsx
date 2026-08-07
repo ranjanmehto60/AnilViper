@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { CategoryType, Product } from "@/types/product";
 
@@ -34,7 +34,9 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
     initial ? String(initial.originalPrice) : ""
   );
   const [description, setDescription] = useState(initial?.description ?? "");
-  const [imageUrls, setImageUrls] = useState(initial?.images.join("\n") ?? "");
+  const [images, setImages] = useState<string[]>(initial?.images ?? []);
+  const [showUrlField, setShowUrlField] = useState(false);
+  const [rawUrls, setRawUrls] = useState(initial?.images.join("\n") ?? "");
   const [sizes, setSizes] = useState<number[]>(
     initial?.availableSizes ?? [140, 150, 160, 170, 180, 190, 200]
   );
@@ -50,15 +52,49 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
     );
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} is not a valid image file.`);
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name} exceeds 5MB limit.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        if (result) {
+          setImages((prev) => [...prev, result]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    e.target.value = "";
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     const priceValue = Number(price);
     const originalPriceValue = Number(originalPrice || price);
-    const images = imageUrls
+    
+    // Combine device uploaded images with any manually typed URLs
+    const extraUrls = rawUrls
       .split("\n")
       .map((url) => url.trim())
       .filter(Boolean);
+    const finalImages = Array.from(new Set([...images, ...extraUrls]));
 
     if (!name.trim()) {
       toast.error("Please enter a uniform name.");
@@ -72,8 +108,8 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
       toast.error("Original price must be at least the selling price.");
       return;
     }
-    if (images.length === 0) {
-      toast.error("Add at least one image URL (one per line).");
+    if (finalImages.length === 0) {
+      toast.error("Please upload at least one image from your device.");
       return;
     }
     if (sizes.length === 0) {
@@ -89,7 +125,7 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
         price: priceValue,
         originalPrice: originalPriceValue,
         description: description.trim(),
-        images,
+        images: finalImages,
         availableSizes: sizes,
         features: features
           .split("\n")
@@ -168,15 +204,69 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
         </div>
       </div>
 
-      <div className="space-y-1">
-        <label className="text-xs font-bold text-slate-700 uppercase">Image URLs (one per line) *</label>
-        <textarea
-          rows={2}
-          placeholder={"/images/kpnp-dobok-1.jpg\n/images/kpnp-dobok-chest.jpg"}
-          value={imageUrls}
-          onChange={(e) => setImageUrls(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#FF3B30] font-mono"
-        />
+      {/* DEVICE IMAGE UPLOAD SECTION */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-700 uppercase">Product Photos (Upload From Device) *</label>
+          <button
+            type="button"
+            onClick={() => setShowUrlField(!showUrlField)}
+            className="text-[11px] text-[#FF3B30] hover:underline font-bold"
+          >
+            {showUrlField ? "Hide URL Input" : "+ Add by URL link"}
+          </button>
+        </div>
+
+        <label className="border-2 border-dashed border-slate-300 hover:border-[#FF3B30] bg-slate-50 hover:bg-red-50/40 rounded-2xl p-4 text-center cursor-pointer transition-all space-y-1 block">
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <div className="w-10 h-10 rounded-full bg-red-100 text-[#FF3B30] flex items-center justify-center mx-auto">
+            <Upload className="w-5 h-5" />
+          </div>
+          <p className="text-xs font-bold text-slate-900">Click to Upload Images from Device</p>
+          <p className="text-[10px] text-slate-500">Pick photos directly from phone or computer gallery (JPG, PNG, WEBP)</p>
+        </label>
+
+        {showUrlField && (
+          <div className="space-y-1 pt-1">
+            <label className="text-[11px] font-bold text-slate-500 uppercase">Paste Image URLs (one per line):</label>
+            <textarea
+              rows={2}
+              placeholder={"/images/kpnp-dobok-1.jpg\n/images/kpnp-dobok-chest.jpg"}
+              value={rawUrls}
+              onChange={(e) => setRawUrls(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#FF3B30] font-mono"
+            />
+          </div>
+        )}
+
+        {/* Thumbnail Previews */}
+        {images.length > 0 && (
+          <div className="space-y-1 pt-1">
+            <label className="text-[11px] font-bold text-slate-500 uppercase">Uploaded Photos ({images.length}):</label>
+            <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+              {images.map((imgUrl, idx) => (
+                <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={imgUrl} alt={`Product ${idx + 1}`} className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="absolute top-1 right-1 bg-slate-900/80 hover:bg-red-600 text-white rounded-full p-1 transition-all"
+                    title="Remove image"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="space-y-1">
