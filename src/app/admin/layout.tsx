@@ -4,7 +4,7 @@ import { ShieldAlert, ArrowLeft } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   // Toggle to pause/resume Admin Panel access
-  const isAdminPaused = true;
+  const isAdminPaused = false;
 
   if (isAdminPaused) {
     return (
