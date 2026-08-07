@@ -222,6 +222,18 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
   }
 
   try {
+    // Calculate total item units in order
+    const totalUnits = payload.items.reduce((sum, item) => sum + (item.units || 1), 0);
+
+    // Compact polybag packaging dimensions (for uniform flyer bags)
+    // 1 item flyer: 25cm x 20cm x 5cm -> Volumetric weight = (25*20*5)/5000 = 0.5kg
+    const packageLength = 25;
+    const packageBreadth = 20;
+    const packageHeight = Math.min(25, Math.max(5, totalUnits * 5));
+
+    // Actual weight: ~0.6kg per uniform
+    const packageWeight = Math.min(10, Math.max(0.5, Math.round(totalUnits * 0.6 * 10) / 10));
+
     const body = {
       order_id: payload.orderId,
       order_date: formatShiprocketDate(payload.orderDate),
@@ -244,10 +256,10 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
       })),
       payment_method: "Prepaid",
       sub_total: payload.subtotal,
-      length: 30,
-      breadth: 25,
-      height: 15,
-      weight: 0.8,
+      length: packageLength,
+      breadth: packageBreadth,
+      height: packageHeight,
+      weight: packageWeight,
     };
 
     const response = await fetch(`${SHIPROCKET_API_BASE}/orders/create/adhoc`, {
