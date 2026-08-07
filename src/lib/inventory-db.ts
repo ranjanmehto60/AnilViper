@@ -27,15 +27,28 @@ function ensureSchema(): Promise<void> {
         CREATE INDEX IF NOT EXISTS idx_inventory_product_id ON inventory (product_id)
       `;
 
-      const products = await listProducts();
-      const now = new Date().toISOString();
-      const staticProductIds = new Set(PRODUCTS.map((product) => product.id));
+      await sql`
+        CREATE TABLE IF NOT EXISTS schema_migrations (
+          name TEXT PRIMARY KEY
+        )
+      `;
 
-      for (const product of products) {
-        product.availableSizes.forEach((size, index) => {
-          const quantity = staticProductIds.has(product.id) ? Math.max(0, 12 - index * 2) : 0;
-          seedInventory(product.id, product.name, size, quantity, 3, now);
-        });
+      const seedCheck = await sql`SELECT name FROM schema_migrations WHERE name = 'seed_inventory_v1'`;
+      if (seedCheck.rows.length === 0) {
+        const products = await listProducts();
+        const now = new Date().toISOString();
+        const staticProductIds = new Set(PRODUCTS.map((product) => product.id));
+
+        for (const product of products) {
+          for (let index = 0; index < product.availableSizes.length; index++) {
+            const size = product.availableSizes[index];
+            const quantity = staticProductIds.has(product.id) ? Math.max(0, 12 - index * 2) : 0;
+            await seedInventory(product.id, product.name, size, quantity, 3, now);
+          }
+        }
+        await sql`
+          INSERT INTO schema_migrations (name) VALUES ('seed_inventory_v1') ON CONFLICT DO NOTHING
+        `;
       }
     })().catch((error) => {
       schemaReady = null;

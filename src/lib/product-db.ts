@@ -19,14 +19,25 @@ function ensureSchema(): Promise<void> {
       await sql`
         CREATE INDEX IF NOT EXISTS idx_products_slug ON products ((data->>'slug'))
       `;
+      await sql`
+        CREATE TABLE IF NOT EXISTS schema_migrations (
+          name TEXT PRIMARY KEY
+        )
+      `;
 
-      const now = Date.now();
-      for (let index = 0; index < PRODUCTS.length; index++) {
-        const product = PRODUCTS[index];
+      const seedCheck = await sql`SELECT name FROM schema_migrations WHERE name = 'seed_products_v1'`;
+      if (seedCheck.rows.length === 0) {
+        const now = Date.now();
+        for (let index = 0; index < PRODUCTS.length; index++) {
+          const product = PRODUCTS[index];
+          await sql`
+            INSERT INTO products (id, data, created_at)
+            VALUES (${product.id}, ${JSON.stringify(product)}::jsonb, ${now + index})
+            ON CONFLICT (id) DO NOTHING
+          `;
+        }
         await sql`
-          INSERT INTO products (id, data, created_at)
-          VALUES (${product.id}, ${JSON.stringify(product)}::jsonb, ${now + index})
-          ON CONFLICT (id) DO NOTHING
+          INSERT INTO schema_migrations (name) VALUES ('seed_products_v1') ON CONFLICT DO NOTHING
         `;
       }
     })().catch((error) => {
@@ -47,13 +58,11 @@ export async function listProducts(): Promise<Product[]> {
   try {
     await ensureSchema();
     const result = await sql<ProductRow>`SELECT data FROM products ORDER BY created_at ASC`;
-    if (result.rows && result.rows.length > 0) {
-      return result.rows.map(mapProductRow);
-    }
+    return result.rows ? result.rows.map(mapProductRow) : [];
   } catch (error) {
     console.error("Postgres connection or query error in listProducts, falling back to static PRODUCTS:", error);
+    return PRODUCTS;
   }
-  return PRODUCTS;
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
