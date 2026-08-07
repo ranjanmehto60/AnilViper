@@ -121,6 +121,8 @@ export async function finalizePaidOrder(
       pincode: address.pincode || "110001",
       items: parseItems(order.items, order.total),
       subtotal: order.subtotal,
+      paymentMethod: order.paymentMethod,
+      codAmount: order.codAmount,
     });
 
     if (shiprocketRes.success) {

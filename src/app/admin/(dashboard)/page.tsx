@@ -52,6 +52,9 @@ interface ServerOrder {
   awb: string | null;
   razorpayPaymentId?: string | null;
   courierName?: string | null;
+  paymentMethod?: "PREPAID" | "COD";
+  bookingAmount?: number;
+  codAmount?: number;
   createdAt: number;
 }
 
@@ -574,6 +577,7 @@ export default function AdminDashboardPage() {
                       <div className="flex items-center gap-2">
                         <span className="bg-red-50 text-[#FF6B61] border border-red-200 text-[10px] font-black px-2.5 py-0.5 rounded-full">
                           Payment: {order.paymentStatus}
+                          {order.paymentMethod === "COD" && ` · COD ₹${order.bookingAmount ?? 400} + ${order.codAmount ?? 0} on delivery`}
                         </span>
                         <select
                           value={order.orderStatus}

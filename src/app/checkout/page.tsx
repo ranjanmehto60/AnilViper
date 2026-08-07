@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Truck,
   CreditCard,
+  Banknote,
   CheckCircle2,
   ChevronRight,
   ArrowRight,
@@ -20,6 +21,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+
+const COD_BOOKING_AMOUNT = 400;
 
 const checkoutSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name"),
@@ -42,10 +45,18 @@ export default function CheckoutPage() {
   const [razorpayOpen, setRazorpayOpen] = useState(false);
   const [ordersPaused, setOrdersPaused] = useState(false);
   const [pauseMessage, setPauseMessage] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"PREPAID" | "COD">("PREPAID");
+  const [codChecking, setCodChecking] = useState(false);
+  const [codServiceable, setCodServiceable] = useState<boolean | null>(null);
   const [orderComplete, setOrderComplete] = useState<{
     orderId: string;
     paymentId: string;
+    paymentMethod?: "PREPAID" | "COD";
+    codAmount?: number;
   } | null>(null);
+
+  const codAvailable = total > COD_BOOKING_AMOUNT;
+  const codAmount = total - COD_BOOKING_AMOUNT;
 
   useEffect(() => {
     fetch("/api/store-status", { cache: "no-store" })
@@ -83,9 +94,42 @@ export default function CheckoutPage() {
     setStep(2);
   };
 
+  const checkCodServiceability = async () => {
+    if (codChecking || codServiceable !== null) return;
+    setCodChecking(true);
+    try {
+      const res = await fetch(
+        `/api/shipping/check-serviceability?pincode=${formData.pincode}&cod=1`,
+        { cache: "no-store" }
+      );
+      const data = await res.json();
+      if (data && data.available === false) {
+        setCodServiceable(false);
+      } else {
+        setCodServiceable(true);
+      }
+    } catch {
+      setCodServiceable(true);
+    } finally {
+      setCodChecking(false);
+    }
+  };
+
+  const handleSelectPaymentMethod = (method: "PREPAID" | "COD") => {
+    setPaymentMethod(method);
+    if (method === "COD" && codServiceable === null) {
+      checkCodServiceability();
+    }
+  };
+
   const handlePaymentSuccess = (orderId: string, paymentId: string) => {
     setRazorpayOpen(false);
-    setOrderComplete({ orderId, paymentId });
+    setOrderComplete({
+      orderId,
+      paymentId,
+      paymentMethod,
+      codAmount: paymentMethod === "COD" ? codAmount : 0,
+    });
     clearCart();
     toast.success("Order Placed Successfully! Confirmation sent via SMS & WhatsApp.");
   };
@@ -107,6 +151,12 @@ export default function CheckoutPage() {
             <p className="text-slate-500">Payment ID: <span className="font-mono text-[#FF3B30] font-bold">{orderComplete.paymentId}</span></p>
             <p className="text-slate-500">Delivery Address: <span className="text-slate-800">{formData.street}, {formData.city} - {formData.pincode}</span></p>
             <p className="text-slate-500">Status: <span className="text-[#FF3B30] font-bold">Processing Dispatch (Shiprocket / Delhivery)</span></p>
+            {orderComplete.paymentMethod === "COD" && (
+              <p className="text-slate-500">
+                COD Balance Payable at Delivery:{" "}
+                <span className="text-[#FF3B30] font-bold">{formatINR(orderComplete.codAmount || 0)}</span>
+              </p>
+            )}
           </div>
 
           <Button variant="default" size="lg" asChild className="w-full text-xs font-black bg-[#FF3B30] hover:bg-[#D92D20] text-white">
@@ -252,15 +302,94 @@ export default function CheckoutPage() {
                     ))}
                   </div>
 
+                  {/* Step 2b: Payment Method */}
+                  <div className="space-y-2 pt-2">
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Select Payment Method</h3>
+
+                    <div
+                      onClick={() => handleSelectPaymentMethod("PREPAID")}
+                      className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
+                        paymentMethod === "PREPAID"
+                          ? "bg-red-50 border-[#FF3B30] shadow-sm"
+                          : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <CreditCard className="w-5 h-5 text-[#FF3B30]" />
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-900">Prepaid Online Payment</h4>
+                          <p className="text-[10px] text-slate-500">Pay {formatINR(total)} now via UPI, Card or Netbanking</p>
+                        </div>
+                      </div>
+                      {paymentMethod === "PREPAID" && <CheckCircle2 className="w-4 h-4 text-[#FF3B30]" />}
+                    </div>
+
+                    <div
+                      onClick={() => codAvailable && handleSelectPaymentMethod("COD")}
+                      className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between ${
+                        !codAvailable
+                          ? "bg-slate-50 border-slate-200 opacity-50 cursor-not-allowed"
+                          : paymentMethod === "COD"
+                            ? "bg-red-50 border-[#FF3B30] shadow-sm cursor-pointer"
+                            : "bg-slate-50 border-slate-200 hover:border-slate-300 cursor-pointer"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Banknote className="w-5 h-5 text-[#FF3B30]" />
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-900">Cash on Delivery</h4>
+                          <p className="text-[10px] text-slate-500">
+                            {codChecking
+                              ? "Checking COD availability for your pincode..."
+                              : `Pay ${formatINR(COD_BOOKING_AMOUNT)} online + ${formatINR(codAmount)} at delivery`}
+                          </p>
+                        </div>
+                      </div>
+                      {paymentMethod === "COD" && <CheckCircle2 className="w-4 h-4 text-[#FF3B30]" />}
+                    </div>
+
+                    {!codAvailable && (
+                      <p className="text-[10px] text-slate-500">
+                        COD is available for orders above {formatINR(COD_BOOKING_AMOUNT)}. Please choose prepaid payment.
+                      </p>
+                    )}
+                    {paymentMethod === "COD" && codServiceable === false && (
+                      <p className="text-[10px] font-bold text-[#FF3B30]">
+                        COD is not available for your pincode. Please choose prepaid payment instead.
+                      </p>
+                    )}
+                    {paymentMethod === "COD" && codServiceable !== false && (
+                      <p className="text-[10px] text-slate-500">
+                        The {formatINR(COD_BOOKING_AMOUNT)} booking fee is non-refundable. The remaining{" "}
+                        {formatINR(codAmount)} is payable to the courier on delivery. See{" "}
+                        <Link href="/terms" className="text-[#FF3B30] font-bold underline">Terms & Conditions</Link>.
+                      </p>
+                    )}
+                  </div>
+
                   <div className="pt-4 border-t border-slate-200">
                     <Button
                       variant="default"
                       size="lg"
-                      onClick={() => setRazorpayOpen(true)}
-                      disabled={ordersPaused}
+                      onClick={() => {
+                        if (paymentMethod === "COD" && codServiceable === false) {
+                          toast.error("COD is not available for your pincode. Please choose prepaid payment.");
+                          return;
+                        }
+                        setRazorpayOpen(true);
+                      }}
+                      disabled={ordersPaused || (paymentMethod === "COD" && codChecking)}
                       className="w-full text-xs font-black gap-2 h-12 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <CreditCard className="w-4 h-4" /> Pay {formatINR(total)} via Razorpay
+                      {paymentMethod === "COD" ? (
+                        <>
+                          <Banknote className="w-4 h-4" /> Pay {formatINR(COD_BOOKING_AMOUNT)} Booking & Place Order
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="w-4 h-4" /> Pay {formatINR(total)} via Razorpay
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -295,6 +424,18 @@ export default function CheckoutPage() {
                   <span>Total (Incl. GST)</span>
                   <span className="text-[#FF3B30] text-xl">{formatINR(total)}</span>
                 </div>
+                {paymentMethod === "COD" && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 space-y-1 text-[11px] text-slate-700">
+                    <p className="flex justify-between">
+                      <span>Online Booking (Non-refundable)</span>
+                      <span className="font-bold text-slate-900">{formatINR(COD_BOOKING_AMOUNT)}</span>
+                    </p>
+                    <p className="flex justify-between">
+                      <span>Balance at Delivery (COD)</span>
+                      <span className="font-bold text-slate-900">{formatINR(codAmount)}</span>
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="bg-red-50 border border-red-200 rounded-2xl p-4 space-y-2 text-xs text-slate-800">
@@ -317,7 +458,7 @@ export default function CheckoutPage() {
       <RazorpayCheckoutModal
         isOpen={razorpayOpen}
         onClose={() => setRazorpayOpen(false)}
-        totalAmount={total}
+        totalAmount={paymentMethod === "COD" ? COD_BOOKING_AMOUNT : total}
         customerName={formData.fullName}
         customerPhone={formData.phone}
         items={items.map((item) => ({
@@ -327,6 +468,8 @@ export default function CheckoutPage() {
         }))}
         address={{ ...formData }}
         discountCode={discountCode}
+        paymentMethod={paymentMethod}
+        codAmount={paymentMethod === "COD" ? codAmount : 0}
         onSuccess={handlePaymentSuccess}
       />
     </div>

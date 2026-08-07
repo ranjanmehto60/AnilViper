@@ -196,6 +196,8 @@ export interface ShiprocketOrderPayload {
     selling_price: number;
   }>;
   subtotal: number;
+  paymentMethod?: "PREPAID" | "COD";
+  codAmount?: number;
 }
 
 export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Promise<{
@@ -234,6 +236,7 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
     // Actual dead weight: ~0.6kg per uniform
     const packageWeight = Math.min(10, Math.max(0.6, Math.round(totalUnits * 0.6 * 10) / 10));
 
+    const isCod = payload.paymentMethod === "COD";
     const body = {
       order_id: payload.orderId,
       order_date: formatShiprocketDate(payload.orderDate),
@@ -254,7 +257,8 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
         units: item.units,
         selling_price: item.selling_price,
       })),
-      payment_method: "Prepaid",
+      payment_method: isCod ? "COD" : "Prepaid",
+      ...(isCod ? { cod_amount: payload.codAmount || 0 } : {}),
       sub_total: payload.subtotal,
       length: packageLength,
       breadth: packageBreadth,

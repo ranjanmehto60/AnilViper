@@ -30,6 +30,8 @@ interface AccountOrder {
   courier: string | null;
   tracking: string | null;
   paymentStatus: string;
+  paymentMethod?: "PREPAID" | "COD";
+  codAmount?: number;
 }
 
 function AccountContent() {
@@ -330,7 +332,10 @@ function AccountContent() {
                   </div>
 
                   <div className="flex justify-between items-center text-xs border-t border-slate-100 pt-3">
-                    <span className="text-slate-500 font-semibold">Payment: {order.paymentStatus}</span>
+                    <span className="text-slate-500 font-semibold">
+                      Payment: {order.paymentStatus}
+                      {order.paymentMethod === "COD" && ` · COD (${formatINR(order.codAmount || 0)} at delivery)`}
+                    </span>
                     <span className="text-base font-black text-[#FF3B30]">{formatINR(order.total)}</span>
                   </div>
                 </div>

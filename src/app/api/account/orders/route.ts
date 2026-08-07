@@ -19,6 +19,8 @@ export async function GET(request: Request) {
     courier: order.awb ? "Shiprocket / Delhivery" : null,
     tracking: order.awb,
     paymentStatus: order.paymentStatus,
+    paymentMethod: order.paymentMethod,
+    codAmount: order.codAmount,
   }));
 
   return NextResponse.json({ orders });

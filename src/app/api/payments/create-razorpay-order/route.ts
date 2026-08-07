@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createOrder, getPauseMessage, isOrdersPaused, updateOrderPaymentAndShipping } from "@/lib/store-db";
-import { computePricing } from "@/lib/pricing";
+import { COD_BOOKING_AMOUNT, computePricing } from "@/lib/pricing";
 import { getStockLevel } from "@/lib/inventory-db";
 import { getRazorpayInstance, isRazorpayConfigured } from "@/lib/razorpay";
 
@@ -23,7 +23,7 @@ interface OrderItemInput {
 
 export async function POST(request: Request) {
   try {
-    let body: { items?: OrderItemInput[]; address?: OrderAddress; discountCode?: unknown };
+    let body: { items?: OrderItemInput[]; address?: OrderAddress; discountCode?: unknown; paymentMethod?: unknown };
     try {
       body = await request.json();
     } catch {
@@ -59,10 +59,21 @@ export async function POST(request: Request) {
     }));
 
     const discountCode = typeof body.discountCode === "string" ? body.discountCode : null;
+    const paymentMethod = body.paymentMethod === "COD" ? "COD" : "PREPAID";
     const { breakdown, error } = await computePricing(lines, discountCode);
     if (error) {
       return NextResponse.json({ error }, { status: 400 });
     }
+
+    if (paymentMethod === "COD" && breakdown.total <= COD_BOOKING_AMOUNT) {
+      return NextResponse.json(
+        { error: `Cash on Delivery is available for orders above ${COD_BOOKING_AMOUNT}. Please choose prepaid online payment instead.` },
+        { status: 400 }
+      );
+    }
+
+    const bookingAmount = paymentMethod === "COD" ? COD_BOOKING_AMOUNT : 0;
+    const codAmount = paymentMethod === "COD" ? Math.max(0, breakdown.total - COD_BOOKING_AMOUNT) : 0;
 
     for (const item of breakdown.items) {
       const available = await getStockLevel(item.productId, item.size);
@@ -98,9 +109,12 @@ export async function POST(request: Request) {
       shipping: breakdown.shipping,
       total: breakdown.total,
       discountCode: breakdown.discountCode,
+      paymentMethod,
+      bookingAmount,
+      codAmount,
     });
 
-    const amountPaise = Math.round(breakdown.total * 100);
+    const amountPaise = Math.round((paymentMethod === "COD" ? bookingAmount : breakdown.total) * 100);
     let razorpayOrderId = `order_sim_${Math.floor(100000 + Math.random() * 900000)}`;
 
     if (isRazorpayConfigured()) {
@@ -137,6 +151,9 @@ export async function POST(request: Request) {
         amount: amountPaise,
         currency: "INR",
         keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_mock",
+        paymentMethod,
+        bookingAmount,
+        codAmount,
         customer: {
           name,
           phone: phoneDigits,

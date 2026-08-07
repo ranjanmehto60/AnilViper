@@ -35,7 +35,15 @@ export default function TermsPage() {
             All prices listed on vipergears.in are in Indian Rupees (₹) and include applicable Goods and Services Tax (GST). Prices may be modified without prior notice.
           </p>
 
-          <h2 className="text-base font-bold text-white uppercase">4. Governing Law</h2>
+          <h2 className="text-base font-bold text-white uppercase">4. Payments, Cash on Delivery & Cancellation</h2>
+          <p>
+            Prepaid orders are payable online via UPI, credit/debit card or netbanking through Razorpay. Cash on Delivery (COD) orders require a non-refundable online booking fee of ₹400 at the time of placing the order; the remaining balance is payable to the courier at the time of delivery.
+          </p>
+          <p>
+            The ₹400 COD booking fee is non-refundable once the order is placed. The delivery balance is payable only after you receive and inspect the parcel. Refunds, if any, are processed exclusively to the original payment method.
+          </p>
+
+          <h2 className="text-base font-bold text-white uppercase">5. Governing Law</h2>
           <p>
             Any disputes arising shall be subject to the exclusive jurisdiction of the courts of New Delhi, India.
           </p>

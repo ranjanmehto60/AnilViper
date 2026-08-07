@@ -3,6 +3,10 @@ import { listProducts } from "@/lib/product-db";
 export const FREE_SHIPPING_THRESHOLD = 0;
 export const SHIPPING_FEE = 0;
 
+// Booking amount collected online for Cash on Delivery orders.
+// Non-refundable in case of cancellation after the order is placed.
+export const COD_BOOKING_AMOUNT = 400;
+
 const PROMO_CODES: Record<string, number> = {
   VIPER10: 10,
   DOJANG20: 20,

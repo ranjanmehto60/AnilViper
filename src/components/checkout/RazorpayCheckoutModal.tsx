@@ -37,6 +37,8 @@ interface RazorpayCheckoutModalProps {
   items: CartOrderLine[];
   address: AddressPayload;
   discountCode?: string | null;
+  paymentMethod: "PREPAID" | "COD";
+  codAmount?: number;
   onSuccess: (orderId: string, paymentId: string) => void;
 }
 
@@ -49,6 +51,8 @@ export function RazorpayCheckoutModal({
   items,
   address,
   discountCode,
+  paymentMethod,
+  codAmount = 0,
   onSuccess,
 }: RazorpayCheckoutModalProps) {
   const [selectedMethod, setSelectedMethod] = useState<"upi" | "card" | "netbanking">("upi");
@@ -84,7 +88,7 @@ export function RazorpayCheckoutModal({
       const createResponse = await fetch("/api/payments/create-razorpay-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, address, discountCode }),
+        body: JSON.stringify({ items, address, discountCode, paymentMethod }),
       });
 
       const created = await parseJsonResponse(createResponse);
@@ -194,7 +198,16 @@ export function RazorpayCheckoutModal({
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Paying <span className="text-[#FF3B30] font-black">{formatINR(totalAmount)}</span> to Viper Gears India
+            {paymentMethod === "COD" ? (
+              <>
+                Paying <span className="text-[#FF3B30] font-black">{formatINR(totalAmount)}</span> as COD booking fee ·{" "}
+                <span className="text-slate-600">{formatINR(codAmount)}</span> payable at delivery
+              </>
+            ) : (
+              <>
+                Paying <span className="text-[#FF3B30] font-black">{formatINR(totalAmount)}</span> to Viper Gears India
+              </>
+            )}
           </p>
         </DialogHeader>
 
@@ -274,6 +287,10 @@ export function RazorpayCheckoutModal({
             {isProcessing ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" /> Connecting to Razorpay...
+              </>
+            ) : paymentMethod === "COD" ? (
+              <>
+                Pay {formatINR(totalAmount)} Booking & Place Order <ArrowRight className="w-4 h-4" />
               </>
             ) : (
               <>

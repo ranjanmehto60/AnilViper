@@ -49,6 +49,9 @@ function ensureSchema(): Promise<void> {
           shipment_id TEXT,
           courier_name TEXT,
           shiprocket_pushed BOOLEAN NOT NULL DEFAULT FALSE,
+          payment_method TEXT NOT NULL DEFAULT 'PREPAID',
+          booking_amount INTEGER NOT NULL DEFAULT 0,
+          cod_amount INTEGER NOT NULL DEFAULT 0,
           created_at BIGINT NOT NULL
         )
       `;
@@ -64,9 +67,18 @@ function ensureSchema(): Promise<void> {
           value TEXT NOT NULL
         )
       `;
-      // Safety for databases created before the shiprocket_pushed column existed
+      // Safety for databases created before newer columns existed
       await sql`
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS shiprocket_pushed BOOLEAN NOT NULL DEFAULT FALSE
+      `;
+      await sql`
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT NOT NULL DEFAULT 'PREPAID'
+      `;
+      await sql`
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS booking_amount INTEGER NOT NULL DEFAULT 0
+      `;
+      await sql`
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS cod_amount INTEGER NOT NULL DEFAULT 0
       `;
     })().catch((error) => {
       schemaReady = null;
@@ -243,6 +255,9 @@ export interface OrderRecordInput {
   shipping: number;
   total: number;
   discountCode: string | null;
+  paymentMethod?: "PREPAID" | "COD";
+  bookingAmount?: number;
+  codAmount?: number;
 }
 
 export interface OrderRecord extends OrderRecordInput {
@@ -255,6 +270,9 @@ export interface OrderRecord extends OrderRecordInput {
   shipmentId?: string | null;
   courierName?: string | null;
   shiprocketPushed?: boolean;
+  paymentMethod: "PREPAID" | "COD";
+  bookingAmount: number;
+  codAmount: number;
   createdAt: number;
 }
 
@@ -278,6 +296,9 @@ type OrderRow = {
   shipment_id: string | null;
   courier_name: string | null;
   shiprocket_pushed: boolean | null;
+  payment_method: string;
+  booking_amount: number | string | null;
+  cod_amount: number | string | null;
   created_at: number | string;
 };
 
@@ -302,6 +323,9 @@ function mapOrderRow(row: OrderRow): OrderRecord {
     shipmentId: row.shipment_id ? String(row.shipment_id) : null,
     courierName: row.courier_name ? String(row.courier_name) : null,
     shiprocketPushed: Boolean(row.shiprocket_pushed),
+    paymentMethod: String(row.payment_method) === "COD" ? "COD" : "PREPAID",
+    bookingAmount: toNumber(row.booking_amount),
+    codAmount: toNumber(row.cod_amount),
     createdAt: toNumber(row.created_at),
   };
 }
@@ -309,10 +333,13 @@ function mapOrderRow(row: OrderRow): OrderRecord {
 export async function createOrder(input: OrderRecordInput): Promise<OrderRecord> {
   await ensureSchema();
   const now = Date.now();
+  const paymentMethod = input.paymentMethod === "COD" ? "COD" : "PREPAID";
+  const bookingAmount = paymentMethod === "COD" ? (input.bookingAmount ?? 0) : 0;
+  const codAmount = paymentMethod === "COD" ? (input.codAmount ?? 0) : 0;
   const result = await sql<OrderRow>`
     INSERT INTO orders
-      (id, customer_name, phone, address, items, subtotal, discount, shipping, total, discount_code, payment_status, order_status, awb, shiprocket_pushed, created_at)
-    VALUES (${input.id}, ${input.customerName}, ${input.phone}, ${input.address}, ${input.items}, ${input.subtotal}, ${input.discount}, ${input.shipping}, ${input.total}, ${input.discountCode}, 'PENDING', 'Processing', NULL, FALSE, ${now})
+      (id, customer_name, phone, address, items, subtotal, discount, shipping, total, discount_code, payment_status, order_status, awb, shiprocket_pushed, payment_method, booking_amount, cod_amount, created_at)
+    VALUES (${input.id}, ${input.customerName}, ${input.phone}, ${input.address}, ${input.items}, ${input.subtotal}, ${input.discount}, ${input.shipping}, ${input.total}, ${input.discountCode}, 'PENDING', 'Processing', NULL, FALSE, ${paymentMethod}, ${bookingAmount}, ${codAmount}, ${now})
     RETURNING *
   `;
 
