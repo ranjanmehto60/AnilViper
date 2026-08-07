@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getOrderById } from "@/lib/store-db";
+import { getOrderById, getOrderByRazorpayOrderId } from "@/lib/store-db";
 import { isRazorpayConfigured, verifyRazorpaySignature } from "@/lib/razorpay";
 import { finalizePaidOrder } from "@/lib/order-flow";
 
@@ -26,7 +26,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing orderId or paymentId" }, { status: 400 });
   }
 
-  const order = await getOrderById(orderId);
+  let order = await getOrderById(orderId);
+  if (!order && razorpayOrderId) {
+    order = await getOrderByRazorpayOrderId(razorpayOrderId);
+  }
   if (!order) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
