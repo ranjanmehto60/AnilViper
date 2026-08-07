@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: Request, context: RouteContext) {
-  if (!isAuthorizedAdmin(request)) {
+  if (!(await isAuthorizedAdmin(request))) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
@@ -28,7 +28,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Quantity and reorder level must be whole numbers" }, { status: 400 });
     }
 
-    const item = updateInventory(id, { quantity, reorderLevel });
+    const item = await updateInventory(id, { quantity, reorderLevel });
     return item
       ? NextResponse.json({ item })
       : NextResponse.json({ error: "Inventory record not found" }, { status: 404 });
@@ -38,7 +38,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 }
 
 export async function DELETE(request: Request, context: RouteContext) {
-  if (!isAuthorizedAdmin(request)) {
+  if (!(await isAuthorizedAdmin(request))) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
@@ -47,7 +47,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Invalid inventory id" }, { status: 400 });
   }
 
-  return deleteInventory(id)
+  return (await deleteInventory(id))
     ? NextResponse.json({ success: true })
     : NextResponse.json({ error: "Inventory record not found" }, { status: 404 });
 }

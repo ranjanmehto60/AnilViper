@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Access denied: identifier is not authorized." }, { status: 403 });
   }
 
-  const { code, rateLimited } = generateOtp("admin", identifier);
+  const { code, rateLimited } = await generateOtp("admin", identifier);
 
   if (rateLimited) {
     return NextResponse.json(

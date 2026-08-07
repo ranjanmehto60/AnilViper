@@ -8,14 +8,14 @@ import { Product } from "@/types/product";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
-  if (!isAuthorizedAdmin(request)) {
+  if (!(await isAuthorizedAdmin(request))) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
-  return NextResponse.json({ products: listProducts() });
+  return NextResponse.json({ products: await listProducts() });
 }
 
 export async function POST(request: Request) {
-  if (!isAuthorizedAdmin(request)) {
+  if (!(await isAuthorizedAdmin(request))) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
@@ -35,8 +35,8 @@ export async function POST(request: Request) {
       ...product,
     };
 
-    createProduct(fullProduct);
-    createInventoryForProduct(fullProduct, 0, 3);
+    await createProduct(fullProduct);
+    await createInventoryForProduct(fullProduct, 0, 3);
 
     return NextResponse.json({ product: fullProduct }, { status: 201 });
   } catch (error) {

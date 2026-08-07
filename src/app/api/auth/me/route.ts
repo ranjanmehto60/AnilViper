@@ -4,7 +4,7 @@ import { ACCOUNT_SESSION_COOKIE, clearCookieHeader, getCookieValue, getCustomerP
 export const runtime = "nodejs";
 
 export async function GET(req: Request) {
-  const phone = getCustomerPhone(getCookieValue(req, ACCOUNT_SESSION_COOKIE));
+  const phone = await getCustomerPhone(getCookieValue(req, ACCOUNT_SESSION_COOKIE));
   if (!phone) {
     return NextResponse.json({ loggedIn: false }, { status: 200 });
   }

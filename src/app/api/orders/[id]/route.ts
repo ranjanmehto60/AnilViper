@@ -5,7 +5,7 @@ import { isAuthorizedAdmin } from "@/lib/admin-api";
 export const runtime = "nodejs";
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
-  if (!isAuthorizedAdmin(request)) {
+  if (!(await isAuthorizedAdmin(request))) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
@@ -18,7 +18,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     return NextResponse.json({ error: "Invalid order status" }, { status: 400 });
   }
 
-  const updated = updateOrderStatus(id, orderStatus, awb);
+  const updated = await updateOrderStatus(id, orderStatus, awb);
   return updated
     ? NextResponse.json({ order: updated })
     : NextResponse.json({ error: "Order not found" }, { status: 404 });

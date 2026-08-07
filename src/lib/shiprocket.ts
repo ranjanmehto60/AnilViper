@@ -1,6 +1,13 @@
 import "server-only";
 
+import { getSetting, setSetting } from "@/lib/store-db";
+
 const SHIPROCKET_API_BASE = "https://apiv2.shiprocket.in/v1/external";
+
+const TOKEN_SETTING_KEY = "shiprocket_token";
+const TOKEN_EXPIRY_SETTING_KEY = "shiprocket_token_expires_at";
+// Shiprocket tokens are valid for ~10 days. Cache for 9 days.
+const TOKEN_CACHE_MS = 9 * 24 * 60 * 60 * 1000;
 
 let cachedToken: string | null = null;
 let tokenExpiresAt = 0;
@@ -32,6 +39,20 @@ export async function getShiprocketToken(): Promise<string | null> {
     return cachedToken;
   }
 
+  // On serverless (Vercel) the in-memory cache does not survive cold starts,
+  // so persist the token in the database to avoid logging in on every lambda.
+  try {
+    const persistedToken = await getSetting(TOKEN_SETTING_KEY);
+    const persistedExpiry = Number((await getSetting(TOKEN_EXPIRY_SETTING_KEY)) ?? 0) || 0;
+    if (persistedToken && now < persistedExpiry) {
+      cachedToken = persistedToken;
+      tokenExpiresAt = persistedExpiry;
+      return persistedToken;
+    }
+  } catch {
+    // DB unavailable — fall through to a fresh login
+  }
+
   try {
     const response = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
       method: "POST",
@@ -47,9 +68,14 @@ export async function getShiprocketToken(): Promise<string | null> {
 
     const data = await safeJsonResponse(response);
     if (data.token) {
-      cachedToken = data.token;
-      // Shiprocket token valid for ~10 days. Cache for 9 days.
-      tokenExpiresAt = now + 9 * 24 * 60 * 60 * 1000;
+      cachedToken = String(data.token);
+      tokenExpiresAt = now + TOKEN_CACHE_MS;
+      try {
+        await setSetting(TOKEN_SETTING_KEY, cachedToken);
+        await setSetting(TOKEN_EXPIRY_SETTING_KEY, String(tokenExpiresAt));
+      } catch {
+        // Persisting the token is optional — the in-memory cache still works
+      }
       return cachedToken;
     }
   } catch (error) {
@@ -57,6 +83,26 @@ export async function getShiprocketToken(): Promise<string | null> {
   }
 
   return null;
+}
+
+// Shiprocket expects order_date in the "YYYY-MM-DD HH:MM" format in IST
+export function formatShiprocketDate(value: string | number | Date): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return new Date().toISOString().replace("T", " ").substring(0, 16);
+  }
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+
+  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
 }
 
 export interface ServiceabilityRequest {
@@ -176,10 +222,9 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
   }
 
   try {
-    const formattedDate = payload.orderDate || new Date().toISOString().replace("T", " ").substring(0, 16);
     const body = {
       order_id: payload.orderId,
-      order_date: formattedDate,
+      order_date: formatShiprocketDate(payload.orderDate),
       pickup_location: pickupLocation,
       billing_customer_name: payload.customerName,
       billing_last_name: "",
@@ -285,13 +330,35 @@ export async function assignShiprocketAWB(shipmentId: number): Promise<{
   }
 }
 
-export async function getShiprocketTracking(awb: string) {
+export interface TrackingScan {
+  location: string;
+  activity: string;
+  date: string;
+}
+
+export interface NormalizedTracking {
+  awb: string;
+  status: string;
+  courierName?: string;
+  currentStatus?: string;
+  eta?: string;
+  scans: TrackingScan[];
+  raw?: unknown;
+}
+
+export async function getShiprocketTracking(awb: string): Promise<NormalizedTracking> {
   const token = await getShiprocketToken();
   if (!token) {
     return {
+      awb,
       status: "In Transit",
+      courierName: "Delhivery / Shiprocket Express",
       scans: [
-        { location: "Delhi Hub", activity: "Dispatched via Express Courier", date: new Date().toISOString() },
+        {
+          location: "Delhi Hub",
+          activity: "Dispatched via Express Courier",
+          date: new Date().toISOString(),
+        },
       ],
     };
   }
@@ -306,8 +373,26 @@ export async function getShiprocketTracking(awb: string) {
     });
 
     const data = await safeJsonResponse(response);
-    return data.tracking_data || data;
+    const tracking = data.tracking_data || data;
+    const shipment = Array.isArray(tracking.shipments) ? tracking.shipments[0] : undefined;
+    const scans = Array.isArray(shipment?.scans)
+      ? shipment.scans.map((scan: { location?: string; activity?: string; date?: string }) => ({
+          location: scan.location || "",
+          activity: scan.activity || "",
+          date: scan.date || "",
+        }))
+      : [];
+
+    return {
+      awb,
+      status: tracking.status || shipment?.status || "In Transit",
+      courierName: tracking.courier_name || shipment?.courier_name,
+      currentStatus: tracking.current_status || shipment?.current_status,
+      eta: tracking.eta || undefined,
+      scans,
+      raw: data,
+    };
   } catch {
-    return { status: "Tracking details unavailable" };
+    return { awb, status: "Tracking details unavailable", scans: [] };
   }
 }

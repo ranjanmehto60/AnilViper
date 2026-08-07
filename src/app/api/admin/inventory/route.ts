@@ -5,15 +5,15 @@ import { createInventory, listInventory } from "@/lib/inventory-db";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
-  if (!isAuthorizedAdmin(request)) {
+  if (!(await isAuthorizedAdmin(request))) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
-  return NextResponse.json({ items: listInventory() });
+  return NextResponse.json({ items: await listInventory() });
 }
 
 export async function POST(request: Request) {
-  if (!isAuthorizedAdmin(request)) {
+  if (!(await isAuthorizedAdmin(request))) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { item: createInventory({ productId, productName, size, quantity, reorderLevel }) },
+      { item: await createInventory({ productId, productName, size, quantity, reorderLevel }) },
       { status: 201 }
     );
   } catch (error) {

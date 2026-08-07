@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const id = (await context.params).id;
-  const product = getProductById(id) ?? getProductBySlug(id);
+  const product = (await getProductById(id)) ?? (await getProductBySlug(id));
 
   if (!product) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });

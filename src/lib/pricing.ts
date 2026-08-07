@@ -39,7 +39,7 @@ export async function computePricing(
     return { breakdown: emptyBreakdown(), error: "Your cart is empty" };
   }
 
-  const products = listProducts();
+  const products = await listProducts();
   const items: PricingLine[] = [];
   let subtotal = 0;
 

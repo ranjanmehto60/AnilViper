@@ -45,9 +45,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (isOrdersPaused()) {
+    if (await isOrdersPaused()) {
       return NextResponse.json(
-        { error: getPauseMessage(), paused: true },
+        { error: await getPauseMessage(), paused: true },
         { status: 503 }
       );
     }
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     }
 
     for (const item of breakdown.items) {
-      const available = getStockLevel(item.productId, item.size);
+      const available = await getStockLevel(item.productId, item.size);
       if (available < item.quantity) {
         return NextResponse.json(
           {
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     }
 
     const orderId = `ORD_VIPER_${Math.floor(100000 + Math.random() * 900000)}`;
-    const order = createOrder({
+    const order = await createOrder({
       id: orderId,
       customerName: name,
       phone: phoneDigits,
@@ -128,7 +128,7 @@ export async function POST(request: Request) {
     }
 
     // Update order with razorpayOrderId
-    updateOrderPaymentAndShipping(orderId, { razorpayOrderId });
+    await updateOrderPaymentAndShipping(orderId, { razorpayOrderId });
 
     return NextResponse.json(
       {

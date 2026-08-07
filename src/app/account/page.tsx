@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/product/ProductCard";
+import { TrackingTimeline } from "@/components/shipping/TrackingTimeline";
 import {
   User,
   Package,
@@ -16,6 +17,7 @@ import {
   Heart,
   LogOut,
   KeyRound,
+  Truck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,6 +45,7 @@ function AccountContent() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [accountOrders, setAccountOrders] = useState<AccountOrder[]>([]);
   const [ordersLoaded, setOrdersLoaded] = useState(false);
+  const [trackingAwb, setTrackingAwb] = useState<string | null>(null);
 
   const { items: wishlistItems } = useWishlistStore();
 
@@ -312,7 +315,17 @@ function AccountContent() {
                       </div>
                     ))}
                     {order.tracking && (
-                      <p className="text-xs text-slate-500 pt-1">Courier: {order.courier} (Tracking: {order.tracking})</p>
+                      <div className="flex items-center justify-between gap-2 pt-1">
+                        <p className="text-xs text-slate-500">Courier: {order.courier} (AWB: {order.tracking})</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setTrackingAwb(order.tracking)}
+                          className="text-[10px] font-black border-[#FF3B30] text-[#FF3B30] hover:bg-red-50 h-8 gap-1.5"
+                        >
+                          <Truck className="w-3.5 h-3.5" /> Track
+                        </Button>
+                      </div>
                     )}
                   </div>
 
@@ -370,6 +383,14 @@ function AccountContent() {
         </Tabs>
 
       </div>
+
+      {trackingAwb && (
+        <TrackingTimeline
+          awb={trackingAwb}
+          open={trackingAwb !== null}
+          onOpenChange={(open) => { if (!open) setTrackingAwb(null); }}
+        />
+      )}
     </div>
   );
 }

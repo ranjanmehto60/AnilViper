@@ -1,92 +1,106 @@
 import "server-only";
 
-import { mkdirSync } from "node:fs";
-import path from "node:path";
-import os from "node:os";
-import { DatabaseSync } from "node:sqlite";
+import { sql } from "@vercel/postgres";
 import { PRODUCTS } from "@/data/products";
 import { Product } from "@/types/product";
 
-const dataDirectory = process.env.VERCEL || process.env.NODE_ENV === "production"
-  ? path.join(os.tmpdir(), "viper-gears-data")
-  : path.join(process.cwd(), ".data");
-const databasePath = path.join(dataDirectory, "viper-gears.sqlite");
+let schemaReady: Promise<void> | null = null;
 
-let database: DatabaseSync | undefined;
+function ensureSchema(): Promise<void> {
+  if (!schemaReady) {
+    schemaReady = (async () => {
+      await sql`
+        CREATE TABLE IF NOT EXISTS products (
+          id TEXT PRIMARY KEY,
+          data JSONB NOT NULL,
+          created_at BIGINT NOT NULL
+        )
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_products_slug ON products ((data->>'slug'))
+      `;
 
-function getDatabase() {
-  if (!database) {
-    mkdirSync(dataDirectory, { recursive: true });
-    database = new DatabaseSync(databasePath);
-    database.exec(`
-      CREATE TABLE IF NOT EXISTS products (
-        id TEXT PRIMARY KEY,
-        data TEXT NOT NULL,
-        created_at INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_products_slug ON products(json_extract(data, '$.slug'));
-    `);
-
-    const seed = database.prepare(
-      "INSERT OR IGNORE INTO products (id, data, created_at) VALUES (?, ?, ?)"
-    );
-    PRODUCTS.forEach((product, index) => {
-      seed.run(product.id, JSON.stringify(product), Date.now() + index);
+      const now = Date.now();
+      for (let index = 0; index < PRODUCTS.length; index++) {
+        const product = PRODUCTS[index];
+        await sql`
+          INSERT INTO products (id, data, created_at)
+          VALUES (${product.id}, ${JSON.stringify(product)}::jsonb, ${now + index})
+          ON CONFLICT (id) DO NOTHING
+        `;
+      }
+    })().catch((error) => {
+      schemaReady = null;
+      throw error;
     });
   }
-
-  return database;
+  return schemaReady;
 }
 
-function mapProductRow(row: Record<string, unknown>): Product {
-  return JSON.parse(String(row.data)) as Product;
+type ProductRow = { data: Product };
+
+function mapProductRow(row: ProductRow): Product {
+  return row.data;
 }
 
-export function listProducts(): Product[] {
-  const rows = getDatabase()
-    .prepare("SELECT data FROM products ORDER BY created_at ASC")
-    .all() as Record<string, unknown>[];
-
-  return rows.map(mapProductRow);
+export async function listProducts(): Promise<Product[]> {
+  try {
+    await ensureSchema();
+    const result = await sql<ProductRow>`SELECT data FROM products ORDER BY created_at ASC`;
+    if (result.rows && result.rows.length > 0) {
+      return result.rows.map(mapProductRow);
+    }
+  } catch (error) {
+    console.error("Postgres connection or query error in listProducts, falling back to static PRODUCTS:", error);
+  }
+  return PRODUCTS;
 }
 
-export function getProductById(id: string): Product | null {
-  const row = getDatabase()
-    .prepare("SELECT data FROM products WHERE id = ?")
-    .get(id) as Record<string, unknown> | undefined;
-
-  return row ? mapProductRow(row) : null;
+export async function getProductById(id: string): Promise<Product | null> {
+  try {
+    await ensureSchema();
+    const result = await sql<ProductRow>`SELECT data FROM products WHERE id = ${id}`;
+    if (result.rows.length > 0) return mapProductRow(result.rows[0]);
+  } catch (error) {
+    console.error("Postgres connection or query error in getProductById, falling back to static PRODUCTS:", error);
+  }
+  return PRODUCTS.find((p) => p.id === id) || null;
 }
 
-export function getProductBySlug(slug: string): Product | null {
-  const row = getDatabase()
-    .prepare("SELECT data FROM products WHERE json_extract(data, '$.slug') = ?")
-    .get(slug) as Record<string, unknown> | undefined;
-
-  return row ? mapProductRow(row) : null;
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  try {
+    await ensureSchema();
+    const result = await sql<ProductRow>`SELECT data FROM products WHERE data->>'slug' = ${slug}`;
+    if (result.rows.length > 0) return mapProductRow(result.rows[0]);
+  } catch (error) {
+    console.error("Postgres connection or query error in getProductBySlug, falling back to static PRODUCTS:", error);
+  }
+  return PRODUCTS.find((p) => p.slug === slug) || null;
 }
 
-export function createProduct(product: Product): Product {
-  getDatabase()
-    .prepare("INSERT INTO products (id, data, created_at) VALUES (?, ?, ?)")
-    .run(product.id, JSON.stringify(product), Date.now());
-
+export async function createProduct(product: Product): Promise<Product> {
+  await ensureSchema();
+  await sql`
+    INSERT INTO products (id, data, created_at) VALUES (${product.id}, ${JSON.stringify(product)}::jsonb, ${Date.now()})
+  `;
   return product;
 }
 
-export function updateProduct(id: string, fields: Partial<Product>): Product | null {
-  const current = getProductById(id);
+export async function updateProduct(id: string, fields: Partial<Product>): Promise<Product | null> {
+  await ensureSchema();
+  const current = await getProductById(id);
   if (!current) return null;
 
   const next = { ...current, ...fields };
-  getDatabase()
-    .prepare("UPDATE products SET data = ? WHERE id = ?")
-    .run(JSON.stringify(next), id);
+  await sql`
+    UPDATE products SET data = ${JSON.stringify(next)}::jsonb WHERE id = ${id}
+  `;
 
   return next;
 }
 
-export function deleteProduct(id: string): boolean {
-  const result = getDatabase().prepare("DELETE FROM products WHERE id = ?").run(id);
-  return result.changes > 0;
+export async function deleteProduct(id: string): Promise<boolean> {
+  await ensureSchema();
+  const result = await sql`DELETE FROM products WHERE id = ${id} RETURNING id`;
+  return result.rows.length > 0;
 }

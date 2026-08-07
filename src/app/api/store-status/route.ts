@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   return NextResponse.json({
-    ordersPaused: isOrdersPaused(),
-    message: getSetting("pause_message") ?? getPauseMessage(),
+    ordersPaused: await isOrdersPaused(),
+    message: (await getSetting("pause_message")) ?? (await getPauseMessage()),
   });
 }

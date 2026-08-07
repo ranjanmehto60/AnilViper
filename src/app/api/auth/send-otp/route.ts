@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Please enter a valid 10-digit Indian mobile number." }, { status: 400 });
   }
 
-  const { code, rateLimited } = generateOtp("customer", phoneDigits);
+  const { code, rateLimited } = await generateOtp("customer", phoneDigits);
   if (rateLimited) {
     return NextResponse.json(
       { error: "Please wait at least 60 seconds before requesting a new OTP." },

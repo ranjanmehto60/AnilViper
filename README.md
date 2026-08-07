@@ -78,19 +78,31 @@ Viper Gears is a fast, mobile-first, modern D2C e-commerce platform built for Ta
 
 ## 🛠️ Local Development Setup
 
-1. **Install Dependencies**:
+1. **Create a Postgres database** (free tier: [Neon](https://neon.tech) or Vercel Storage) and add its connection string to `.env.local` as `POSTGRES_URL`.
+
+2. **Install Dependencies**:
    ```bash
    npm install --legacy-peer-deps
    ```
 
-2. **Run Development Server**:
+3. **Run Development Server**:
    ```bash
    npm run dev
    ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-The inventory database is created automatically at `.data/viper-gears.sqlite` on first use. The `.data` directory is ignored by Git so local inventory records stay out of commits. For a multi-instance production deployment, move this SQLite database to a managed shared database or persistent volume.
+Tables (`otp_codes`, `sessions`, `orders`, `settings`, `products`, `inventory`) are created automatically on first use, and the product/inventory seed data is loaded once (`ON CONFLICT DO NOTHING`).
+
+### Migrating from the legacy SQLite database
+
+If you previously ran the app on SQLite (`.data/viper-gears.sqlite`), admin-created products and edited stock quantities only live there. Copy them into Postgres once:
+
+```bash
+POSTGRES_URL=<your pooled connection string> node scripts/migrate-sqlite-to-postgres.mjs
+```
+
+The script is idempotent — safe to re-run.
 
 ---
 
@@ -101,3 +113,20 @@ npm run build
 ```
 
 Deployed and ready for Vercel deployment!
+
+---
+
+## 📦 Shipping Flow (Razorpay → Shiprocket)
+
+1. **Checkout**: customer pays via Razorpay checkout modal.
+2. **Finalize (exactly once)**: both the client-side `verify-razorpay-payment` route and the Razorpay webhook (`/api/webhooks/razorpay`) call `finalizePaidOrder()`, which atomically:
+   - marks the order `PAID` (single `UPDATE ... WHERE payment_status = 'PENDING'` — only one caller wins),
+   - decrements inventory for each line item,
+   - pushes the order to Shiprocket (`/orders/create/adhoc`) and assigns an AWB, guarded by the `shiprocket_pushed` flag so duplicate shipments are impossible.
+3. **Retries**: if the Shiprocket push fails, the webhook returns `500` so Razorpay retries it; the claim is released so the retry re-pushes. Admins can also trigger a manual re-push from the admin dashboard ("Sync Shiprocket").
+4. **Tracking**: customers see a "Track" button on their orders in `/account`; admins see one on each order. Both call `/api/shipping/track/{awb}`, which fetches live Shiprocket scan data.
+
+**Vercel notes**:
+- All data lives in Postgres (`POSTGRES_URL`), so orders persist across cold starts.
+- Shiprocket auth token is cached in the `settings` table to avoid logging in on every lambda cold start.
+- Webhook and verification routes run with `maxDuration = 60` so Shiprocket calls complete on the Hobby plan.

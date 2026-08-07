@@ -5,18 +5,18 @@ import { getPauseMessage, getSetting, isOrdersPaused, setSetting } from "@/lib/s
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
-  if (!isAuthorizedAdmin(request)) {
+  if (!(await isAuthorizedAdmin(request))) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
   return NextResponse.json({
-    ordersPaused: isOrdersPaused(),
-    message: getSetting("pause_message") ?? getPauseMessage(),
+    ordersPaused: await isOrdersPaused(),
+    message: (await getSetting("pause_message")) ?? (await getPauseMessage()),
   });
 }
 
 export async function PATCH(request: Request) {
-  if (!isAuthorizedAdmin(request)) {
+  if (!(await isAuthorizedAdmin(request))) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
@@ -28,15 +28,15 @@ export async function PATCH(request: Request) {
   }
 
   if (body.ordersPaused !== undefined) {
-    setSetting("orders_paused", body.ordersPaused === true ? "1" : "0");
+    await setSetting("orders_paused", body.ordersPaused === true ? "1" : "0");
   }
 
   if (typeof body.message === "string" && body.message.trim()) {
-    setSetting("pause_message", body.message.trim());
+    await setSetting("pause_message", body.message.trim());
   }
 
   return NextResponse.json({
-    ordersPaused: isOrdersPaused(),
-    message: getSetting("pause_message") ?? getPauseMessage(),
+    ordersPaused: await isOrdersPaused(),
+    message: (await getSetting("pause_message")) ?? (await getPauseMessage()),
   });
 }

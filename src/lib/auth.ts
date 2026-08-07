@@ -39,33 +39,33 @@ export function isAllowedAdminIdentifier(identifier: string): boolean {
   );
 }
 
-export function isAdminSession(token: string | null | undefined): boolean {
+export async function isAdminSession(token: string | null | undefined): Promise<boolean> {
   if (!token) return false;
-  const session = readSession(token);
+  const session = await readSession(token);
   if (!session || session.role !== "admin") return false;
   return isAllowedAdminIdentifier(session.identifier);
 }
 
-export function isCustomerSession(token: string | null | undefined): boolean {
+export async function isCustomerSession(token: string | null | undefined): Promise<boolean> {
   if (!token) return false;
-  const session = readSession(token);
+  const session = await readSession(token);
   return session !== null && session.role === "customer";
 }
 
-export function getCustomerPhone(token: string | null | undefined): string | null {
+export async function getCustomerPhone(token: string | null | undefined): Promise<string | null> {
   if (!token) return null;
-  const session = readSession(token);
+  const session = await readSession(token);
   return session && session.role === "customer" ? session.identifier : null;
 }
 
-export function createAdminSession(identifier: string): { token: string; ttlMs: number } {
+export async function createAdminSession(identifier: string): Promise<{ token: string; ttlMs: number }> {
   return createSession("admin", identifier);
 }
 
-export function createCustomerSession(phone: string): { token: string; ttlMs: number } {
+export async function createCustomerSession(phone: string): Promise<{ token: string; ttlMs: number }> {
   return createSession("customer", phone);
 }
 
-export function endSession(token: string | null | undefined) {
-  deleteSession(token);
+export async function endSession(token: string | null | undefined): Promise<void> {
+  await deleteSession(token);
 }

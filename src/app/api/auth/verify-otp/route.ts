@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Enter the 6-digit OTP sent to your phone." }, { status: 400 });
   }
 
-  const status = verifyOtp("customer", phoneDigits, otp);
+  const status = await verifyOtp("customer", phoneDigits, otp);
   if (status !== "ok") {
     const message = status === "expired" || status === "missing"
       ? "OTP expired or no active OTP. Please request a new code."
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: message }, { status: 401 });
   }
 
-  const { token, ttlMs } = createCustomerSession(phoneDigits);
+  const { token, ttlMs } = await createCustomerSession(phoneDigits);
   const response = NextResponse.json({ success: true });
   response.headers.set("set-cookie", sessionCookieHeader(ACCOUNT_SESSION_COOKIE, token, ttlMs / 1000));
   return response;

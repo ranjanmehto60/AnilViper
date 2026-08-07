@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ProductForm } from "@/components/admin/ProductForm";
+import { TrackingTimeline } from "@/components/shipping/TrackingTimeline";
 import {
   Package,
   ShoppingBag,
@@ -34,6 +35,8 @@ import {
   PlayCircle,
   Save,
   Settings2,
+  Truck,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -68,6 +71,8 @@ export default function AdminDashboardPage() {
   const [ordersPaused, setOrdersPaused] = useState(false);
   const [pauseMessage, setPauseMessage] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
+  const [trackingAwb, setTrackingAwb] = useState<string | null>(null);
+  const [syncingOrderId, setSyncingOrderId] = useState<string | null>(null);
 
   const loadProducts = useCallback(async () => {
     setIsLoadingProducts(true);
@@ -223,6 +228,33 @@ export default function AdminDashboardPage() {
       toast.success("Updated product price in catalog!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to update price");
+    }
+  };
+
+  const handleSyncShiprocket = async (order: ServerOrder) => {
+    setSyncingOrderId(order.id);
+    try {
+      const response = await fetch(`/api/admin/orders/${order.id}/shiprocket`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to sync order to Shiprocket");
+      if (data.shiprocketError) throw new Error(data.shiprocketError);
+      if (data.awb) {
+        setOrders((current) =>
+          current.map((o) =>
+            o.id === order.id ? { ...o, awb: data.awb, courierName: data.courierName || o.courierName } : o
+          )
+        );
+        toast.success(`Order pushed to Shiprocket. AWB: ${data.awb}`);
+      } else {
+        toast.info("Shipment already handled for this order.");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to sync order to Shiprocket");
+    } finally {
+      setSyncingOrderId(null);
     }
   };
 
@@ -552,6 +584,31 @@ export default function AdminDashboardPage() {
                           <option value="Shipped">Shipped</option>
                           <option value="Delivered">Delivered</option>
                         </select>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setTrackingAwb(order.awb)}
+                          disabled={!order.awb}
+                          className="h-8 px-2 text-[10px] font-black border-[#FF3B30] text-[#FF3B30] hover:bg-red-50 gap-1"
+                          title={order.awb ? `Track AWB ${order.awb}` : "No AWB assigned yet"}
+                        >
+                          <Truck className="w-3.5 h-3.5" /> Track
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSyncShiprocket(order)}
+                          disabled={syncingOrderId === order.id || Boolean(order.awb)}
+                          className="h-8 px-2 text-[10px] font-black border-slate-300 text-slate-700 hover:bg-slate-100 gap-1"
+                          title="Push paid order to Shiprocket and generate AWB"
+                        >
+                          {syncingOrderId === order.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <RefreshCw className="w-3.5 h-3.5" />
+                          )}
+                          Sync Shiprocket
+                        </Button>
                       </div>
                     </div>
 
@@ -695,6 +752,14 @@ export default function AdminDashboardPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {trackingAwb && (
+        <TrackingTimeline
+          awb={trackingAwb}
+          open={trackingAwb !== null}
+          onOpenChange={(open) => { if (!open) setTrackingAwb(null); }}
+        />
+      )}
     </div>
   );
 }

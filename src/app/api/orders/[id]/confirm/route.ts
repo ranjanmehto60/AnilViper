@@ -12,7 +12,7 @@ interface StoredOrderLine {
 
 export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
   const orderId = (await context.params).id;
-  const order = getOrderById(orderId);
+  const order = await getOrderById(orderId);
 
   if (!order) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -21,9 +21,9 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
     return NextResponse.json({ success: true, alreadyPaid: true });
   }
 
-  if (isOrdersPaused()) {
+  if (await isOrdersPaused()) {
     return NextResponse.json(
-      { error: getPauseMessage(), paused: true },
+      { error: await getPauseMessage(), paused: true },
       { status: 503 }
     );
   }
@@ -31,7 +31,7 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
   const items = JSON.parse(order.items) as StoredOrderLine[];
 
   for (const item of items) {
-    const available = getStockLevel(item.productId, item.size);
+    const available = await getStockLevel(item.productId, item.size);
     if (available < item.quantity) {
       return NextResponse.json(
         {
@@ -44,7 +44,7 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
 
   let allDecremented = true;
   for (const item of items) {
-    if (!decrementInventory(item.productId, item.size, item.quantity)) {
+    if (!(await decrementInventory(item.productId, item.size, item.quantity))) {
       allDecremented = false;
       break;
     }
@@ -54,6 +54,6 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
     return NextResponse.json({ error: "Stock changed while processing your payment. Please retry." }, { status: 409 });
   }
 
-  markOrderPaid(orderId);
+  await markOrderPaid(orderId);
   return NextResponse.json({ success: true });
 }

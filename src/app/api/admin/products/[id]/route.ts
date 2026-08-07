@@ -12,12 +12,12 @@ import { Product } from "@/types/product";
 export const runtime = "nodejs";
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
-  if (!isAuthorizedAdmin(request)) {
+  if (!(await isAuthorizedAdmin(request))) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
   const id = (await context.params).id;
-  const current = getProductById(id);
+  const current = await getProductById(id);
   if (!current) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
@@ -39,25 +39,25 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     patch.availableSizes !== undefined &&
     JSON.stringify(patch.availableSizes) !== JSON.stringify(current.availableSizes);
 
-  const updated = updateProduct(id, patch) as Product;
+  const updated = (await updateProduct(id, patch)) as Product;
 
-  if (nameChanged) renameInventoryProduct(id, updated.name);
-  if (sizesChanged) createInventoryForProduct(updated, 0, 3);
+  if (nameChanged) await renameInventoryProduct(id, updated.name);
+  if (sizesChanged) await createInventoryForProduct(updated, 0, 3);
 
   return NextResponse.json({ product: updated });
 }
 
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
-  if (!isAuthorizedAdmin(request)) {
+  if (!(await isAuthorizedAdmin(request))) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
   const id = (await context.params).id;
-  const removed = deleteProduct(id);
+  const removed = await deleteProduct(id);
   if (!removed) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
 
-  deleteInventoryByProduct(id);
+  await deleteInventoryByProduct(id);
   return NextResponse.json({ success: true });
 }
