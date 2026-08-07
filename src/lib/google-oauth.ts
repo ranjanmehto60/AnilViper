@@ -66,15 +66,17 @@ export async function exchangeCodeForTokens(params: {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       code: params.code,
-      client_id: params.clientId,
-      client_secret: params.clientSecret,
+      client_id: params.clientId.trim(),
+      client_secret: params.clientSecret.trim(),
       redirect_uri: params.redirectUri,
       grant_type: "authorization_code",
       code_verifier: params.verifier,
     }),
   });
   if (!res.ok) {
-    throw new Error(`Google token exchange failed: ${res.status}`);
+    const errorText = await res.text();
+    console.error(`[Google Token Exchange Error ${res.status}]`, errorText);
+    throw new Error(`Google token exchange failed (${res.status}): ${errorText}`);
   }
   return res.json();
 }
