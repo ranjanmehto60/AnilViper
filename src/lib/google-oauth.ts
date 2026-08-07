@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createHash, createVerify, randomBytes, timingSafeEqual } from "crypto";
+import { createHash, createPublicKey, createVerify, randomBytes, timingSafeEqual } from "crypto";
 import { ADMIN_CONFIG } from "@/config/admin";
 
 const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -132,36 +132,6 @@ function base64UrlDecode(input: string): Buffer {
   return Buffer.from(normalized + pad, "base64");
 }
 
-function derLength(len: number): Buffer {
-  if (len < 128) return Buffer.from([len]);
-  const bytes: number[] = [];
-  let n = len;
-  while (n > 0) {
-    bytes.unshift(n & 0xff);
-    n >>= 8;
-  }
-  return Buffer.from([0x80 | bytes.length, ...bytes]);
-}
-
-function derInteger(value: Buffer): Buffer {
-  let v = value;
-  if (v[0] & 0x80) v = Buffer.concat([Buffer.from([0x00]), v]);
-  return Buffer.concat([Buffer.from([0x02]), derLength(v.length), v]);
-}
-
-function derSequence(parts: Buffer[]): Buffer {
-  const content = Buffer.concat(parts);
-  return Buffer.concat([Buffer.from([0x30]), derLength(content.length), content]);
-}
-
-function jwkToPem(jwk: { n: string; e: string }): string {
-  const n = derInteger(base64UrlDecode(jwk.n));
-  const e = derInteger(base64UrlDecode(jwk.e));
-  const der = derSequence([n, e]);
-  const body = der.toString("base64").match(/.{1,64}/g)?.join("\n") ?? "";
-  return `-----BEGIN PUBLIC KEY-----\n${body}\n-----END PUBLIC KEY-----`;
-}
-
 export async function verifyGoogleIdToken(
   idToken: string,
   clientId: string
@@ -194,10 +164,17 @@ export async function verifyGoogleIdToken(
   const key = keys.find((k) => k.kid === header.kid && k.alg === "RS256" && k.n && k.e);
   if (!key || !key.n || !key.e) return null;
 
+  let publicKey;
+  try {
+    publicKey = createPublicKey({ key: { kty: "RSA", n: key.n, e: key.e }, format: "jwk" });
+  } catch {
+    return null;
+  }
+
   const signer = createVerify("RSA-SHA256");
   signer.update(`${headerB64}.${payloadB64}`);
   signer.end();
-  const valid = signer.verify(jwkToPem({ n: key.n, e: key.e }), base64UrlDecode(signatureB64));
+  const valid = signer.verify(publicKey, base64UrlDecode(signatureB64));
   if (!valid) return null;
 
   return payload;
