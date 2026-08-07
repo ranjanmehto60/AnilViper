@@ -225,14 +225,14 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
     // Calculate total item units in order
     const totalUnits = payload.items.reduce((sum, item) => sum + (item.units || 1), 0);
 
-    // Compact polybag packaging dimensions (for uniform flyer bags)
-    // 1 item flyer: 25cm x 20cm x 5cm -> Volumetric weight = (25*20*5)/5000 = 0.5kg
-    const packageLength = 25;
-    const packageBreadth = 20;
-    const packageHeight = Math.min(25, Math.max(5, totalUnits * 5));
+    // Exact packaging dimensions specified: 41cm x 31cm x 3.7cm
+    // 1 item box/flyer: 41cm x 31cm x 3.7cm -> Volumetric weight = (41*31*3.7)/5000 = 0.941kg
+    const packageLength = 41;
+    const packageBreadth = 31;
+    const packageHeight = Math.min(30, Math.max(3.7, Math.round(totalUnits * 3.7 * 10) / 10));
 
-    // Actual weight: ~0.6kg per uniform
-    const packageWeight = Math.min(10, Math.max(0.5, Math.round(totalUnits * 0.6 * 10) / 10));
+    // Actual dead weight: ~0.6kg per uniform
+    const packageWeight = Math.min(10, Math.max(0.6, Math.round(totalUnits * 0.6 * 10) / 10));
 
     const body = {
       order_id: payload.orderId,
