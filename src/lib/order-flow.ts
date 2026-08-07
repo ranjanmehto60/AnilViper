@@ -9,6 +9,7 @@ import {
 } from "@/lib/store-db";
 import { decrementInventory } from "@/lib/inventory-db";
 import { createShiprocketOrder } from "@/lib/shiprocket";
+import { sendOrderNotification } from "@/lib/order-messages";
 
 export interface FinalizePaidOrderInput {
   razorpayOrderId?: string | null;
@@ -99,6 +100,9 @@ export async function finalizePaidOrder(
     } catch {
       // Ignore malformed items — payment is still recorded
     }
+
+    // Fire-and-forget order confirmation (never blocks or fails finalization)
+    await sendOrderNotification(order);
   }
 
   const pushClaimed = await claimShiprocketPush(orderId);
