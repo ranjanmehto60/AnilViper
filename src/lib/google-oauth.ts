@@ -20,15 +20,21 @@ export function generateOAuthState(): { state: string; verifier: string; challen
 }
 
 export function buildRedirectUri(request: Request): string {
-  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
-  const proto = request.headers.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
+  const rawHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  const host = rawHost ? rawHost.split(",")[0].trim() : null;
+  const rawProto = request.headers.get("x-forwarded-proto");
+  let proto = rawProto ? rawProto.split(",")[0].trim() : "https";
+
+  if (host && host.includes("localhost")) {
+    proto = "http";
+  }
 
   if (host) {
     return `${proto}://${host}/api/admin/google/callback`;
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (appUrl) {
+  if (appUrl && !appUrl.includes("localhost")) {
     return `${appUrl.replace(/\/$/, "")}/api/admin/google/callback`;
   }
 
@@ -41,8 +47,9 @@ export function buildGoogleAuthUrl(
   state: string,
   challenge: string
 ): string {
+  const cleanClientId = clientId.replace(/^["']|["']$/g, "").trim();
   const params = new URLSearchParams({
-    client_id: clientId,
+    client_id: cleanClientId,
     redirect_uri: redirectUri,
     response_type: "code",
     scope: "openid email profile",
@@ -61,13 +68,16 @@ export async function exchangeCodeForTokens(params: {
   clientId: string;
   clientSecret: string;
 }): Promise<{ id_token?: string; access_token?: string; error?: string }> {
+  const cleanClientId = params.clientId.replace(/^["']|["']$/g, "").trim();
+  const cleanClientSecret = params.clientSecret.replace(/^["']|["']$/g, "").trim();
+
   const res = await fetch(GOOGLE_TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       code: params.code,
-      client_id: params.clientId.trim(),
-      client_secret: params.clientSecret.trim(),
+      client_id: cleanClientId,
+      client_secret: cleanClientSecret,
       redirect_uri: params.redirectUri,
       grant_type: "authorization_code",
       code_verifier: params.verifier,
