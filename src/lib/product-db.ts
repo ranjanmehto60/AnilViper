@@ -2,7 +2,6 @@ import "server-only";
 import "@/lib/db-env";
 
 import { sql } from "@vercel/postgres";
-import { revalidateTag, unstable_cache } from "next/cache";
 import { PRODUCTS } from "@/data/products";
 import { Product } from "@/types/product";
 
@@ -76,23 +75,9 @@ const fetchProductsFromDb = async (): Promise<Product[]> => {
   });
 };
 
-const getCachedProducts = unstable_cache(
-  fetchProductsFromDb,
-  ["products-list-v1"],
-  { revalidate: 300, tags: ["products"] }
-);
-
-function purgeProductCache() {
-  try {
-    revalidateTag("products");
-  } catch {
-    // Ignore error when called outside request lifecycle
-  }
-}
-
 export async function listProducts(): Promise<Product[]> {
   try {
-    return await getCachedProducts();
+    return await fetchProductsFromDb();
   } catch (error) {
     console.error("Postgres connection or query error in listProducts:", error);
     return [];
@@ -132,7 +117,6 @@ export async function createProduct(product: Product): Promise<Product> {
     `;
     return product;
   });
-  purgeProductCache();
   return result;
 }
 
@@ -147,7 +131,6 @@ export async function updateProduct(id: string, fields: Partial<Product>): Promi
     `;
   });
 
-  purgeProductCache();
   return next;
 }
 
@@ -156,6 +139,5 @@ export async function deleteProduct(id: string): Promise<boolean> {
     const res = await sql`DELETE FROM products WHERE id = ${id} RETURNING id`;
     return res.rows.length > 0;
   });
-  purgeProductCache();
   return result;
 }

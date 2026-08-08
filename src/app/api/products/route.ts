@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { listProducts } from "@/lib/product-db";
-import { PRODUCTS } from "@/data/products";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,6 +10,6 @@ export async function GET() {
     return NextResponse.json({ products });
   } catch (error) {
     console.error("Error in /api/products GET:", error);
-    return NextResponse.json({ products: PRODUCTS });
+    return NextResponse.json({ products: [] });
   }
 }
