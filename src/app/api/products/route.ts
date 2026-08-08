@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const products = await listProducts();
-    return NextResponse.json({ products: products.length > 0 ? products : PRODUCTS });
+    return NextResponse.json({ products });
   } catch (error) {
     console.error("Error in /api/products GET:", error);
     return NextResponse.json({ products: PRODUCTS });

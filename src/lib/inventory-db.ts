@@ -1,4 +1,5 @@
 import "server-only";
+import "@/lib/db-env";
 
 import { sql } from "@vercel/postgres";
 import { PRODUCTS } from "@/data/products";
@@ -58,6 +59,19 @@ function ensureSchema(): Promise<void> {
   return schemaReady;
 }
 
+async function withSchemaFallback<T>(queryFn: () => Promise<T>): Promise<T> {
+  try {
+    return await queryFn();
+  } catch (error: unknown) {
+    const errCode = typeof error === "object" && error !== null && "code" in error ? (error as { code?: string }).code : undefined;
+    if (errCode === "42P01" || errCode === "42703") {
+      await ensureSchema();
+      return await queryFn();
+    }
+    throw error;
+  }
+}
+
 async function seedInventory(
   productId: string,
   productName: string,
@@ -101,86 +115,106 @@ function mapInventoryRow(row: InventoryRow): InventoryItem {
 }
 
 export async function listInventory(): Promise<InventoryItem[]> {
-  await ensureSchema();
-  const result = await sql<InventoryRow>`
-    SELECT * FROM inventory ORDER BY LOWER(product_name), size_cm
-  `;
-  return result.rows.map(mapInventoryRow);
+  try {
+    return await withSchemaFallback(async () => {
+      const result = await sql<InventoryRow>`
+        SELECT * FROM inventory ORDER BY LOWER(product_name), size_cm
+      `;
+      return result.rows.map(mapInventoryRow);
+    });
+  } catch (error) {
+    console.error("Postgres connection or query error in listInventory:", error);
+    return [];
+  }
 }
 
 export async function createInventory(input: CreateInventoryItemInput): Promise<InventoryItem> {
-  await ensureSchema();
-  const result = await sql<InventoryRow>`
-    INSERT INTO inventory (product_id, product_name, size_cm, quantity, reorder_level, updated_at)
-    VALUES (${input.productId}, ${input.productName}, ${input.size}, ${input.quantity}, ${input.reorderLevel}, ${new Date().toISOString()})
-    RETURNING *
-  `;
-  return mapInventoryRow(result.rows[0]);
+  return withSchemaFallback(async () => {
+    const result = await sql<InventoryRow>`
+      INSERT INTO inventory (product_id, product_name, size_cm, quantity, reorder_level, updated_at)
+      VALUES (${input.productId}, ${input.productName}, ${input.size}, ${input.quantity}, ${input.reorderLevel}, ${new Date().toISOString()})
+      RETURNING *
+    `;
+    return mapInventoryRow(result.rows[0]);
+  });
 }
 
 export async function updateInventory(id: number, input: UpdateInventoryItemInput): Promise<InventoryItem | null> {
-  await ensureSchema();
   const current = await getInventoryById(id);
   if (!current) return null;
 
   const quantity = input.quantity ?? current.quantity;
   const reorderLevel = input.reorderLevel ?? current.reorderLevel;
 
-  const result = await sql<InventoryRow>`
-    UPDATE inventory
-    SET quantity = ${quantity}, reorder_level = ${reorderLevel}, updated_at = ${new Date().toISOString()}
-    WHERE id = ${id}
-    RETURNING *
-  `;
+  return withSchemaFallback(async () => {
+    const result = await sql<InventoryRow>`
+      UPDATE inventory
+      SET quantity = ${quantity}, reorder_level = ${reorderLevel}, updated_at = ${new Date().toISOString()}
+      WHERE id = ${id}
+      RETURNING *
+    `;
 
-  return result.rows.length > 0 ? mapInventoryRow(result.rows[0]) : null;
+    return result.rows.length > 0 ? mapInventoryRow(result.rows[0]) : null;
+  });
 }
 
 export async function deleteInventory(id: number): Promise<boolean> {
-  await ensureSchema();
-  const result = await sql`DELETE FROM inventory WHERE id = ${id} RETURNING id`;
-  return result.rows.length > 0;
+  return withSchemaFallback(async () => {
+    const result = await sql`DELETE FROM inventory WHERE id = ${id} RETURNING id`;
+    return result.rows.length > 0;
+  });
 }
 
 export async function createInventoryForProduct(product: Product, defaultQuantity = 0, reorderLevel = 3): Promise<void> {
-  await ensureSchema();
   const now = new Date().toISOString();
   for (const size of product.availableSizes) {
-    await seedInventory(product.id, product.name, size, defaultQuantity, reorderLevel, now);
+    await withSchemaFallback(async () => {
+      await seedInventory(product.id, product.name, size, defaultQuantity, reorderLevel, now);
+    });
   }
 }
 
 export async function deleteInventoryByProduct(productId: string): Promise<void> {
-  await ensureSchema();
-  await sql`DELETE FROM inventory WHERE product_id = ${productId}`;
+  await withSchemaFallback(async () => {
+    await sql`DELETE FROM inventory WHERE product_id = ${productId}`;
+  });
 }
 
 export async function renameInventoryProduct(productId: string, productName: string): Promise<void> {
-  await ensureSchema();
-  await sql`UPDATE inventory SET product_name = ${productName} WHERE product_id = ${productId}`;
+  await withSchemaFallback(async () => {
+    await sql`UPDATE inventory SET product_name = ${productName} WHERE product_id = ${productId}`;
+  });
 }
 
 export async function getStockLevel(productId: string, size: number): Promise<number> {
-  await ensureSchema();
-  const result = await sql<{ quantity: number | string }>`
-    SELECT quantity FROM inventory WHERE product_id = ${productId} AND size_cm = ${size}
-  `;
-  return result.rows.length > 0 ? toNumber(result.rows[0].quantity) : 0;
+  try {
+    return await withSchemaFallback(async () => {
+      const result = await sql<{ quantity: number | string }>`
+        SELECT quantity FROM inventory WHERE product_id = ${productId} AND size_cm = ${size}
+      `;
+      return result.rows.length > 0 ? toNumber(result.rows[0].quantity) : 0;
+    });
+  } catch (error) {
+    console.error("Postgres error in getStockLevel:", error);
+    return 0;
+  }
 }
 
 export async function decrementInventory(productId: string, size: number, quantity: number): Promise<boolean> {
-  await ensureSchema();
-  const result = await sql`
-    UPDATE inventory
-    SET quantity = quantity - ${quantity}, updated_at = ${new Date().toISOString()}
-    WHERE product_id = ${productId} AND size_cm = ${size} AND quantity >= ${quantity}
-    RETURNING id
-  `;
-  return result.rows.length > 0;
+  return withSchemaFallback(async () => {
+    const result = await sql`
+      UPDATE inventory
+      SET quantity = quantity - ${quantity}, updated_at = ${new Date().toISOString()}
+      WHERE product_id = ${productId} AND size_cm = ${size} AND quantity >= ${quantity}
+      RETURNING id
+    `;
+    return result.rows.length > 0;
+  });
 }
 
 async function getInventoryById(id: number): Promise<InventoryItem | null> {
-  await ensureSchema();
-  const result = await sql<InventoryRow>`SELECT * FROM inventory WHERE id = ${id}`;
-  return result.rows.length > 0 ? mapInventoryRow(result.rows[0]) : null;
+  return withSchemaFallback(async () => {
+    const result = await sql<InventoryRow>`SELECT * FROM inventory WHERE id = ${id}`;
+    return result.rows.length > 0 ? mapInventoryRow(result.rows[0]) : null;
+  });
 }

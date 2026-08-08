@@ -6,7 +6,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   const cookieStore = await cookies();
   const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null;
 
-  if (!isAdminSession(token)) {
+  if (!(await isAdminSession(token))) {
     redirect("/admin/login");
   }
 

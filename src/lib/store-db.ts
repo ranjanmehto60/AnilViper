@@ -1,4 +1,5 @@
 import "server-only";
+import "@/lib/db-env";
 
 import { sql } from "@vercel/postgres";
 import { createHash, randomBytes, randomInt } from "node:crypto";
@@ -88,6 +89,19 @@ function ensureSchema(): Promise<void> {
   return schemaReady;
 }
 
+async function withSchemaFallback<T>(queryFn: () => Promise<T>): Promise<T> {
+  try {
+    return await queryFn();
+  } catch (error: unknown) {
+    const errCode = typeof error === "object" && error !== null && "code" in error ? (error as { code?: string }).code : undefined;
+    if (errCode === "42P01" || errCode === "42703") {
+      await ensureSchema();
+      return await queryFn();
+    }
+    throw error;
+  }
+}
+
 function hashHex(value: string) {
   return createHash("sha256").update(value).digest("hex");
 }
@@ -109,61 +123,63 @@ export async function generateOtp(
   scope: string,
   identifier: string
 ): Promise<{ code: string; rateLimited: boolean }> {
-  await ensureSchema();
-  const now = Date.now();
+  return withSchemaFallback(async () => {
+    const now = Date.now();
 
-  const existing = await sql<{ created_at: string }>`
-    SELECT created_at FROM otp_codes WHERE scope = ${scope} AND identifier = ${identifier}
-  `;
+    const existing = await sql<{ created_at: string }>`
+      SELECT created_at FROM otp_codes WHERE scope = ${scope} AND identifier = ${identifier}
+    `;
 
-  if (existing.rows.length > 0 && now - toNumber(existing.rows[0].created_at) < RESEND_COOLDOWN_MS) {
-    return { code: "", rateLimited: true };
-  }
+    if (existing.rows.length > 0 && now - toNumber(existing.rows[0].created_at) < RESEND_COOLDOWN_MS) {
+      return { code: "", rateLimited: true };
+    }
 
-  const code = String(randomInt(100000, 1000000));
-  await sql`
-    INSERT INTO otp_codes (scope, identifier, code_hash, expires_at, attempts, created_at)
-    VALUES (${scope}, ${identifier}, ${hashHex(code)}, ${now + OTP_TTL_MS}, 0, ${now})
-    ON CONFLICT (scope, identifier) DO UPDATE SET
-      code_hash = EXCLUDED.code_hash,
-      expires_at = EXCLUDED.expires_at,
-      attempts = 0,
-      created_at = EXCLUDED.created_at
-  `;
+    const code = String(randomInt(100000, 1000000));
+    await sql`
+      INSERT INTO otp_codes (scope, identifier, code_hash, expires_at, attempts, created_at)
+      VALUES (${scope}, ${identifier}, ${hashHex(code)}, ${now + OTP_TTL_MS}, 0, ${now})
+      ON CONFLICT (scope, identifier) DO UPDATE SET
+        code_hash = EXCLUDED.code_hash,
+        expires_at = EXCLUDED.expires_at,
+        attempts = 0,
+        created_at = EXCLUDED.created_at
+    `;
 
-  return { code, rateLimited: false };
+    return { code, rateLimited: false };
+  });
 }
 
 export async function verifyOtp(scope: string, identifier: string, code: string): Promise<"ok" | "invalid" | "rate-limited" | "expired" | "missing"> {
-  await ensureSchema();
-  const cleanCode = String(code || "").trim();
+  return withSchemaFallback(async () => {
+    const cleanCode = String(code || "").trim();
 
-  const row = await sql<{ code_hash: string; expires_at: string; attempts: number }>`
-    SELECT code_hash, expires_at, attempts FROM otp_codes WHERE scope = ${scope} AND identifier = ${identifier}
-  `;
-
-  if (row.rows.length === 0) return "missing";
-
-  const record = row.rows[0];
-  if (Date.now() > toNumber(record.expires_at)) {
-    await sql`DELETE FROM otp_codes WHERE scope = ${scope} AND identifier = ${identifier}`;
-    return "expired";
-  }
-
-  if (record.attempts >= MAX_OTP_ATTEMPTS) {
-    await sql`DELETE FROM otp_codes WHERE scope = ${scope} AND identifier = ${identifier}`;
-    return "expired";
-  }
-
-  if (hashHex(cleanCode) !== record.code_hash) {
-    await sql`
-      UPDATE otp_codes SET attempts = attempts + 1 WHERE scope = ${scope} AND identifier = ${identifier}
+    const row = await sql<{ code_hash: string; expires_at: string; attempts: number }>`
+      SELECT code_hash, expires_at, attempts FROM otp_codes WHERE scope = ${scope} AND identifier = ${identifier}
     `;
-    return "invalid";
-  }
 
-  await sql`DELETE FROM otp_codes WHERE scope = ${scope} AND identifier = ${identifier}`;
-  return "ok";
+    if (row.rows.length === 0) return "missing";
+
+    const record = row.rows[0];
+    if (Date.now() > toNumber(record.expires_at)) {
+      await sql`DELETE FROM otp_codes WHERE scope = ${scope} AND identifier = ${identifier}`;
+      return "expired";
+    }
+
+    if (record.attempts >= MAX_OTP_ATTEMPTS) {
+      await sql`DELETE FROM otp_codes WHERE scope = ${scope} AND identifier = ${identifier}`;
+      return "expired";
+    }
+
+    if (hashHex(cleanCode) !== record.code_hash) {
+      await sql`
+        UPDATE otp_codes SET attempts = attempts + 1 WHERE scope = ${scope} AND identifier = ${identifier}
+      `;
+      return "invalid";
+    }
+
+    await sql`DELETE FROM otp_codes WHERE scope = ${scope} AND identifier = ${identifier}`;
+    return "ok";
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -173,17 +189,19 @@ export async function verifyOtp(scope: string, identifier: string, code: string)
 const DEFAULT_PAUSE_MESSAGE = "We are currently not accepting new orders. Please check back soon.";
 
 export async function getSetting(key: string, defaultValue: string | null = null): Promise<string | null> {
-  await ensureSchema();
-  const row = await sql<{ value: string }>`SELECT value FROM settings WHERE key = ${key}`;
-  return row.rows.length > 0 ? row.rows[0].value : defaultValue;
+  return withSchemaFallback(async () => {
+    const row = await sql<{ value: string }>`SELECT value FROM settings WHERE key = ${key}`;
+    return row.rows.length > 0 ? row.rows[0].value : defaultValue;
+  });
 }
 
 export async function setSetting(key: string, value: string): Promise<void> {
-  await ensureSchema();
-  await sql`
-    INSERT INTO settings (key, value) VALUES (${key}, ${value})
-    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
-  `;
+  await withSchemaFallback(async () => {
+    await sql`
+      INSERT INTO settings (key, value) VALUES (${key}, ${value})
+      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+    `;
+  });
 }
 
 export async function isOrdersPaused(): Promise<boolean> {
@@ -202,42 +220,44 @@ const ADMIN_SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const ACCOUNT_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 export async function createSession(role: "admin" | "customer", identifier: string): Promise<{ token: string; ttlMs: number }> {
-  await ensureSchema();
-  const token = randomBytes(32).toString("hex");
-  const ttlMs = role === "admin" ? ADMIN_SESSION_TTL_MS : ACCOUNT_SESSION_TTL_MS;
+  return withSchemaFallback(async () => {
+    const token = randomBytes(32).toString("hex");
+    const ttlMs = role === "admin" ? ADMIN_SESSION_TTL_MS : ACCOUNT_SESSION_TTL_MS;
 
-  await sql`
-    INSERT INTO sessions (token_hash, role, identifier, expires_at, created_at)
-    VALUES (${hashHex(token)}, ${role}, ${identifier}, ${Date.now() + ttlMs}, ${Date.now()})
-  `;
+    await sql`
+      INSERT INTO sessions (token_hash, role, identifier, expires_at, created_at)
+      VALUES (${hashHex(token)}, ${role}, ${identifier}, ${Date.now() + ttlMs}, ${Date.now()})
+    `;
 
-  return { token, ttlMs };
+    return { token, ttlMs };
+  });
 }
 
 export async function readSession(
   token: string | null | undefined
 ): Promise<{ role: "admin" | "customer"; identifier: string } | null> {
-  await ensureSchema();
   if (!token) return null;
+  return withSchemaFallback(async () => {
+    const row = await sql<{ role: string; identifier: string; expires_at: string }>`
+      SELECT role, identifier, expires_at FROM sessions WHERE token_hash = ${hashHex(token)}
+    `;
 
-  const row = await sql<{ role: string; identifier: string; expires_at: string }>`
-    SELECT role, identifier, expires_at FROM sessions WHERE token_hash = ${hashHex(token)}
-  `;
+    if (row.rows.length === 0) return null;
+    const session = row.rows[0];
+    if (Date.now() > toNumber(session.expires_at)) {
+      await sql`DELETE FROM sessions WHERE token_hash = ${hashHex(token)}`;
+      return null;
+    }
 
-  if (row.rows.length === 0) return null;
-  const session = row.rows[0];
-  if (Date.now() > toNumber(session.expires_at)) {
-    await sql`DELETE FROM sessions WHERE token_hash = ${hashHex(token)}`;
-    return null;
-  }
-
-  return { role: session.role as "admin" | "customer", identifier: session.identifier };
+    return { role: session.role as "admin" | "customer", identifier: session.identifier };
+  });
 }
 
 export async function deleteSession(token: string | null | undefined): Promise<void> {
-  await ensureSchema();
   if (!token) return;
-  await sql`DELETE FROM sessions WHERE token_hash = ${hashHex(token)}`;
+  await withSchemaFallback(async () => {
+    await sql`DELETE FROM sessions WHERE token_hash = ${hashHex(token)}`;
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -331,64 +351,82 @@ function mapOrderRow(row: OrderRow): OrderRecord {
 }
 
 export async function createOrder(input: OrderRecordInput): Promise<OrderRecord> {
-  await ensureSchema();
-  const now = Date.now();
-  const paymentMethod = input.paymentMethod === "COD" ? "COD" : "PREPAID";
-  const bookingAmount = paymentMethod === "COD" ? (input.bookingAmount ?? 0) : 0;
-  const codAmount = paymentMethod === "COD" ? (input.codAmount ?? 0) : 0;
-  const result = await sql<OrderRow>`
-    INSERT INTO orders
-      (id, customer_name, phone, address, items, subtotal, discount, shipping, total, discount_code, payment_status, order_status, awb, shiprocket_pushed, payment_method, booking_amount, cod_amount, created_at)
-    VALUES (${input.id}, ${input.customerName}, ${input.phone}, ${input.address}, ${input.items}, ${input.subtotal}, ${input.discount}, ${input.shipping}, ${input.total}, ${input.discountCode}, 'PENDING', 'Processing', NULL, FALSE, ${paymentMethod}, ${bookingAmount}, ${codAmount}, ${now})
-    RETURNING *
-  `;
+  return withSchemaFallback(async () => {
+    const now = Date.now();
+    const paymentMethod = input.paymentMethod === "COD" ? "COD" : "PREPAID";
+    const bookingAmount = paymentMethod === "COD" ? (input.bookingAmount ?? 0) : 0;
+    const codAmount = paymentMethod === "COD" ? (input.codAmount ?? 0) : 0;
+    const result = await sql<OrderRow>`
+      INSERT INTO orders
+        (id, customer_name, phone, address, items, subtotal, discount, shipping, total, discount_code, payment_status, order_status, awb, shiprocket_pushed, payment_method, booking_amount, cod_amount, created_at)
+      VALUES (${input.id}, ${input.customerName}, ${input.phone}, ${input.address}, ${input.items}, ${input.subtotal}, ${input.discount}, ${input.shipping}, ${input.total}, ${input.discountCode}, 'PENDING', 'Processing', NULL, FALSE, ${paymentMethod}, ${bookingAmount}, ${codAmount}, ${now})
+      RETURNING *
+    `;
 
-  return mapOrderRow(result.rows[0]);
+    return mapOrderRow(result.rows[0]);
+  });
 }
 
 export async function getOrderById(id: string): Promise<OrderRecord | null> {
-  await ensureSchema();
-  const result = await sql<OrderRow>`SELECT * FROM orders WHERE id = ${id}`;
-  return result.rows.length > 0 ? mapOrderRow(result.rows[0]) : null;
+  return withSchemaFallback(async () => {
+    const result = await sql<OrderRow>`SELECT * FROM orders WHERE id = ${id}`;
+    return result.rows.length > 0 ? mapOrderRow(result.rows[0]) : null;
+  });
 }
 
 export async function getOrderByRazorpayOrderId(razorpayOrderId: string): Promise<OrderRecord | null> {
-  await ensureSchema();
-  const result = await sql<OrderRow>`SELECT * FROM orders WHERE razorpay_order_id = ${razorpayOrderId}`;
-  return result.rows.length > 0 ? mapOrderRow(result.rows[0]) : null;
+  return withSchemaFallback(async () => {
+    const result = await sql<OrderRow>`SELECT * FROM orders WHERE razorpay_order_id = ${razorpayOrderId}`;
+    return result.rows.length > 0 ? mapOrderRow(result.rows[0]) : null;
+  });
 }
 
 export async function listOrders(): Promise<OrderRecord[]> {
-  await ensureSchema();
-  const result = await sql<OrderRow>`SELECT * FROM orders ORDER BY created_at DESC`;
-  return result.rows.map(mapOrderRow);
+  try {
+    return await withSchemaFallback(async () => {
+      const result = await sql<OrderRow>`SELECT * FROM orders ORDER BY created_at DESC`;
+      return result.rows.map(mapOrderRow);
+    });
+  } catch (error) {
+    console.error("Postgres error in listOrders:", error);
+    return [];
+  }
 }
 
 export async function listOrdersByPhone(phone: string): Promise<OrderRecord[]> {
-  await ensureSchema();
-  const result = await sql<OrderRow>`SELECT * FROM orders WHERE phone = ${phone} ORDER BY created_at DESC`;
-  return result.rows.map(mapOrderRow);
+  try {
+    return await withSchemaFallback(async () => {
+      const result = await sql<OrderRow>`SELECT * FROM orders WHERE phone = ${phone} ORDER BY created_at DESC`;
+      return result.rows.map(mapOrderRow);
+    });
+  } catch (error) {
+    console.error("Postgres error in listOrdersByPhone:", error);
+    return [];
+  }
 }
 
 export async function markOrderPaid(id: string): Promise<boolean> {
-  await ensureSchema();
-  const result = await sql`
-    UPDATE orders SET payment_status = 'PAID' WHERE id = ${id} AND payment_status = 'PENDING' RETURNING id
-  `;
-  return result.rows.length > 0;
+  return withSchemaFallback(async () => {
+    const result = await sql`
+      UPDATE orders SET payment_status = 'PAID' WHERE id = ${id} AND payment_status = 'PENDING' RETURNING id
+    `;
+    return result.rows.length > 0;
+  });
 }
 
 export async function claimShiprocketPush(id: string): Promise<boolean> {
-  await ensureSchema();
-  const result = await sql`
-    UPDATE orders SET shiprocket_pushed = TRUE WHERE id = ${id} AND shiprocket_pushed = FALSE RETURNING id
-  `;
-  return result.rows.length > 0;
+  return withSchemaFallback(async () => {
+    const result = await sql`
+      UPDATE orders SET shiprocket_pushed = TRUE WHERE id = ${id} AND shiprocket_pushed = FALSE RETURNING id
+    `;
+    return result.rows.length > 0;
+  });
 }
 
 export async function resetShiprocketPushClaim(id: string): Promise<void> {
-  await ensureSchema();
-  await sql`UPDATE orders SET shiprocket_pushed = FALSE WHERE id = ${id}`;
+  await withSchemaFallback(async () => {
+    await sql`UPDATE orders SET shiprocket_pushed = FALSE WHERE id = ${id}`;
+  });
 }
 
 export async function updateOrderPaymentAndShipping(
@@ -404,7 +442,6 @@ export async function updateOrderPaymentAndShipping(
     orderStatus?: OrderRecord["orderStatus"];
   }
 ): Promise<OrderRecord | null> {
-  await ensureSchema();
   const current = await getOrderById(id);
   if (!current) return null;
 
@@ -417,21 +454,23 @@ export async function updateOrderPaymentAndShipping(
   const courierName = data.courierName !== undefined ? data.courierName : current.courierName;
   const orderStatus = data.orderStatus ?? current.orderStatus;
 
-  const result = await sql<OrderRow>`
-    UPDATE orders SET
-      payment_status = ${paymentStatus},
-      razorpay_order_id = ${razorpayOrderId ?? null},
-      razorpay_payment_id = ${razorpayPaymentId ?? null},
-      shiprocket_order_id = ${shiprocketOrderId ?? null},
-      shipment_id = ${shipmentId ?? null},
-      awb = ${awb ?? null},
-      courier_name = ${courierName ?? null},
-      order_status = ${orderStatus}
-    WHERE id = ${id}
-    RETURNING *
-  `;
+  return withSchemaFallback(async () => {
+    const result = await sql<OrderRow>`
+      UPDATE orders SET
+        payment_status = ${paymentStatus},
+        razorpay_order_id = ${razorpayOrderId ?? null},
+        razorpay_payment_id = ${razorpayPaymentId ?? null},
+        shiprocket_order_id = ${shiprocketOrderId ?? null},
+        shipment_id = ${shipmentId ?? null},
+        awb = ${awb ?? null},
+        courier_name = ${courierName ?? null},
+        order_status = ${orderStatus}
+      WHERE id = ${id}
+      RETURNING *
+    `;
 
-  return result.rows.length > 0 ? mapOrderRow(result.rows[0]) : null;
+    return result.rows.length > 0 ? mapOrderRow(result.rows[0]) : null;
+  });
 }
 
 export async function updateOrderStatus(
@@ -439,13 +478,14 @@ export async function updateOrderStatus(
   orderStatus: OrderRecord["orderStatus"],
   awb?: string | null
 ): Promise<OrderRecord | null> {
-  await ensureSchema();
   const current = await getOrderById(id);
   if (!current) return null;
 
-  const result = await sql<OrderRow>`
-    UPDATE orders SET order_status = ${orderStatus}, awb = ${awb ?? null} WHERE id = ${id} RETURNING *
-  `;
+  return withSchemaFallback(async () => {
+    const result = await sql<OrderRow>`
+      UPDATE orders SET order_status = ${orderStatus}, awb = ${awb ?? null} WHERE id = ${id} RETURNING *
+    `;
 
-  return result.rows.length > 0 ? mapOrderRow(result.rows[0]) : null;
+    return result.rows.length > 0 ? mapOrderRow(result.rows[0]) : null;
+  });
 }
