@@ -27,7 +27,11 @@ export function SizeGuideModal({ children, open, onOpenChange }: SizeGuideModalP
     { size: 170, height: "160 - 170 cm", weight: "58 - 68 kg", age: "Adult Medium", category: "Senior Adult" },
     { size: 180, height: "170 - 180 cm", weight: "68 - 80 kg", age: "Adult Large", category: "Senior Adult" },
     { size: 190, height: "180 - 190 cm", weight: "80 - 95 kg", age: "Adult XL", category: "Heavy Weight" },
-    { size: 200, height: "190 - 200 cm", weight: "95+ kg", age: "Adult XXL", category: "Heavy Weight" },
+    { size: 200, height: "190 - 200 cm", weight: "95 - 105 kg", age: "Adult XXL", category: "Heavy Weight" },
+    { size: 210, height: "200 - 210 cm", weight: "105 - 115 kg", age: "Adult 3XL", category: "Tall / Heavy Weight" },
+    { size: 220, height: "210 - 220 cm", weight: "115 - 125 kg", age: "Adult 4XL", category: "Tall / Heavy Weight" },
+    { size: 230, height: "220 - 230 cm", weight: "125 - 135 kg", age: "Adult 5XL", category: "Tall / Heavy Weight" },
+    { size: 240, height: "230 - 240 cm", weight: "135+ kg", age: "Adult 6XL", category: "Tall / Heavy Weight" },
   ];
 
   return (

@@ -233,8 +233,8 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
     const packageBreadth = 31;
     const packageHeight = Math.min(30, Math.max(3.7, Math.round(totalUnits * 3.7 * 10) / 10));
 
-    // Actual dead weight: ~0.6kg per uniform
-    const packageWeight = Math.min(10, Math.max(0.6, Math.round(totalUnits * 0.6 * 10) / 10));
+    // Actual dead weight: 0.5kg (500 grams) per unit for belts, accessories and light gear
+    const packageWeight = Math.min(10, Math.max(0.5, Math.round(totalUnits * 0.5 * 10) / 10));
 
     const isCod = payload.paymentMethod === "COD";
     const body = {

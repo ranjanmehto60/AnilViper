@@ -71,7 +71,11 @@ export async function computePricing(
   const percent = getDiscountPercent(discountCode);
   const discount = Math.round((subtotal * percent) / 100);
   const isTestProductInCart = items.some((it) => it.productId === "test-gateway-sample-1-rupee");
-  const shipping = (subtotal >= FREE_SHIPPING_THRESHOLD || isTestProductInCart) ? 0 : SHIPPING_FEE;
+  const hasBeltsAndAccessories = items.some((it) => {
+    const prod = products.find((p) => p.id === it.productId);
+    return prod?.category === "Belts & Accessories";
+  });
+  const shipping = isTestProductInCart ? 0 : hasBeltsAndAccessories ? 200 : 0;
   const total = Math.max(0, subtotal - discount + shipping);
 
   return {

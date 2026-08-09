@@ -15,7 +15,7 @@ const CATEGORIES: CategoryType[] = [
   "Belts & Accessories",
 ];
 
-const ALL_SIZES = [110, 120, 130, 140, 150, 160, 170, 180, 190, 200];
+const ALL_SIZES = [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240];
 
 interface ProductFormProps {
   initial?: Product | null;

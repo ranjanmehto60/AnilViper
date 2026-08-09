@@ -48,7 +48,7 @@ function ShopContent() {
     "Belts & Accessories",
   ];
 
-  const availableSizes = [110, 120, 130, 140, 150, 160, 170, 180, 190, 200];
+  const availableSizes = [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240];
 
   useEffect(() => {
     fetch("/api/products", { cache: "no-store" })

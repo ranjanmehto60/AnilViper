@@ -107,7 +107,14 @@ export const useCartStore = create<CartState>()(
       },
 
       getShippingFee: () => {
-        return 0; // Free Shipping for testing
+        const items = get().items;
+        const hasBeltsAndAccessories = items.some(
+          (it) => it.product.category === "Belts & Accessories"
+        );
+        if (hasBeltsAndAccessories) {
+          return 200;
+        }
+        return 0;
       },
 
       getTotal: () => {
