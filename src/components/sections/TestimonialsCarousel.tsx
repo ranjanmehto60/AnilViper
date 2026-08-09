@@ -4,7 +4,7 @@ import React, { useCallback } from "react";
 import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { REVIEWS } from "@/data/reviews";
-import { Star, Quote, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Star, Quote, ChevronLeft, ChevronRight, CheckCircle2, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function TestimonialsCarousel() {
@@ -19,16 +19,16 @@ export function TestimonialsCarousel() {
   }, [emblaApi]);
 
   return (
-    <section className="py-20 bg-white border-t border-slate-200 relative">
+    <section className="py-20 bg-[#08080C] border-b border-zinc-800/80 relative">
       <div className="container mx-auto px-4">
         
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-12 gap-4">
           <div>
-            <span className="text-xs font-extrabold text-[#FF3B30] uppercase tracking-widest bg-red-50 border border-red-200 px-3.5 py-1.5 rounded-full shadow-sm">
-              ATHLETE & COACH REVIEWS
+            <span className="text-xs font-black text-[#FF3B30] uppercase tracking-widest bg-red-950/60 border border-[#FF3B30]/40 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 w-fit shadow-md">
+              <Award className="w-4 h-4 text-[#FF3B30]" /> ATHLETE & COACH REVIEWS
             </span>
-            <h2 className="text-4xl sm:text-5xl font-black text-slate-900 uppercase tracking-tight bebas-font mt-2">
+            <h2 className="text-4xl sm:text-5xl font-black text-white uppercase tracking-tight bebas-font mt-2">
               TRUSTED BY CHAMPIONS IN INDIA
             </h2>
           </div>
@@ -38,7 +38,7 @@ export function TestimonialsCarousel() {
               variant="outline"
               size="icon"
               onClick={scrollPrev}
-              className="rounded-full bg-white border-slate-200 text-slate-700 hover:text-slate-900 shadow-sm"
+              className="rounded-full bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white hover:border-[#FF3B30]"
               aria-label="Previous Testimonial"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -47,7 +47,7 @@ export function TestimonialsCarousel() {
               variant="outline"
               size="icon"
               onClick={scrollNext}
-              className="rounded-full bg-white border-slate-200 text-slate-700 hover:text-slate-900 shadow-sm"
+              className="rounded-full bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white hover:border-[#FF3B30]"
               aria-label="Next Testimonial"
             >
               <ChevronRight className="w-5 h-5" />
@@ -63,25 +63,25 @@ export function TestimonialsCarousel() {
                 key={rev.id}
                 className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.33%] pl-4"
               >
-                <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 h-full flex flex-col justify-between space-y-4 hover:border-[#FF3B30] transition-colors shadow-sm">
+                <div className="bg-zinc-950/90 border border-zinc-800 rounded-3xl p-6 h-full flex flex-col justify-between space-y-4 hover:border-[#FF3B30]/60 transition-colors shadow-xl glass-card">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1 text-amber-400">
                         {Array.from({ length: rev.rating }).map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-amber-400" />
+                          <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                         ))}
                       </div>
-                      <Quote className="w-6 h-6 text-slate-300" />
+                      <Quote className="w-6 h-6 text-zinc-700" />
                     </div>
 
-                    <p className="text-xs text-slate-700 italic leading-relaxed font-medium">
+                    <p className="text-xs text-zinc-300 italic leading-relaxed font-medium">
                       &quot;{rev.comment}&quot;
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3 pt-4 border-t border-slate-200">
+                  <div className="flex items-center gap-3 pt-4 border-t border-zinc-800">
                     {rev.userImage && (
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-300">
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-zinc-700">
                         <Image
                           src={rev.userImage}
                           alt={rev.author}
@@ -91,11 +91,11 @@ export function TestimonialsCarousel() {
                       </div>
                     )}
                     <div>
-                      <h4 className="text-xs font-extrabold text-slate-900 flex items-center gap-1">
+                      <h4 className="text-xs font-black text-white flex items-center gap-1">
                         {rev.author}
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#FF3B30]" />
                       </h4>
-                      <span className="text-[10px] text-slate-500 block">{rev.role}</span>
+                      <span className="text-[10px] text-zinc-400 block font-semibold">{rev.role}</span>
                     </div>
                   </div>
                 </div>
@@ -108,3 +108,4 @@ export function TestimonialsCarousel() {
     </section>
   );
 }
+

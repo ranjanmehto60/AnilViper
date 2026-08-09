@@ -1,48 +1,49 @@
 "use client";
 
 import React from "react";
-import { ShieldCheck, Truck, Users } from "lucide-react";
+import { Truck, Users, Zap, Award } from "lucide-react";
+
 
 export function HighlightsBar() {
   const highlights = [
     {
-      icon: ShieldCheck,
+      icon: Award,
       title: "WT Approved Quality",
-      desc: "Official competition standards",
+      desc: "World Taekwondo certified standards",
     },
     {
       icon: Truck,
       title: "100% Free Pan-India Delivery",
-      desc: "Free express shipping on all orders",
+      desc: "Fast express shipping on all orders",
     },
     {
-      icon: ShieldCheck,
-      title: "Premium 210 GSM Fabric",
+      icon: Zap,
+      title: "210 GSM Aeroflex Fabric",
       desc: "Lightweight & moisture-wicking",
     },
     {
       icon: Users,
       title: "Trusted by 500+ Dojangs",
-      desc: "Coaches & academies in India",
+      desc: "Coaches & academies across India",
     },
   ];
 
   return (
-    <section className="bg-white border-y border-slate-200 py-8 shadow-sm">
+    <section className="bg-[#0B0C12] border-y border-zinc-800/80 py-8 relative z-20">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {highlights.map((item, index) => {
             const Icon = item.icon;
             return (
-              <div key={index} className="flex items-center gap-3.5 group">
-                <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-[#FF3B30] group-hover:bg-[#FF3B30] group-hover:text-white transition-all shrink-0 shadow-sm">
-                  <Icon className="w-6 h-6" />
+              <div key={index} className="flex items-center gap-4 group p-3 rounded-2xl transition-all duration-300 hover:bg-zinc-900/60 border border-transparent hover:border-zinc-800">
+                <div className="w-12 h-12 rounded-2xl bg-red-950/60 border border-[#FF3B30]/40 flex items-center justify-center text-[#FF3B30] group-hover:bg-[#FF3B30] group-hover:text-black transition-all shrink-0 shadow-lg group-hover:shadow-[#FF3B30]/30">
+                  <Icon className="w-6 h-6 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">
+                  <h4 className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
                     {item.title}
                   </h4>
-                  <p className="text-[11px] text-slate-500 font-medium">{item.desc}</p>
+                  <p className="text-[11px] text-zinc-400 font-semibold mt-0.5">{item.desc}</p>
                 </div>
               </div>
             );
@@ -52,3 +53,4 @@ export function HighlightsBar() {
     </section>
   );
 }
+
