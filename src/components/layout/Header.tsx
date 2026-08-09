@@ -78,8 +78,8 @@ export function Header() {
           <div className="animate-marquee whitespace-nowrap text-[11px] font-bold tracking-widest uppercase flex items-center gap-6">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#FF3B30] live-pulse shrink-0" />
-              <span className="text-[#FF3B30] font-black">WT APPROVED:</span>
-              <span className="text-zinc-200">Official Viper Gears Competition Taekwondo Doboks India Edition | 100% Free Pan-India Express Delivery</span>
+              <span className="text-[#FF3B30] font-black">WT APPROVED DOBOKS:</span>
+              <span className="text-zinc-200">Free Pan-India Delivery on Dress Orders Above ₹3,000 | Flat ₹400 Shipping Below ₹3,000 | Belts &amp; Accessories ₹200 Delivery</span>
             </span>
             <span className="text-zinc-500">|</span>
             <span className="flex items-center gap-1.5 text-zinc-300">
@@ -87,14 +87,14 @@ export function Header() {
             </span>
             <span className="text-zinc-500">|</span>
             <span className="flex items-center gap-1.5 text-zinc-300">
-              🇮🇳 OFFICIAL INDIAN FLAG SLEEVE PATCH & WORLD TAEKWONDO EMBLEM
+              🇮🇳 OFFICIAL INDIAN FLAG SLEEVE PATCH &amp; WORLD TAEKWONDO EMBLEM
             </span>
             <span className="text-zinc-500">|</span>
             {/* Repeat for continuous loop */}
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#FF3B30] live-pulse shrink-0" />
-              <span className="text-[#FF3B30] font-black">WT APPROVED:</span>
-              <span className="text-zinc-200">Official Viper Gears Competition Taekwondo Doboks India Edition | 100% Free Pan-India Express Delivery</span>
+              <span className="text-[#FF3B30] font-black">WT APPROVED DOBOKS:</span>
+              <span className="text-zinc-200">Free Pan-India Delivery on Dress Orders Above ₹3,000 | Flat ₹400 Shipping Below ₹3,000 | Belts &amp; Accessories ₹200 Delivery</span>
             </span>
             <span className="text-zinc-500">|</span>
             <span className="flex items-center gap-1.5 text-zinc-300">

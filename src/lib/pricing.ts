@@ -76,11 +76,33 @@ export async function computePricing(
   const percent = getDiscountPercent(discountCode);
   const discount = Math.round((subtotal * percent) / 100);
   const isTestProductInCart = items.some((it) => it.productId === "test-gateway-sample-1-rupee");
-  const hasBeltsAndAccessories = items.some((it) => {
+  
+  let dressSubtotal = 0;
+  let hasDresses = false;
+  let hasBeltsAndAccessories = false;
+
+  for (const it of items) {
     const prod = products.find((p) => p.id === it.productId);
-    return prod?.category === "Belts & Accessories";
-  });
-  const shipping = isTestProductInCart ? 0 : hasBeltsAndAccessories ? 200 : 0;
+    if (prod?.category === "Belts & Accessories") {
+      hasBeltsAndAccessories = true;
+    } else if (it.productId !== "test-gateway-sample-1-rupee") {
+      hasDresses = true;
+      dressSubtotal += it.lineTotal;
+    }
+  }
+
+  let shipping = 0;
+  if (isTestProductInCart) {
+    shipping = 0;
+  } else {
+    let dressShipping = 0;
+    if (hasDresses) {
+      dressShipping = dressSubtotal < 3000 ? 400 : 0;
+    }
+    let beltShipping = hasBeltsAndAccessories ? 200 : 0;
+    shipping = dressShipping + beltShipping;
+  }
+
   const total = Math.max(0, subtotal - discount + shipping);
 
   return {
