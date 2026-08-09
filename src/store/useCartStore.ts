@@ -130,7 +130,7 @@ export const useCartStore = create<CartState>()(
         if (hasDresses) {
           dressShipping = dressSubtotal < 3000 ? 400 : 0;
         }
-        let beltShipping = hasBeltsAndAccessories ? 200 : 0;
+        const beltShipping = hasBeltsAndAccessories ? 200 : 0;
         return dressShipping + beltShipping;
       },
 
