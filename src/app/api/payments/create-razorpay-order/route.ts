@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createOrder, getPauseMessage, isOrdersPaused, updateOrderPaymentAndShipping } from "@/lib/store-db";
-import { COD_BOOKING_AMOUNT, computePricing } from "@/lib/pricing";
+import { computePricing } from "@/lib/pricing";
+import { listProducts } from "@/lib/product-db";
 import { getStockLevel } from "@/lib/inventory-db";
 import { getRazorpayInstance, isRazorpayConfigured } from "@/lib/razorpay";
 
@@ -65,15 +66,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error }, { status: 400 });
     }
 
-    if (paymentMethod === "COD" && breakdown.total <= COD_BOOKING_AMOUNT) {
+    const products = await listProducts();
+    const hasBeltsAndAccessories = breakdown.items.some((it) => {
+      const prod = products.find((p) => p.id === it.productId);
+      return prod?.category === "Belts & Accessories";
+    });
+    const targetBookingAmount = hasBeltsAndAccessories ? 200 : 400;
+
+    if (paymentMethod === "COD" && breakdown.total <= targetBookingAmount) {
       return NextResponse.json(
-        { error: `Cash on Delivery is available for orders above ${COD_BOOKING_AMOUNT}. Please choose prepaid online payment instead.` },
+        { error: `Cash on Delivery is available for orders above ₹${targetBookingAmount}. Please choose prepaid online payment instead.` },
         { status: 400 }
       );
     }
 
-    const bookingAmount = paymentMethod === "COD" ? COD_BOOKING_AMOUNT : 0;
-    const codAmount = paymentMethod === "COD" ? Math.max(0, breakdown.total - COD_BOOKING_AMOUNT) : 0;
+    const bookingAmount = paymentMethod === "COD" ? targetBookingAmount : 0;
+    const codAmount = paymentMethod === "COD" ? Math.max(0, breakdown.total - targetBookingAmount) : 0;
 
     for (const item of breakdown.items) {
       const available = await getStockLevel(item.productId, item.size);

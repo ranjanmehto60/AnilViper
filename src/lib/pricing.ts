@@ -5,7 +5,12 @@ export const SHIPPING_FEE = 0;
 
 // Booking amount collected online for Cash on Delivery orders.
 // Non-refundable in case of cancellation after the order is placed.
-export const COD_BOOKING_AMOUNT = 400;
+export const DEFAULT_COD_BOOKING_AMOUNT = 400;
+export const BELT_COD_BOOKING_AMOUNT = 200;
+
+export function getCodBookingAmount(hasBeltsAndAccessories: boolean): number {
+  return hasBeltsAndAccessories ? BELT_COD_BOOKING_AMOUNT : DEFAULT_COD_BOOKING_AMOUNT;
+}
 
 const PROMO_CODES: Record<string, number> = {
   VIPER10: 10,

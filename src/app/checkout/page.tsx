@@ -22,8 +22,6 @@ import {
 import { toast } from "sonner";
 import { z } from "zod";
 
-const COD_BOOKING_AMOUNT = 400;
-
 const checkoutSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name"),
   phone: z.string().trim().regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number"),
@@ -55,8 +53,11 @@ export default function CheckoutPage() {
     codAmount?: number;
   } | null>(null);
 
-  const codAvailable = total > COD_BOOKING_AMOUNT;
-  const codAmount = total - COD_BOOKING_AMOUNT;
+  const hasBeltsAndAccessories = items.some((it) => it.product.category === "Belts & Accessories");
+  const bookingAmount = hasBeltsAndAccessories ? 200 : 400;
+
+  const codAvailable = total > bookingAmount;
+  const codAmount = total - bookingAmount;
 
   useEffect(() => {
     fetch("/api/store-status", { cache: "no-store" })
@@ -341,7 +342,7 @@ export default function CheckoutPage() {
                           <p className="text-[10px] text-slate-500">
                             {codChecking
                               ? "Checking COD availability for your pincode..."
-                              : `Pay ${formatINR(COD_BOOKING_AMOUNT)} online + ${formatINR(codAmount)} at delivery`}
+                              : `Pay ${formatINR(bookingAmount)} online + ${formatINR(codAmount)} at delivery`}
                           </p>
                         </div>
                       </div>
@@ -350,7 +351,7 @@ export default function CheckoutPage() {
 
                     {!codAvailable && (
                       <p className="text-[10px] text-slate-500">
-                        COD is available for orders above {formatINR(COD_BOOKING_AMOUNT)}. Please choose prepaid payment.
+                        COD is available for orders above {formatINR(bookingAmount)}. Please choose prepaid payment.
                       </p>
                     )}
                     {paymentMethod === "COD" && codServiceable === false && (
@@ -360,7 +361,7 @@ export default function CheckoutPage() {
                     )}
                     {paymentMethod === "COD" && codServiceable !== false && (
                       <p className="text-[10px] text-slate-500">
-                        The {formatINR(COD_BOOKING_AMOUNT)} booking fee is non-refundable. The remaining{" "}
+                        The {formatINR(bookingAmount)} booking fee is non-refundable. The remaining{" "}
                         {formatINR(codAmount)} is payable to the courier on delivery. See{" "}
                         <Link href="/terms" className="text-[#FF3B30] font-bold underline">Terms & Conditions</Link>.
                       </p>
@@ -383,7 +384,7 @@ export default function CheckoutPage() {
                     >
                       {paymentMethod === "COD" ? (
                         <>
-                          <Banknote className="w-4 h-4" /> Pay {formatINR(COD_BOOKING_AMOUNT)} Booking & Place Order
+                          <Banknote className="w-4 h-4" /> Pay {formatINR(bookingAmount)} Booking & Place Order
                         </>
                       ) : (
                         <>
@@ -428,7 +429,7 @@ export default function CheckoutPage() {
                   <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 space-y-1 text-[11px] text-slate-700">
                     <p className="flex justify-between">
                       <span>Online Booking (Non-refundable)</span>
-                      <span className="font-bold text-slate-900">{formatINR(COD_BOOKING_AMOUNT)}</span>
+                      <span className="font-bold text-slate-900">{formatINR(bookingAmount)}</span>
                     </p>
                     <p className="flex justify-between">
                       <span>Balance at Delivery (COD)</span>
@@ -458,7 +459,7 @@ export default function CheckoutPage() {
       <RazorpayCheckoutModal
         isOpen={razorpayOpen}
         onClose={() => setRazorpayOpen(false)}
-        totalAmount={paymentMethod === "COD" ? COD_BOOKING_AMOUNT : total}
+        totalAmount={paymentMethod === "COD" ? bookingAmount : total}
         customerName={formData.fullName}
         customerPhone={formData.phone}
         items={items.map((item) => ({
