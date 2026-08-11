@@ -37,47 +37,47 @@ export function SizeGuideModal({ children, open, onOpenChange }: SizeGuideModalP
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent className="max-w-2xl bg-white border-slate-200 text-slate-900 shadow-2xl">
+      <DialogContent className="max-w-2xl border-border bg-surface text-foreground shadow-lg">
         <DialogHeader>
-          <DialogTitle className="text-xl font-black tracking-wider uppercase text-slate-900 flex items-center gap-2">
-            <Ruler className="w-5 h-5 text-[#FF3B30]" />
-            Viper Gears Taekwondo Dobok Sizing Guide
+          <DialogTitle className="flex items-center gap-2 text-xl font-medium tracking-tight text-ink">
+            <Ruler className="h-5 w-5 text-accent" />
+            Find your dobok size
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
-          <p className="text-xs text-slate-600">
+          <p className="text-sm leading-relaxed text-muted">
             Taekwondo uniforms (Doboks) are sized according to total height in centimeters. Choose the size that matches your practitioner&apos;s height. If between sizes or heavy build, select the next size up.
           </p>
 
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50">
+          <div className="overflow-x-auto rounded-xl border border-border bg-background">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-100 text-slate-700 border-b border-slate-200 uppercase text-[11px]">
+              <thead className="border-b border-border bg-surface-2 text-[10px] uppercase text-muted">
                 <tr>
-                  <th className="p-3 font-extrabold text-[#FF3B30]">Uniform Size</th>
-                  <th className="p-3 font-bold">Athlete Height</th>
-                  <th className="p-3 font-bold">Approx Weight</th>
-                  <th className="p-3 font-bold">Age / Fit</th>
+                  <th className="p-3 font-semibold text-accent">Uniform size</th>
+                  <th className="p-3 font-semibold">Athlete height</th>
+                  <th className="p-3 font-semibold">Approx. weight</th>
+                  <th className="p-3 font-semibold">Age / fit</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 text-slate-700">
+              <tbody className="divide-y divide-border text-muted">
                 {sizeChart.map((row) => (
-                  <tr key={row.size} className="hover:bg-slate-100/60 transition-colors">
-                    <td className="p-3 font-black text-slate-900">{row.size} cm</td>
-                    <td className="p-3 text-slate-700">{row.height}</td>
-                    <td className="p-3 text-slate-600">{row.weight}</td>
-                    <td className="p-3 text-slate-600">{row.age}</td>
+                  <tr key={row.size} className="transition-colors hover:bg-surface-2">
+                    <td className="p-3 font-semibold text-ink">{row.size} cm</td>
+                    <td className="p-3">{row.height}</td>
+                    <td className="p-3">{row.weight}</td>
+                    <td className="p-3">{row.age}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-1.5 text-xs text-slate-800">
-            <h4 className="font-bold text-[#FF6B61] flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#FF3B30]" /> Pro Tips for Perfect Fit:
+          <div className="space-y-1.5 rounded-xl border border-accent/25 bg-accent/10 p-4 text-xs text-ink">
+            <h4 className="flex items-center gap-1.5 font-semibold text-ink">
+              <CheckCircle2 className="h-4 w-4 text-accent" /> Fit notes
             </h4>
-            <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600">
+            <ul className="list-inside list-disc space-y-1 text-[11px] text-muted">
               <li>Our Viper Gears Doboks undergo pre-shrunk washing so shrinkage is under 1.5%.</li>
               <li>Trousers feature an adjustable elastic waistband for comfort.</li>
               <li>Need custom Dojang academy sizing or bulk orders? Call our Chattarpur team at +91-9958419286.</li>

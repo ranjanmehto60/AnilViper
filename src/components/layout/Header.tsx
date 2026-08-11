@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/store/useCartStore";
@@ -8,15 +8,13 @@ import { useWishlistStore } from "@/store/useWishlistStore";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Product } from "@/types/product";
 import {
-  ShoppingBag,
+  ArrowUpRight,
   Heart,
-  User,
-  Search,
   Menu,
+  Search,
+  ShoppingBag,
+  User,
   X,
-  Crown,
-  ArrowRight,
-  Flame
 } from "lucide-react";
 import {
   Sheet,
@@ -26,6 +24,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { useHydrated } from "@/hooks/useHydrated";
+
+const navLinks = [
+  { name: "Shop doboks", href: "/shop" },
+  { name: "Our story", href: "/about" },
+  { name: "Bulk orders", href: "/contact" },
+];
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -34,6 +39,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [scrolled, setScrolled] = useState(false);
+  const hydrated = useHydrated();
 
   const cartItemCount = useCartStore((state) => state.getItemCount());
   const wishlistCount = useWishlistStore((state) => state.items.length);
@@ -46,262 +52,173 @@ export function Header() {
       })
       .catch(() => {});
 
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 16);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Shop Doboks", href: "/shop" },
-    { name: "Our Story", href: "/about" },
-    { name: "Action Gallery", href: "/gallery" },
-    { name: "Contact & Bulk", href: "/contact" },
-  ];
-
   const filteredProducts = searchQuery.trim()
     ? products.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.category.toLowerCase().includes(searchQuery.toLowerCase())
+        (product) =>
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.category.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : [];
 
-
   return (
     <>
-      {/* Top Banner Marquee Bar */}
-      <div className="bg-[#05060A] text-zinc-300 py-2 border-b border-white/10 overflow-hidden relative z-50">
-        <div className="flex items-center">
-          <div className="animate-marquee whitespace-nowrap text-[11px] font-bold tracking-widest uppercase flex items-center gap-6">
-            <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#FF3B30] live-pulse shrink-0" />
-              <span className="text-[#FF3B30] font-black">WT APPROVED DOBOKS:</span>
-              <span className="text-zinc-200">Free Pan-India Delivery on Dress Orders Above ₹3,000 | Flat ₹400 Shipping Below ₹3,000 | Belts &amp; Accessories ₹200 Delivery</span>
-            </span>
-            <span className="text-zinc-500">|</span>
-            <span className="flex items-center gap-1.5 text-zinc-300">
-              <Flame className="w-3.5 h-3.5 text-[#FF3B30] fill-[#FF3B30]" /> 210 GSM LIGHTWEIGHT MOISTURE-WICKING AEROFLEX FABRIC
-            </span>
-            <span className="text-zinc-500">|</span>
-            <span className="flex items-center gap-1.5 text-zinc-300">
-              🇮🇳 OFFICIAL INDIAN FLAG SLEEVE PATCH &amp; WORLD TAEKWONDO EMBLEM
-            </span>
-            <span className="text-zinc-500">|</span>
-            {/* Repeat for continuous loop */}
-            <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#FF3B30] live-pulse shrink-0" />
-              <span className="text-[#FF3B30] font-black">WT APPROVED DOBOKS:</span>
-              <span className="text-zinc-200">Free Pan-India Delivery on Dress Orders Above ₹3,000 | Flat ₹400 Shipping Below ₹3,000 | Belts &amp; Accessories ₹200 Delivery</span>
-            </span>
-            <span className="text-zinc-500">|</span>
-            <span className="flex items-center gap-1.5 text-zinc-300">
-              <Flame className="w-3.5 h-3.5 text-[#FF3B30] fill-[#FF3B30]" /> 210 GSM LIGHTWEIGHT MOISTURE-WICKING AEROFLEX FABRIC
-            </span>
-            <span className="text-zinc-500">|</span>
-            <span className="flex items-center gap-1.5 text-zinc-300">
-              🇮🇳 OFFICIAL INDIAN FLAG SLEEVE PATCH & WORLD TAEKWONDO EMBLEM
-            </span>
-          </div>
-        </div>
+      <div className="bg-ink px-4 py-2 text-center text-[10px] font-semibold tracking-[0.14em] text-white/75 uppercase">
+        Made in India <span className="mx-2 text-accent">/</span> WT-approved competition gear <span className="mx-2 text-accent">/</span> Pan-India delivery
       </div>
 
-      {/* Main Glass Navigation Header */}
       <header
-        className={`sticky top-0 z-40 w-full transition-all duration-300 ${
+        className={`sticky top-0 z-40 w-full border-b transition-all duration-300 ${
           scrolled
-            ? "bg-[#090A10]/95 backdrop-blur-xl border-b border-[#FF3B30]/30 shadow-2xl py-3"
-            : "bg-[#0A0B12]/85 backdrop-blur-md border-b border-white/10 py-4"
+            ? "border-border bg-background/95 py-3 shadow-sm backdrop-blur-xl"
+            : "border-border/70 bg-background/90 py-4 backdrop-blur-md"
         }`}
       >
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          
-          {/* Mobile Hamburger Toggle */}
-          <div className="lg:hidden flex items-center">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+          <div className="lg:hidden">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-zinc-200 hover:bg-zinc-800 hover:text-white">
-                  <Menu className="w-6 h-6" />
+                <Button variant="ghost" size="icon" aria-label="Open menu">
+                  <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] bg-[#0A0B12] border-zinc-800 text-white p-6">
-                <SheetHeader className="text-left border-b border-zinc-800 pb-4">
-                  <SheetTitle className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-zinc-900 border border-[#FF3B30]/40 p-1 shadow-md">
-                      <Image src="/images/viper-logo.jpg" alt="Viper Logo" fill className="object-contain p-0.5" />
-                    </div>
-                    <span className="text-2xl font-black tracking-widest text-white bebas-font">
-                      VIPER <span className="text-[#FF3B30]">GEARS</span>
-                    </span>
+              <SheetContent side="left" className="w-[min(88vw,360px)] bg-surface p-6 text-foreground">
+                <SheetHeader className="border-b border-border pb-5 text-left">
+                  <SheetTitle className="flex items-center gap-3 text-foreground">
+                    <BrandMark compact />
+                    <span className="text-xs font-semibold tracking-[0.14em] text-muted uppercase">Navigation</span>
                   </SheetTitle>
                 </SheetHeader>
-                <div className="flex flex-col gap-4 py-6">
+                <nav className="flex flex-col py-6">
+                  <Link
+                    href="/"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-between border-b border-border py-4 text-lg font-medium"
+                  >
+                    Home <ArrowUpRight className="h-4 w-4 text-accent" />
+                  </Link>
                   {navLinks.map((link) => (
                     <Link
                       key={link.name}
                       href={link.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="text-sm font-extrabold uppercase tracking-wider text-zinc-300 hover:text-[#FF3B30] py-2.5 border-b border-zinc-800/80 flex items-center justify-between"
+                      className="flex items-center justify-between border-b border-border py-4 text-lg font-medium"
                     >
-                      <span>{link.name}</span>
-                      <ArrowRight className="w-4 h-4 text-zinc-500" />
+                      {link.name} <ArrowUpRight className="h-4 w-4 text-accent" />
                     </Link>
                   ))}
-                  <div className="pt-4 space-y-3">
-                    <Link
-                      href="/admin/login"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2 text-xs font-black text-amber-400 bg-zinc-900 border border-amber-500/30 p-3 rounded-xl hover:border-amber-400 transition-colors"
-                    >
-                      <Crown className="w-4 h-4 text-amber-400" /> Admin Portal
-                    </Link>
-                  </div>
+                </nav>
+                <div className="mt-auto border-t border-border pt-5">
+                  <Link
+                    href="/account"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 text-sm font-semibold text-muted"
+                  >
+                    <User className="h-4 w-4" /> Account & orders
+                  </Link>
                 </div>
               </SheetContent>
             </Sheet>
           </div>
 
-          {/* Logo Section */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-11 h-11 rounded-2xl bg-zinc-900 border border-zinc-700/80 p-1 shadow-xl group-hover:border-[#FF3B30] transition-all duration-300 overflow-hidden group-hover:shadow-[#FF3B30]/30 group-hover:shadow-lg">
-              <Image
-                src="/images/viper-logo.jpg"
-                alt="Viper Gears Official Brand Logo"
-                fill
-                className="object-contain p-0.5 group-hover:scale-110 transition-transform duration-300"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl sm:text-3xl font-black tracking-widest text-white leading-none bebas-font">
-                  VIPER <span className="text-[#FF3B30]">GEARS</span>
-                </span>
-                <span className="text-[10px] bg-red-950/80 text-[#FF3B30] font-black px-1.5 py-0.5 rounded border border-[#FF3B30]/40">
-                  IN 🇮🇳
-                </span>
-              </div>
-              <span className="text-[10px] tracking-[0.2em] text-zinc-400 font-extrabold uppercase block mt-0.5">
-                Official Taekwondo Gear
-              </span>
-            </div>
+          <Link href="/" className="shrink-0" aria-label="Viper Gears home">
+            <BrandMark />
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden items-center gap-7 lg:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-xs font-black tracking-widest uppercase transition-all duration-200 relative py-1 text-zinc-300 hover:text-[#FF3B30] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-[#FF3B30] hover:after:w-full after:transition-all"
+                className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase transition-colors hover:text-foreground"
               >
                 {link.name}
               </Link>
             ))}
           </nav>
 
-          {/* Action Icons Right Section */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            
-            {/* Search Trigger */}
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="p-2.5 text-zinc-300 hover:text-[#FF3B30] hover:bg-zinc-800/80 rounded-full transition-colors relative"
-              aria-label="Search Products"
+              onClick={() => setIsSearchOpen((open) => !open)}
+              className="rounded-full p-2.5 text-foreground transition-colors hover:bg-surface-2"
+              aria-label="Search products"
             >
-              <Search className="w-5 h-5" />
+              <Search className="h-[18px] w-[18px]" />
             </button>
-
-            {/* Wishlist Button */}
             <Link
               href="/account?tab=wishlist"
-              className="p-2.5 text-zinc-300 hover:text-[#FF3B30] hover:bg-zinc-800/80 rounded-full transition-colors relative hidden sm:flex"
+              className="relative hidden rounded-full p-2.5 text-foreground transition-colors hover:bg-surface-2 sm:flex"
               aria-label="Wishlist"
             >
-              <Heart className="w-5 h-5" />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#FF3B30] text-black text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-md">
-                  {wishlistCount}
-                </span>
-              )}
+              <Heart className="h-[18px] w-[18px]" />
+              {hydrated && wishlistCount > 0 && <CountBubble count={wishlistCount} />}
             </Link>
-
-            {/* User Account */}
             <Link
               href="/account"
-              className="p-2.5 text-zinc-300 hover:text-[#FF3B30] hover:bg-zinc-800/80 rounded-full transition-colors"
-              aria-label="User Account"
+              className="hidden rounded-full p-2.5 text-foreground transition-colors hover:bg-surface-2 sm:flex"
+              aria-label="Account"
             >
-              <User className="w-5 h-5" />
+              <User className="h-[18px] w-[18px]" />
             </Link>
-
-            {/* Store Admin Dashboard Button */}
-            <Link
-              href="/admin/login"
-              className="p-2.5 text-zinc-300 hover:text-amber-400 hover:bg-zinc-800/80 rounded-full transition-colors hidden md:flex"
-              title="Store Admin Dashboard"
-            >
-              <Crown className="w-5 h-5 text-amber-400" />
-            </Link>
-
-            {/* Cart Drawer Trigger */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 bg-[#FF3B30] hover:bg-[#D92D20] text-black rounded-full transition-all duration-300 shadow-lg neon-crimson-glow"
-              aria-label="Shopping Cart"
+              className="relative ml-1 flex items-center gap-2 rounded-full bg-ink px-3.5 py-2.5 text-white transition-colors hover:bg-accent"
+              aria-label="Open cart"
             >
-              <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-zinc-950 text-white text-[10px] font-black w-5 h-5 rounded-full border-2 border-[#FF3B30] flex items-center justify-center">
-                  {cartItemCount}
-                </span>
-              )}
+              <ShoppingBag className="h-[17px] w-[17px]" />
+              <span className="hidden text-[11px] font-semibold tracking-[0.1em] uppercase sm:inline">Bag</span>
+              {hydrated && cartItemCount > 0 && <CountBubble count={cartItemCount} inverted />}
             </button>
-
           </div>
-
         </div>
 
-        {/* Instant Search Bar Dropdown */}
         {isSearchOpen && (
-          <div className="bg-[#0A0B12] border-b border-zinc-800 p-4 transition-all animate-in slide-in-from-top-2">
-            <div className="container mx-auto max-w-xl relative">
+          <div className="border-t border-border bg-surface px-4 py-4 shadow-md">
+            <div className="relative mx-auto max-w-xl">
+              <Search className="absolute left-4 top-3.5 h-4 w-4 text-subtle" />
               <input
                 type="text"
-                placeholder="Search Viper Dobok, Black Belt, Junior Kids, Sparring..."
+                placeholder="Search doboks, belts, sparring gear..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-zinc-900/90 border border-zinc-700 text-white placeholder-zinc-400 px-4 py-3 rounded-xl text-xs focus:outline-none focus:border-[#FF3B30] shadow-inner"
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="h-11 w-full rounded-lg border border-border bg-background px-11 pr-11 text-sm text-foreground outline-none transition-colors placeholder:text-subtle focus:border-accent"
                 autoFocus
               />
               <button
-                onClick={() => setIsSearchOpen(false)}
-                className="absolute right-3 top-3 text-zinc-400 hover:text-white"
+                onClick={() => {
+                  setIsSearchOpen(false);
+                  setSearchQuery("");
+                }}
+                className="absolute right-3 top-3 rounded-full p-0.5 text-muted hover:text-foreground"
+                aria-label="Close search"
               >
-                <X className="w-5 h-5" />
+                <X className="h-4 w-4" />
               </button>
 
-              {/* Live Search Results Overlay */}
               {searchQuery.trim() && (
-                <div className="absolute top-14 left-0 right-0 bg-[#0F101A] border border-zinc-700 rounded-xl shadow-2xl p-2 z-50 max-h-80 overflow-y-auto space-y-1">
+                <div className="surface-card absolute left-0 right-0 top-14 z-50 max-h-80 overflow-y-auto rounded-lg p-2 shadow-lg">
                   {filteredProducts.length === 0 ? (
-                    <div className="p-4 text-xs text-zinc-400 text-center">No doboks found matching &quot;{searchQuery}&quot;</div>
+                    <div className="p-4 text-center text-sm text-muted">No products found.</div>
                   ) : (
                     filteredProducts.map((product) => (
                       <Link
                         key={product.id}
                         href={`/product/${product.slug}`}
                         onClick={() => setIsSearchOpen(false)}
-                        className="flex items-center gap-3 p-2 hover:bg-zinc-800/80 rounded-lg text-xs transition-colors"
+                        className="flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-surface-2"
                       >
-                        <div className="relative w-10 h-10 rounded-lg bg-zinc-900 shrink-0 overflow-hidden border border-zinc-800">
-                          <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+                        <div className="relative h-12 w-10 shrink-0 overflow-hidden rounded-md bg-surface-2">
+                          <Image src={product.images[0]} alt={product.name} fill className="object-cover object-top" />
                         </div>
-                        <div className="flex-1">
-                          <h4 className="font-bold text-white line-clamp-1">{product.name}</h4>
-                          <span className="text-[#FF3B30] font-mono font-bold">₹{product.price}</span>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="line-clamp-1 text-sm font-medium text-foreground">{product.name}</h4>
+                          <span className="text-xs font-semibold text-accent">₹{product.price.toLocaleString("en-IN")}</span>
                         </div>
+                        <ArrowUpRight className="h-4 w-4 text-subtle" />
                       </Link>
                     ))
                   )}
@@ -310,12 +227,33 @@ export function Header() {
             </div>
           </div>
         )}
-
       </header>
 
-      {/* Cart Drawer Component */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
 }
 
+function BrandMark({ compact = false }: { compact?: boolean }) {
+  return (
+    <span className={`flex items-center ${compact ? "gap-2" : "gap-3"}`}>
+      <span className={`relative block shrink-0 overflow-hidden rounded-md bg-white ${compact ? "h-9 w-9" : "h-10 w-10"}`}>
+                <Image src="/images/viper-logo.jpg" alt="Viper Gears logo" fill className="object-contain p-0.5" />
+      </span>
+      <span className="leading-none">
+        <span className={`block font-semibold tracking-[0.12em] text-foreground ${compact ? "text-lg" : "text-xl sm:text-2xl"}`}>
+          VIPER <span className="text-accent">GEARS</span>
+        </span>
+        {!compact && <span className="mt-1 block text-[9px] font-semibold tracking-[0.18em] text-muted uppercase">Taekwondo equipment</span>}
+      </span>
+    </span>
+  );
+}
+
+function CountBubble({ count, inverted = false }: { count: number; inverted?: boolean }) {
+  return (
+    <span className={`absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold ${inverted ? "bg-accent text-white" : "bg-accent text-white"}`}>
+      {count}
+    </span>
+  );
+}

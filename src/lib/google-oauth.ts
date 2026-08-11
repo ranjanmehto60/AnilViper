@@ -20,6 +20,11 @@ export function generateOAuthState(): { state: string; verifier: string; challen
 }
 
 export function buildRedirectUri(request: Request): string {
+  const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (configuredAppUrl) {
+    return `${configuredAppUrl.replace(/\/$/, "")}/api/admin/google/callback`;
+  }
+
   const rawHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
   const host = rawHost ? rawHost.split(",")[0].trim() : null;
   const rawProto = request.headers.get("x-forwarded-proto");

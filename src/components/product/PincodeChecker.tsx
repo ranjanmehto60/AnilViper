@@ -72,21 +72,21 @@ export function PincodeChecker() {
   };
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
-      <div className="flex items-center gap-2 text-xs font-extrabold text-slate-900 uppercase tracking-wider">
-        <Truck className="w-4 h-4 text-[#FF3B30]" />
-        Check Delivery Availability & Serviceability
+    <div className="space-y-3 rounded-xl border border-border bg-background p-4">
+      <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.08em] text-ink uppercase">
+        <Truck className="h-4 w-4 text-accent" />
+        Check delivery availability
       </div>
 
       <form onSubmit={handleCheck} className="flex gap-2">
         <div className="relative flex-1">
-          <MapPin className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+          <MapPin className="absolute left-3 top-3 h-4 w-4 text-subtle" />
           <Input
             placeholder="Enter 6-digit Pincode (e.g. 110074)"
             value={pincode}
             onChange={(e) => setPincode(e.target.value)}
             maxLength={6}
-            className="pl-9 h-10 text-xs bg-white border-slate-200 text-slate-900"
+            className="h-10 bg-surface pl-9 text-xs text-foreground"
           />
         </div>
         <Button
@@ -94,7 +94,7 @@ export function PincodeChecker() {
           disabled={loading}
           variant="secondary"
           size="sm"
-          className="h-10 px-4 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white gap-1.5"
+          className="h-10 gap-1.5 rounded-full bg-ink px-4 text-xs font-semibold text-white hover:bg-accent"
         >
           {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Check"}
         </Button>
@@ -104,20 +104,20 @@ export function PincodeChecker() {
         <div
           className={`p-3 rounded-xl text-xs flex items-start gap-2.5 border ${
             status.available
-              ? "bg-red-50 border-red-200 text-slate-800"
-              : "bg-red-50 border-red-200 text-red-700"
+              ? "border-accent/25 bg-accent/10 text-ink"
+              : "border-danger/25 bg-danger/10 text-danger"
           }`}
         >
           {status.available ? (
-            <CheckCircle2 className="w-4 h-4 text-[#FF3B30] shrink-0 mt-0.5" />
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
           ) : (
-            <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
           )}
           <div>
             <p className="font-bold">{status.message}</p>
             {status.deliveryTime && (
-              <p className="text-[11px] text-slate-600 mt-0.5">
-                Courier Partner: <span className="font-bold text-slate-900">{status.courierName || "Shiprocket Express"}</span> • Estimated Delivery: <span className="font-extrabold text-slate-900">{status.deliveryTime}</span>
+              <p className="mt-0.5 text-[11px] text-muted">
+                Courier: <span className="font-semibold text-ink">{status.courierName || "Shiprocket Express"}</span> • Estimated delivery: <span className="font-semibold text-ink">{status.deliveryTime}</span>
               </p>
             )}
           </div>

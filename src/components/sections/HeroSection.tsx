@@ -1,126 +1,159 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, ArrowRight, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SizeGuideModal } from "@/components/product/SizeGuideModal";
-import { ShieldCheck, ArrowRight, Ruler, Trophy, Flame } from "lucide-react";
+
+const slides = [
+  {
+    image: "/images/kpnp-dobok-1.jpg",
+    label: "India Edition",
+    detail: "Black V-neck competition dobok",
+  },
+  {
+    image: "/images/kpnp-dobok-2.jpg",
+    label: "India Edition",
+    detail: "Color-belt competition dobok",
+  },
+  {
+    image: "/images/kpnp-dobok-chest.jpg",
+    label: "Built for the details",
+    detail: "WT emblem, flag patch, and clean finish",
+  },
+];
 
 export function HeroSection() {
   const [sizeModalOpen, setSizeModalOpen] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const slide = slides[activeSlide];
 
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % slides.length);
+    }, 5200);
+    return () => window.clearInterval(timer);
+  }, [isPaused]);
+
+  const moveSlide = (direction: 1 | -1) => {
+    setActiveSlide((current) => (current + direction + slides.length) % slides.length);
+  };
 
   return (
-    <>
-      <section className="relative min-h-[75vh] lg:min-h-[82vh] flex items-center justify-center overflow-hidden bg-[#08080C] py-16 lg:py-24 border-b border-zinc-800/80 carbon-grid">
-        
-        {/* Ambient Dark Atmospheric Glow Spheres */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#FF3B30]/15 rounded-full blur-[150px] pointer-events-none" />
-        <div className="absolute top-1/4 right-10 w-[350px] h-[350px] bg-red-900/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-10 left-10 w-[350px] h-[350px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
+    <section className="relative overflow-hidden border-b border-border bg-surface">
+      <div className="pointer-events-none absolute -right-32 top-0 h-[32rem] w-[32rem] rounded-full bg-accent/10 blur-3xl" />
+      <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: "easeOut" }}
+          className="relative z-10 max-w-xl"
+        >
+          <p className="section-kicker mb-5">Taekwondo equipment / India</p>
+          <h1 className="display-title text-[clamp(4.2rem,10vw,8.6rem)] leading-[0.82] text-ink">
+            TRAIN IN IT.<br />
+            <span className="text-accent">COMPETE IN IT.</span>
+          </h1>
+          <p className="mt-7 max-w-md text-base leading-relaxed text-muted sm:text-lg">
+            Performance doboks and training gear made for clean movement, hard rounds, and the long road to your next belt.
+          </p>
 
-        <div className="container mx-auto px-4 relative z-10 text-center max-w-5xl">
-          
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="space-y-8"
-          >
-            {/* Championship Badge */}
-            <div className="inline-flex items-center gap-2.5 bg-red-950/80 border border-[#FF3B30]/40 px-5 py-2 rounded-full text-xs sm:text-sm font-black text-[#FF3B30] shadow-xl backdrop-blur-md">
-              <Trophy className="w-4 h-4 text-[#FF3B30] fill-[#FF3B30]" />
-              <span className="tracking-widest uppercase">OFFICIAL WT APPROVED TAEKWONDO UNIFORMS 🇮🇳</span>
-            </div>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button asChild size="lg" className="h-12 rounded-full bg-ink px-7 text-sm text-white hover:bg-accent">
+              <Link href="/shop">
+                Shop doboks <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setSizeModalOpen(true)}
+              className="h-12 rounded-full border-border-strong px-6 text-sm"
+            >
+              <Ruler className="h-4 w-4 text-accent" /> Find your size
+            </Button>
+          </div>
+        </motion.div>
 
-            {/* Main Headline */}
-            <div className="space-y-3 max-w-4xl mx-auto">
-              <h1 className="text-5xl sm:text-7xl lg:text-8xl xl:text-9xl font-black tracking-tight text-white uppercase leading-[0.9] bebas-font">
-                STRIKE WITH <br className="hidden sm:inline" />
-                <span className="crimson-gradient-text">PRECISION & POWER</span>
-              </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-zinc-300 max-w-2xl mx-auto font-medium leading-relaxed pt-2">
-                Engineered specifically for Indian Taekwondo champions. Lightweight 210 GSM moisture-wicking fabric, 180° kick freedom, and official Indian Flag detailing certified for World Taekwondo tournaments.
-              </p>
-            </div>
-
-            {/* Specs Badges Grid - 4 Columns */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 max-w-3xl mx-auto text-left">
-              <div className="bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl backdrop-blur-md hover:border-[#FF3B30]/50 transition-colors shadow-lg">
-                <div className="text-xl sm:text-2xl font-black text-white font-mono flex items-center gap-1">
-                  210 <span className="text-xs text-[#FF3B30]">GSM</span>
-                </div>
-                <span className="text-[11px] text-zinc-400 font-bold block mt-0.5">Aeroflex Moisture Weave</span>
-              </div>
-
-              <div className="bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl backdrop-blur-md hover:border-[#FF3B30]/50 transition-colors shadow-lg">
-                <div className="text-xl sm:text-2xl font-black text-white font-mono flex items-center gap-1">
-                  180° <span className="text-xs text-[#FF3B30]">SPAN</span>
-                </div>
-                <span className="text-[11px] text-zinc-400 font-bold block mt-0.5">Zero-Drag Crotch Gusset</span>
-              </div>
-
-              <div className="bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl backdrop-blur-md hover:border-[#FF3B30]/50 transition-colors shadow-lg">
-                <div className="text-xl sm:text-2xl font-black text-[#FF3B30] font-mono flex items-center gap-1">
-                  🇮🇳 INDIA
-                </div>
-                <span className="text-[11px] text-zinc-400 font-bold block mt-0.5">Sleeve Flag &amp; Back &quot;IND&quot;</span>
-              </div>
-
-              <div className="bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl backdrop-blur-md hover:border-[#FF3B30]/50 transition-colors shadow-lg">
-                <div className="text-xl sm:text-2xl font-black text-white font-mono flex items-center gap-1">
-                  100% <span className="text-xs text-[#FF3B30]">WT</span>
-                </div>
-                <span className="text-[11px] text-zinc-400 font-bold block mt-0.5">World Certified Standard</span>
-              </div>
-            </div>
-
-            {/* CTAs Row */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 max-w-xl mx-auto">
-              <Button
-                variant="default"
-                size="lg"
-                asChild
-                className="w-full sm:w-auto h-14 px-8 text-sm gap-3 bg-[#FF3B30] hover:bg-[#D92D20] text-black font-black uppercase tracking-wider rounded-2xl shadow-2xl neon-crimson-glow group"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
+          className="relative mx-auto w-full max-w-2xl"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <div className="relative aspect-[0.94] overflow-hidden rounded-[2rem] bg-[#d8d6d4] shadow-lg">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={slide.image}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.45 }}
+                className="absolute inset-0"
               >
-                <Link href="/product/kpnp-competition-taekwondo-dobok-india-edition">
-                  <span>BUY VIPER GEARS INDIA EDITION</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform stroke-[2.5]" />
-                </Link>
-              </Button>
+                <Image
+                  src={slide.image}
+                  alt={`${slide.label}: ${slide.detail}`}
+                  fill
+                  priority={activeSlide === 0}
+                  className="object-cover object-top"
+                />
+              </motion.div>
+            </AnimatePresence>
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-transparent to-transparent" />
 
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => setSizeModalOpen(true)}
-                className="w-full sm:w-auto h-14 px-6 text-sm gap-2.5 border-zinc-700 bg-zinc-900/90 text-zinc-200 hover:bg-zinc-800 hover:text-white rounded-2xl backdrop-blur-md"
-              >
-                <Ruler className="w-4 h-4 text-[#FF3B30]" /> Height Sizing Guide
-              </Button>
-            </div>
-
-            {/* Social Proof & Trust Line */}
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-3 text-xs text-zinc-400 font-semibold border-t border-zinc-800/80 max-w-xl mx-auto">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#FF3B30]" />
-                <span>WT Approved Competition Standard</span>
+            <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4 text-white sm:inset-x-6 sm:bottom-6">
+              <div>
+                <p className="text-[10px] font-semibold tracking-[0.16em] text-white/65 uppercase">{slide.label}</p>
+                <p className="mt-1 text-lg font-medium">{slide.detail}</p>
               </div>
-              <span className="hidden sm:inline text-zinc-700">•</span>
-              <div className="flex items-center gap-2">
-                <Flame className="w-4 h-4 text-[#FF3B30] fill-[#FF3B30]" />
-                <span>Trusted by <strong className="text-white">500+ Indian Dojangs</strong></span>
+              <div className="flex shrink-0 gap-2">
+                <button
+                  type="button"
+                  onClick={() => moveSlide(-1)}
+                  aria-label="Previous dress"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-ink/35 text-white backdrop-blur-sm transition-colors hover:bg-white hover:text-ink"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveSlide(1)}
+                  aria-label="Next dress"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-ink transition-colors hover:bg-accent hover:text-white"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </button>
               </div>
             </div>
+          </div>
 
-          </motion.div>
-
-        </div>
-      </section>
+          <div className="mt-4 flex items-center justify-between px-1">
+            <div className="flex items-center gap-2" aria-label="Dress slides">
+              {slides.map((item, index) => (
+                <button
+                  key={item.image}
+                  type="button"
+                  onClick={() => setActiveSlide(index)}
+                  aria-label={`Show dress ${index + 1}`}
+                  aria-current={activeSlide === index}
+                  className={`h-1.5 rounded-full transition-all ${activeSlide === index ? "w-8 bg-accent" : "w-1.5 bg-border-strong hover:bg-ink"}`}
+                />
+              ))}
+            </div>
+            <span className="text-[10px] font-semibold tracking-[0.14em] text-muted uppercase">{String(activeSlide + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}</span>
+          </div>
+        </motion.div>
+      </div>
 
       <SizeGuideModal open={sizeModalOpen} onOpenChange={setSizeModalOpen} />
-    </>
+    </section>
   );
 }
-
-

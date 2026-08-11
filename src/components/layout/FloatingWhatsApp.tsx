@@ -10,15 +10,11 @@ export function FloatingWhatsApp() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with Viper Gears on WhatsApp"
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-[#25D366] text-black font-extrabold px-4 py-3 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all group duration-300 border-2 border-white/20"
+      className="group fixed bottom-5 right-5 z-50 flex items-center gap-2.5 rounded-full bg-[#25D366] px-4 py-3 font-semibold text-ink shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#20bd5a] active:scale-95 sm:bottom-6 sm:right-6"
     >
-      <MessageCircle className="w-6 h-6 fill-black group-hover:rotate-12 transition-transform" />
-      <span className="hidden sm:inline-block text-xs font-black tracking-wider uppercase">
+      <MessageCircle className="h-5 w-5 fill-ink transition-transform group-hover:rotate-12" />
+      <span className="hidden text-xs font-semibold tracking-[0.08em] uppercase sm:inline-block">
         Chat on WhatsApp
-      </span>
-      <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-500"></span>
       </span>
     </a>
   );

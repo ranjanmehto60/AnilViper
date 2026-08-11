@@ -52,25 +52,22 @@ Viper Gears is a fast, mobile-first, modern D2C e-commerce platform built for Ta
    - Info accordions (Fabric Specs, Shipping Info, Returns).
    - Schema.org Product JSON-LD generation.
 
-5. **Action Gallery (`/gallery`)**:
-   - Filterable masonry photo showcase (Tournaments, Dojangs, Behind The Scenes) with lightbox preview.
-
-6. **Contact Us (`/contact`)**:
+5. **Contact Us (`/contact`)**:
    - Form validated with React Hook Form + Zod.
    - Chattarpur Delhi location info, clickable phone link (+91-9871674886), Google Maps iframe embed.
 
-7. **Cart & 3-Step Checkout (`/cart`, `/checkout`)**:
+6. **Cart & 3-Step Checkout (`/cart`, `/checkout`)**:
    - Slide-over Cart Drawer + Full Cart Page with promo codes (`VIPER10`).
    - 3-step checkout leading to simulated Razorpay Gateway modal.
 
-8. **User Account (`/account`)**:
+7. **User Account (`/account`)**:
    - Phone/OTP auth modal.
    - Order history with tracking status, saved addresses, wishlist grid, and profile details.
 
-9. **Legal Policies (`/privacy-policy`, `/terms`, `/shipping-policy`, `/return-policy`)**:
+8. **Legal Policies (`/privacy-policy`, `/terms`, `/shipping-policy`, `/return-policy`)**:
    - Full compliance content tailored for Indian D2C Taekwondo e-commerce.
 
-10. **Admin Inventory (`/admin/inventory`)**:
+9. **Admin Inventory (`/admin/inventory`)**:
    - Admin-only inventory management for each dress and height size.
    - SQLite-backed quantities, reorder thresholds, low-stock indicators, and CRUD actions.
 

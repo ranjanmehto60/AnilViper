@@ -4,6 +4,7 @@ import "@/lib/db-env";
 import { sql } from "@vercel/postgres";
 import { PRODUCTS } from "@/data/products";
 import { Product } from "@/types/product";
+import { filterStorefrontProducts, isStorefrontVisible } from "@/lib/product-visibility";
 
 let schemaReady: Promise<void> | null = null;
 
@@ -84,6 +85,10 @@ export async function listProducts(): Promise<Product[]> {
   }
 }
 
+export async function listStorefrontProducts(): Promise<Product[]> {
+  return filterStorefrontProducts(await listProducts());
+}
+
 export async function getProductById(id: string): Promise<Product | null> {
   try {
     return await withSchemaFallback(async () => {
@@ -109,6 +114,8 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   }
   return null;
 }
+
+export { isStorefrontVisible };
 
 export async function createProduct(product: Product): Promise<Product> {
   const result = await withSchemaFallback(async () => {

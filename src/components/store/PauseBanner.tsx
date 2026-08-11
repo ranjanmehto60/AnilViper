@@ -23,10 +23,10 @@ export function PauseBanner() {
   if (!status?.ordersPaused) return null;
 
   return (
-    <div className="bg-[#FF3B30]/10 border-b border-[#FF3B30]/30 text-[#FF3B30]">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-center gap-3 text-center">
-        <PauseCircle className="w-5 h-5 shrink-0" />
-        <p className="text-xs sm:text-sm font-bold">
+    <div className="border-b border-accent/25 bg-accent/10 text-ink">
+      <div className="mx-auto flex max-w-7xl items-center justify-center gap-3 px-4 py-3 text-center sm:px-6">
+        <PauseCircle className="h-5 w-5 shrink-0 text-accent" />
+        <p className="text-xs font-semibold sm:text-sm">
           {status.message || "We are currently not accepting new orders. Please check back soon."}
         </p>
       </div>

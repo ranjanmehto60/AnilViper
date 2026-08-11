@@ -18,6 +18,7 @@ export interface Product {
   isWTApproved: boolean;
   isBestSeller?: boolean;
   isNewArrival?: boolean;
+  isStorefrontVisible?: boolean;
   inStock: boolean;
   images: string[];
   description: string;

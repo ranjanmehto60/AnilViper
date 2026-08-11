@@ -23,7 +23,8 @@ type OAuthError =
   | "not_configured"
   | "token_exchange_failed"
   | "token_invalid"
-  | "not_authorized";
+  | "not_authorized"
+  | "server_error";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -71,7 +72,15 @@ export async function GET(request: Request) {
       return fail("not_authorized");
     }
 
-    const { token, ttlMs } = await createAdminSession(claims.email);
+    let token: string;
+    let ttlMs: number;
+    try {
+      ({ token, ttlMs } = await createAdminSession(claims.email));
+    } catch (error) {
+      console.error("[Admin Session Creation Error]", error);
+      return fail("server_error");
+    }
+
     const response = NextResponse.redirect(new URL("/admin", request.url));
     response.cookies.set(ADMIN_SESSION_COOKIE, token, {
       httpOnly: true,

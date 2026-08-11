@@ -36,10 +36,10 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-3xl bg-white border-slate-200 text-slate-900 p-0 overflow-hidden shadow-2xl">
+        <DialogContent className="max-w-3xl overflow-hidden border-border bg-surface p-0 text-foreground shadow-lg">
           <div className="grid grid-cols-1 md:grid-cols-2">
             {/* Image Preview */}
-            <div className="relative aspect-square md:h-full bg-slate-100">
+            <div className="relative aspect-square bg-surface-2 md:h-full">
               <Image
                 src={product.images[0]}
                 alt={product.name}
@@ -48,8 +48,8 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               />
               <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
                 {product.isWTApproved && (
-                  <Badge variant="wtApproved" className="text-[10px] bg-white/90 text-[#FF6B61] border-red-300 font-extrabold shadow-sm">
-                    <ShieldCheck className="w-3 h-3 text-[#FF3B30] mr-1" /> WT Approved
+                  <Badge variant="wtApproved" className="bg-surface/90 text-accent">
+                    <ShieldCheck className="mr-1 h-3 w-3 text-accent" /> WT-approved
                   </Badge>
                 )}
               </div>
@@ -58,50 +58,50 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
             {/* Product Info */}
             <div className="p-6 flex flex-col justify-between space-y-4">
               <div>
-                <span className="text-xs font-extrabold text-[#FF3B30] uppercase tracking-wider">
+                <span className="section-kicker">
                   {product.category}
                 </span>
 
-                <DialogTitle className="text-lg font-black text-slate-900 mt-1 leading-snug">
+                <DialogTitle className="mt-1 text-xl font-medium leading-snug text-ink">
                   {product.name}
                 </DialogTitle>
 
-                <div className="flex items-center gap-2 mt-2 text-xs">
-                  <div className="flex items-center gap-1 text-amber-500 font-bold">
-                    <Star className="w-3.5 h-3.5 fill-amber-400" />
+                <div className="mt-2 flex items-center gap-2 text-xs">
+                  <div className="flex items-center gap-1 font-semibold text-accent">
+                    <Star className="h-3.5 w-3.5 fill-current" />
                     <span>{product.rating}</span>
                   </div>
-                  <span className="text-slate-400">({product.reviewCount} Reviews)</span>
-                  <span className="text-slate-300">|</span>
+                  <span className="text-muted">({product.reviewCount} reviews)</span>
+                  <span className="text-border-strong">|</span>
                   {product.inStock ? (
-                    <span className="text-[#FF3B30] font-bold">In Stock</span>
+                    <span className="font-semibold text-accent">In stock</span>
                   ) : (
-                    <span className="text-red-600 font-bold">Out of Stock</span>
+                    <span className="font-semibold text-danger">Out of stock</span>
                   )}
                 </div>
 
                 <div className="flex items-baseline gap-2.5 mt-3">
-                  <span className="text-xl font-black text-[#FF3B30]">
+                  <span className="text-xl font-semibold text-ink">
                     {formatINR(product.price)}
                   </span>
                   {product.originalPrice > product.price && (
-                    <span className="text-xs text-slate-400 line-through">
+                    <span className="text-xs text-muted line-through">
                       {formatINR(product.originalPrice)}
                     </span>
                   )}
                 </div>
 
-                <p className="text-xs text-slate-600 line-clamp-3 mt-3 leading-relaxed">
+                <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted">
                   {product.description}
                 </p>
 
                 {/* Size Selector */}
-                <div className="mt-4 space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-slate-800">Select Height Size (cm):</span>
+                <div className="mt-5 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-ink">Select height (cm)</span>
                     <button
                       onClick={() => setSizeGuideOpen(true)}
-                      className="text-[#FF3B30] hover:underline font-bold flex items-center gap-1"
+                      className="flex items-center gap-1 font-semibold text-accent hover:underline"
                     >
                       <Ruler className="w-3.5 h-3.5" /> Size Chart
                     </button>
@@ -112,10 +112,10 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                       <button
                         key={size}
                         onClick={() => setSelectedSize(size)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${
+                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
                           selectedSize === size
-                            ? "bg-[#FF3B30] text-white border-[#FF3B30] shadow-md shadow-red-500/20"
-                            : "bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300"
+                            ? "border-ink bg-ink text-white"
+                            : "border-border bg-background text-muted hover:border-ink hover:text-ink"
                         }`}
                       >
                         {size} cm
@@ -126,12 +126,12 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-2 pt-2 border-t border-slate-100">
+              <div className="space-y-2 border-t border-border pt-4">
                 <Button
                   variant="default"
                   onClick={handleAddToCart}
                   disabled={!product.inStock}
-                  className="w-full text-xs font-black gap-2 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full gap-2 rounded-full bg-ink text-xs font-semibold text-white hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <ShoppingBag className="w-4 h-4" /> {product.inStock ? "Add To Cart" : "Out of Stock"}
                 </Button>
@@ -140,7 +140,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                   variant="ghost"
                   onClick={onClose}
                   asChild
-                  className="w-full text-xs text-slate-600 hover:text-slate-900"
+                  className="w-full text-xs text-muted hover:text-ink"
                 >
                   <Link href={`/product/${product.slug}`} className="flex items-center justify-center gap-1">
                     View Full Product Details <ArrowRight className="w-3.5 h-3.5" />

@@ -3,109 +3,55 @@
 import React, { useCallback } from "react";
 import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
+import { ChevronLeft, ChevronRight, CheckCircle2, Star } from "lucide-react";
 import { REVIEWS } from "@/data/reviews";
-import { Star, Quote, ChevronLeft, ChevronRight, CheckCircle2, Award } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export function TestimonialsCarousel() {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start" });
-
-  const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext();
-  }, [emblaApi]);
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
-    <section className="py-20 bg-[#08080C] border-b border-zinc-800/80 relative">
-      <div className="container mx-auto px-4">
-        
-        {/* Section Header */}
-        <div className="flex flex-col sm:flex-row items-center justify-between mb-12 gap-4">
+    <section className="border-b border-border bg-surface py-16 sm:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mb-9 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <span className="text-xs font-black text-[#FF3B30] uppercase tracking-widest bg-red-950/60 border border-[#FF3B30]/40 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 w-fit shadow-md">
-              <Award className="w-4 h-4 text-[#FF3B30]" /> ATHLETE & COACH REVIEWS
-            </span>
-            <h2 className="text-4xl sm:text-5xl font-black text-white uppercase tracking-tight bebas-font mt-2">
-              TRUSTED BY CHAMPIONS IN INDIA
-            </h2>
+            <p className="section-kicker mb-3">From the community</p>
+            <h2 className="section-title">Good gear gets noticed.</h2>
           </div>
-
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={scrollPrev}
-              className="rounded-full bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white hover:border-[#FF3B30]"
-              aria-label="Previous Testimonial"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={scrollNext}
-              className="rounded-full bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white hover:border-[#FF3B30]"
-              aria-label="Next Testimonial"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </Button>
+            <button onClick={scrollPrev} aria-label="Previous review" className="flex h-10 w-10 items-center justify-center rounded-full border border-border-strong text-ink transition-colors hover:bg-ink hover:text-white"><ChevronLeft className="h-4 w-4" /></button>
+            <button onClick={scrollNext} aria-label="Next review" className="flex h-10 w-10 items-center justify-center rounded-full border border-border-strong text-ink transition-colors hover:bg-ink hover:text-white"><ChevronRight className="h-4 w-4" /></button>
           </div>
         </div>
 
-        {/* Embla Carousel Viewport */}
-        <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
-          <div className="flex -ml-4">
-            {REVIEWS.map((rev) => (
-              <div
-                key={rev.id}
-                className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.33%] pl-4"
-              >
-                <div className="bg-zinc-950/90 border border-zinc-800 rounded-3xl p-6 h-full flex flex-col justify-between space-y-4 hover:border-[#FF3B30]/60 transition-colors shadow-xl glass-card">
-                  <div className="space-y-3">
+        <div ref={emblaRef} className="overflow-hidden">
+          <div className="-ml-4 flex">
+            {REVIEWS.map((review) => (
+              <div key={review.id} className="min-w-0 flex-[0_0_100%] pl-4 md:flex-[0_0_50%] lg:flex-[0_0_33.33%]">
+                <article className="flex h-full min-h-[245px] flex-col justify-between rounded-2xl border border-border bg-background p-5 sm:p-6">
+                  <div>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-amber-400">
-                        {Array.from({ length: rev.rating }).map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                        ))}
+                      <div className="flex gap-0.5 text-accent">
+                        {Array.from({ length: review.rating }).map((_, index) => <Star key={index} className="h-3.5 w-3.5 fill-current" />)}
                       </div>
-                      <Quote className="w-6 h-6 text-zinc-700" />
+                      <span className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Verified</span>
                     </div>
-
-                    <p className="text-xs text-zinc-300 italic leading-relaxed font-medium">
-                      &quot;{rev.comment}&quot;
-                    </p>
+                    <p className="mt-5 text-base leading-relaxed text-ink">“{review.comment}”</p>
                   </div>
-
-                  <div className="flex items-center gap-3 pt-4 border-t border-zinc-800">
-                    {rev.userImage && (
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-zinc-700">
-                        <Image
-                          src={rev.userImage}
-                          alt={rev.author}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
+                  <div className="mt-7 flex items-center gap-3 border-t border-border pt-4">
+                    {review.userImage && <div className="relative h-9 w-9 overflow-hidden rounded-full bg-surface-2"><Image src={review.userImage} alt={review.author} fill className="object-cover" /></div>}
                     <div>
-                      <h4 className="text-xs font-black text-white flex items-center gap-1">
-                        {rev.author}
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#FF3B30]" />
-                      </h4>
-                      <span className="text-[10px] text-zinc-400 block font-semibold">{rev.role}</span>
+                      <p className="flex items-center gap-1 text-xs font-semibold text-ink">{review.author} <CheckCircle2 className="h-3.5 w-3.5 text-accent" /></p>
+                      <p className="mt-0.5 text-[11px] text-muted">{review.role}</p>
                     </div>
                   </div>
-                </div>
+                </article>
               </div>
             ))}
           </div>
         </div>
-
       </div>
     </section>
   );
 }
-

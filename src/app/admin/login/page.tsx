@@ -14,6 +14,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   token_invalid: "Google sign-in verification failed. Please try again.",
   not_authorized:
     "This Google account is not authorized to access the admin panel. Sign in with the authorized account.",
+  server_error:
+    "Google sign-in succeeded, but the admin session could not be saved. Check the database connection and try again.",
 };
 
 function GoogleIcon() {

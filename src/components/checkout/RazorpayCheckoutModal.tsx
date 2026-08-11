@@ -114,7 +114,7 @@ export function RazorpayCheckoutModal({
             contact: customerPhone,
           },
           theme: {
-            color: "#FF3B30",
+          color: "#D94735",
           },
           handler: async function (response: {
             razorpay_payment_id: string;
@@ -187,25 +187,25 @@ export function RazorpayCheckoutModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md bg-white border-slate-200 text-slate-900 p-6 rounded-3xl shadow-2xl">
-        <DialogHeader className="border-b border-slate-200 pb-4">
+      <DialogContent className="max-w-md rounded-2xl border-border bg-surface p-6 text-foreground shadow-lg">
+        <DialogHeader className="border-b border-border pb-4">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-base font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-[#FF3B30]" /> Razorpay Gateway
+            <DialogTitle className="flex items-center gap-2 text-base font-medium tracking-tight text-ink">
+              <Lock className="h-4 w-4 text-accent" /> Secure payment
             </DialogTitle>
-            <span className="text-xs bg-red-50 text-[#FF6B61] font-bold px-2.5 py-0.5 rounded-full border border-red-200">
-              SECURE CHECKOUT
+            <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-semibold tracking-[0.08em] text-accent uppercase">
+              Secure checkout
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="mt-1 text-xs text-muted">
             {paymentMethod === "COD" ? (
               <>
-                Paying <span className="text-[#FF3B30] font-black">{formatINR(totalAmount)}</span> as COD booking fee ·{" "}
-                <span className="text-slate-600">{formatINR(codAmount)}</span> payable at delivery
+                Paying <span className="font-semibold text-ink">{formatINR(totalAmount)}</span> as COD booking fee ·{" "}
+                <span className="text-muted">{formatINR(codAmount)}</span> payable at delivery
               </>
             ) : (
               <>
-                Paying <span className="text-[#FF3B30] font-black">{formatINR(totalAmount)}</span> to Viper Gears India
+                Paying <span className="font-semibold text-ink">{formatINR(totalAmount)}</span> to Viper Gears India
               </>
             )}
           </p>
@@ -213,67 +213,67 @@ export function RazorpayCheckoutModal({
 
         <div className="space-y-4 pt-2">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase">Select Payment Mode:</label>
+            <label className="text-xs font-semibold tracking-[0.12em] text-muted uppercase">Select payment mode</label>
 
             <div
               onClick={() => setSelectedMethod("upi")}
               className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
                 selectedMethod === "upi"
-                  ? "bg-red-50 border-[#FF3B30] shadow-sm"
-                  : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                  ? "border-ink bg-accent/10"
+                  : "border-border bg-background hover:border-border-strong"
               }`}
             >
               <div className="flex items-center gap-3">
-                <Smartphone className="w-5 h-5 text-[#FF3B30]" />
+                <Smartphone className="h-5 w-5 text-accent" />
                 <div>
-                  <h4 className="text-xs font-bold text-slate-900">Instant UPI / QR Code</h4>
-                  <p className="text-[10px] text-slate-500">Google Pay, PhonePe, Paytm, BHIM</p>
+                  <h4 className="text-sm font-semibold text-ink">Instant UPI / QR code</h4>
+                  <p className="text-[10px] text-muted">Google Pay, PhonePe, Paytm, BHIM</p>
                 </div>
               </div>
-              {selectedMethod === "upi" && <CheckCircle2 className="w-4 h-4 text-[#FF3B30]" />}
+              {selectedMethod === "upi" && <CheckCircle2 className="h-4 w-4 text-accent" />}
             </div>
 
             <div
               onClick={() => setSelectedMethod("card")}
               className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
                 selectedMethod === "card"
-                  ? "bg-red-50 border-[#FF3B30] shadow-sm"
-                  : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                  ? "border-ink bg-accent/10"
+                  : "border-border bg-background hover:border-border-strong"
               }`}
             >
               <div className="flex items-center gap-3">
-                <CreditCard className="w-5 h-5 text-[#FF3B30]" />
+                <CreditCard className="h-5 w-5 text-accent" />
                 <div>
-                  <h4 className="text-xs font-bold text-slate-900">Credit / Debit Cards</h4>
-                  <p className="text-[10px] text-slate-500">Visa, Mastercard, RuPay, Maestro</p>
+                  <h4 className="text-sm font-semibold text-ink">Credit / debit cards</h4>
+                  <p className="text-[10px] text-muted">Visa, Mastercard, RuPay, Maestro</p>
                 </div>
               </div>
-              {selectedMethod === "card" && <CheckCircle2 className="w-4 h-4 text-[#FF3B30]" />}
+              {selectedMethod === "card" && <CheckCircle2 className="h-4 w-4 text-accent" />}
             </div>
 
             <div
               onClick={() => setSelectedMethod("netbanking")}
               className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
                 selectedMethod === "netbanking"
-                  ? "bg-red-50 border-[#FF3B30] shadow-sm"
-                  : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                  ? "border-ink bg-accent/10"
+                  : "border-border bg-background hover:border-border-strong"
               }`}
             >
               <div className="flex items-center gap-3">
-                <Building2 className="w-5 h-5 text-[#FF3B30]" />
+                <Building2 className="h-5 w-5 text-accent" />
                 <div>
-                  <h4 className="text-xs font-bold text-slate-900">Netbanking & Wallets</h4>
-                  <p className="text-[10px] text-slate-500">HDFC, SBI, ICICI, Axis, Mobikwik</p>
+                  <h4 className="text-sm font-semibold text-ink">Netbanking & wallets</h4>
+                  <p className="text-[10px] text-muted">HDFC, SBI, ICICI, Axis, Mobikwik</p>
                 </div>
               </div>
-              {selectedMethod === "netbanking" && <CheckCircle2 className="w-4 h-4 text-[#FF3B30]" />}
+              {selectedMethod === "netbanking" && <CheckCircle2 className="h-4 w-4 text-accent" />}
             </div>
           </div>
 
-          <div className="bg-slate-100 p-3.5 rounded-xl text-[11px] text-slate-600 space-y-1">
-            <p><span className="text-slate-900 font-semibold">Billed To:</span> {customerName || "Viper Athlete"} ({customerPhone || "+91-**********"})</p>
-            <p className="flex items-center gap-1 text-red-700 font-semibold">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#FF3B30]" /> 256-Bit SSL Encrypted Secure Razorpay Payment
+          <div className="space-y-1 rounded-xl bg-surface-2 p-3.5 text-[11px] text-muted">
+            <p><span className="font-semibold text-ink">Billed to:</span> {customerName || "Viper Athlete"} ({customerPhone || "+91-**********"})</p>
+            <p className="flex items-center gap-1 font-semibold text-ink">
+              <ShieldCheck className="h-3.5 w-3.5 text-accent" /> 256-bit SSL encrypted Razorpay payment
             </p>
           </div>
 
@@ -282,7 +282,7 @@ export function RazorpayCheckoutModal({
             size="lg"
             onClick={handlePayNow}
             disabled={isProcessing}
-            className="w-full text-xs font-black gap-2 h-12 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg shadow-red-500/20"
+            className="h-12 w-full gap-2 rounded-full bg-ink text-xs font-semibold text-white hover:bg-accent"
           >
             {isProcessing ? (
               <>

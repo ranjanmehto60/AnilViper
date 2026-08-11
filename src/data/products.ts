@@ -13,6 +13,7 @@ export const PRODUCTS: Product[] = [
     isWTApproved: true,
     isBestSeller: true,
     isNewArrival: true,
+    isStorefrontVisible: false,
     inStock: true,
     images: [
       "/images/kpnp-dobok-1.jpg",

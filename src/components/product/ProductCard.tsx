@@ -3,24 +3,15 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Check, Eye, Heart, Ruler, ShoppingBag, Star } from "lucide-react";
 import { Product } from "@/types/product";
 import { formatINR } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { QuickViewModal } from "./QuickViewModal";
 import { SizeGuideModal } from "./SizeGuideModal";
-import { Button } from "@/components/ui/button";
-import {
-  Heart,
-  Eye,
-  Ruler,
-  ShoppingBag,
-  ShieldCheck,
-  Check,
-  X,
-  Star
-} from "lucide-react";
 import { toast } from "sonner";
+import { useHydrated } from "@/hooks/useHydrated";
 
 interface ProductCardProps {
   product: Product;
@@ -28,203 +19,77 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const initialSize = product.availableSizes?.[0] || 170;
-  const [selectedSize, setSelectedSize] = useState<number>(initialSize);
+  const [selectedSize, setSelectedSize] = useState(initialSize);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
-
   const addItem = useCartStore((state) => state.addItem);
   const { toggleWishlist, isInWishlist } = useWishlistStore();
+  const hydrated = useHydrated();
+  const isWishlisted = hydrated && isInWishlist(product.id);
+  const discount = product.originalPrice > product.price ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
-  const isWishlisted = isInWishlist(product.id);
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleAddToCart = () => {
     addItem(product, selectedSize, 1);
-    toast.success(`Added ${product.name} (${selectedSize} cm) to cart!`);
+    toast.success(`Added ${product.name} (${selectedSize} cm) to cart.`);
   };
 
-  const handleToggleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleToggleWishlist = () => {
     toggleWishlist(product);
-    if (!isWishlisted) {
-      toast.success(`Added to Wishlist!`);
-    } else {
-      toast.info(`Removed from Wishlist.`);
-    }
+    toast[isWishlisted ? "info" : "success"](isWishlisted ? "Removed from wishlist." : "Added to wishlist.");
   };
 
   return (
     <>
-      <div className="group relative bg-[#0F172A] border border-slate-800 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:border-[#FF3B30]/50 transition-all duration-300 flex flex-col justify-between text-white">
-        
-        <div>
-          {/* Image & Badge Area */}
-          <div className="relative h-64 sm:h-72 w-full bg-[#0B101D] overflow-hidden">
-            
-            <Link href={`/product/${product.slug}`} className="block w-full h-full">
-              <Image
-                src={product.images[0] || "/images/kpnp-dobok-1.jpg"}
-                alt={product.name}
-                fill
-                className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
-              />
-            </Link>
-
-            {/* Badges Overlay */}
-            <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
-              {!product.inStock && (
-                <span className="bg-red-600 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider">
-                  OUT OF STOCK
-                </span>
-              )}
-              {product.isNewArrival && (
-                <span className="bg-[#FF3B30] text-black text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider">
-                  NEW
-                </span>
-              )}
-              {product.isBestSeller && (
-                <span className="bg-slate-950 border border-slate-700 text-amber-400 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-amber-400" /> BESTSELLER
-                </span>
-              )}
-              <span className="bg-slate-900/90 backdrop-blur-md text-slate-200 border border-slate-700 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-[#FF3B30]" /> WT APPROVED
-              </span>
-            </div>
-
-            {/* Quick Action Buttons (Wishlist & Quick View) */}
-            <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
-              <button
-                onClick={handleToggleWishlist}
-                className={`p-2.5 rounded-full backdrop-blur-md transition-all shadow-md ${
-                  isWishlisted
-                    ? "bg-red-500 text-white"
-                    : "bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-red-400 border border-slate-700"
-                }`}
-                title="Save to Wishlist"
-              >
-                <Heart className={`w-4 h-4 ${isWishlisted ? "fill-white" : ""}`} />
-              </button>
-
-              <button
-                onClick={() => setIsQuickViewOpen(true)}
-                className="p-2.5 rounded-full bg-slate-900/90 text-slate-300 hover:bg-slate-800 hover:text-[#FF3B30] border border-slate-700 backdrop-blur-md transition-all shadow-md"
-                title="Quick View"
-              >
-                <Eye className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Size Selector Strip at Bottom of Image */}
-            <div className="absolute bottom-3 left-3 right-3 bg-slate-900/95 backdrop-blur-md border border-slate-700 p-2 rounded-2xl shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-between gap-1 z-10">
-              <span className="text-[10px] font-bold text-slate-400 uppercase pl-1 hidden sm:inline">Size:</span>
-              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-                {(product.availableSizes || [160, 170, 180, 190]).map((sz) => (
-                  <button
-                    key={sz}
-                    type="button"
-                    onClick={() => setSelectedSize(sz)}
-                    className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${
-                      selectedSize === sz
-                        ? "bg-[#FF3B30] text-black"
-                        : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                    }`}
-                  >
-                    {sz} cm
-                  </button>
-                ))}
-              </div>
-            </div>
-
+      <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background transition duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md">
+        <div className="relative aspect-[0.82] overflow-hidden bg-surface-2">
+          <Link href={`/product/${product.slug}`} className="block h-full">
+            <Image src={product.images[0] || "/images/kpnp-dobok-1.jpg"} alt={product.name} fill className="object-cover object-top transition duration-700 group-hover:scale-[1.03]" />
+          </Link>
+          <div className="absolute left-3 top-3 flex gap-2">
+            {product.isNewArrival && <span className="rounded-full bg-accent px-3 py-1 text-[10px] font-semibold tracking-[0.08em] text-white uppercase">New</span>}
+            {!product.isNewArrival && product.isBestSeller && <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-semibold tracking-[0.08em] text-ink uppercase backdrop-blur-sm">Bestseller</span>}
           </div>
-
-          {/* Product Info Section */}
-          <div className="p-5 space-y-3">
-            
-            {/* Category & Rating */}
-            <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-              <span className="uppercase text-[10px] tracking-wider text-[#FF3B30] font-extrabold">
-                {product.category}
-              </span>
-              <div className="flex items-center gap-1 text-amber-400 font-mono font-bold">
-                <Star className="w-3.5 h-3.5 fill-amber-400" />
-                <span>{product.rating}</span>
-                <span className="text-slate-400">({product.reviewCount})</span>
-              </div>
-            </div>
-
-            {/* Title */}
-            <h3 className="text-sm font-black text-white line-clamp-2 leading-tight hover:text-[#FF3B30] transition-colors">
-              <Link href={`/product/${product.slug}`}>{product.name}</Link>
-            </h3>
-
-            {/* Price Row */}
-            <div className="flex items-baseline gap-2 pt-1">
-              <span className="text-lg font-black text-white font-mono">
-                {formatINR(product.price)}
-              </span>
-              {product.originalPrice && (
-                <span className="text-xs text-slate-400 line-through font-mono">
-                  {formatINR(product.originalPrice)}
-                </span>
-              )}
-              {product.originalPrice && (
-                <span className="text-[10px] font-extrabold text-[#FF3B30] bg-[#FF3B30]/10 border border-[#FF3B30]/30 px-1.5 py-0.5 rounded">
-                  SAVE {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                </span>
-              )}
-            </div>
-
-          </div>
-        </div>
-
-        {/* Action Button Footer */}
-        <div className="p-5 pt-0 space-y-2">
-          
-          <div className="flex items-center justify-between text-[11px]">
-            <button
-              onClick={() => setIsSizeGuideOpen(true)}
-              className="text-slate-400 hover:text-white underline flex items-center gap-1 font-semibold"
-            >
-              <Ruler className="w-3.5 h-3.5 text-[#FF3B30]" /> Size Chart Guide
+          <div className="absolute right-3 top-3 flex flex-col gap-2">
+            <button onClick={handleToggleWishlist} aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"} className={`flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition-colors ${isWishlisted ? "bg-accent text-white" : "bg-white/90 text-ink hover:bg-ink hover:text-white"}`}>
+              <Heart className={`h-4 w-4 ${isWishlisted ? "fill-current" : ""}`} />
             </button>
-            <span className={product.inStock ? "text-[#FF3B30] font-extrabold flex items-center gap-1" : "text-red-500 font-extrabold flex items-center gap-1"}>
-              {product.inStock ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-[#FF3B30]" /> IN STOCK
-                </>
-              ) : (
-                <>
-                  <X className="w-3.5 h-3.5" /> OUT OF STOCK
-                </>
-              )}
-            </span>
+            <button onClick={() => setIsQuickViewOpen(true)} aria-label="Quick view" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-ink backdrop-blur-sm transition-colors hover:bg-ink hover:text-white">
+              <Eye className="h-4 w-4" />
+            </button>
           </div>
-
-          <Button
-            onClick={handleAddToCart}
-            disabled={!product.inStock}
-            className="w-full text-xs font-black uppercase tracking-wider h-11 bg-[#FF3B30] hover:bg-[#E12D25] text-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 group/btn neon-red-glow disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <ShoppingBag className="w-4 h-4 group-hover/btn:scale-110 transition-transform stroke-[2.5]" />
-            <span>{product.inStock ? `ADD TO CART • ${selectedSize} CM` : "OUT OF STOCK"}</span>
-          </Button>
-
+          {product.isWTApproved && <span className="absolute bottom-3 left-3 rounded-full bg-ink/80 px-3 py-1 text-[10px] font-semibold tracking-[0.08em] text-white uppercase backdrop-blur-sm">WT-approved</span>}
         </div>
 
-      </div>
+        <div className="flex flex-1 flex-col p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-[10px] font-semibold tracking-[0.12em] text-accent uppercase">{product.category}</p>
+            <span className="flex items-center gap-1 text-[11px] font-medium text-muted"><Star className="h-3 w-3 fill-accent text-accent" /> {product.rating}</span>
+          </div>
+          <h3 className="mt-2 line-clamp-2 min-h-[2.7rem] text-base font-medium leading-snug tracking-tight text-ink">
+            <Link href={`/product/${product.slug}`} className="transition-colors hover:text-accent">{product.name}</Link>
+          </h3>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-base font-semibold text-ink">{formatINR(product.price)}</span>
+            {discount > 0 && <><span className="text-xs text-muted line-through">{formatINR(product.originalPrice)}</span><span className="text-[10px] font-semibold text-accent">-{discount}%</span></>}
+          </div>
 
-      {/* Modals */}
-      <QuickViewModal
-        product={product}
-        isOpen={isQuickViewOpen}
-        onClose={() => setIsQuickViewOpen(false)}
-      />
+          <div className="mt-5 flex items-center justify-between gap-3 border-t border-border pt-4">
+            <label className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-muted">
+              <span className="hidden sm:inline">Size</span>
+              <select value={selectedSize} onChange={(event) => setSelectedSize(Number(event.target.value))} aria-label={`Select size for ${product.name}`} className="max-w-[92px] rounded-md border border-border bg-surface px-2 py-1.5 text-[11px] font-semibold text-ink outline-none focus:border-accent">
+                {(product.availableSizes || [160, 170, 180, 190]).map((size) => <option key={size} value={size}>{size} cm</option>)}
+              </select>
+            </label>
+            <button onClick={() => setIsSizeGuideOpen(true)} className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium text-muted transition-colors hover:text-ink"><Ruler className="h-3.5 w-3.5 text-accent" /> Guide</button>
+          </div>
+          <button onClick={handleAddToCart} disabled={!product.inStock} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-ink text-xs font-semibold text-white transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40">
+            {product.inStock ? <><ShoppingBag className="h-4 w-4" /> Add to bag</> : <><Check className="h-4 w-4" /> Out of stock</>}
+          </button>
+        </div>
+      </article>
 
-      <SizeGuideModal
-        open={isSizeGuideOpen}
-        onOpenChange={setIsSizeGuideOpen}
-      />
+      <QuickViewModal product={product} isOpen={isQuickViewOpen} onClose={() => setIsQuickViewOpen(false)} />
+      <SizeGuideModal open={isSizeGuideOpen} onOpenChange={setIsSizeGuideOpen} />
     </>
   );
 }
