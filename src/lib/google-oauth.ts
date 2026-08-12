@@ -21,26 +21,38 @@ export function generateOAuthState(): { state: string; verifier: string; challen
 
 export function buildRedirectUri(request: Request): string {
   const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (configuredAppUrl) {
+  const rawHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  const host = rawHost ? rawHost.split(",")[0].trim() : null;
+
+  // A localhost NEXT_PUBLIC_APP_URL can be baked into a production build.
+  // Prefer the actual production host in that case so Google receives the
+  // same callback URI that the browser is using.
+  const isLocalHost = (value: string) =>
+    value.startsWith("localhost") || value.startsWith("127.0.0.1") || value.startsWith("[::1]");
+  const isLocalUrl = (value: string) => {
+    try {
+      return isLocalHost(new URL(value).host);
+    } catch {
+      return value.includes("localhost");
+    }
+  };
+
+  if (host && isLocalHost(host)) {
+    return `http://${host}/api/admin/google/callback`;
+  }
+
+  if (configuredAppUrl && !isLocalUrl(configuredAppUrl)) {
     return `${configuredAppUrl.replace(/\/$/, "")}/api/admin/google/callback`;
   }
 
-  const rawHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
-  const host = rawHost ? rawHost.split(",")[0].trim() : null;
-  const rawProto = request.headers.get("x-forwarded-proto");
-  let proto = rawProto ? rawProto.split(",")[0].trim() : "https";
-
-  if (host && host.includes("localhost")) {
-    proto = "http";
-  }
-
   if (host) {
+    const rawProto = request.headers.get("x-forwarded-proto");
+    const proto = rawProto ? rawProto.split(",")[0].trim() : "https";
     return `${proto}://${host}/api/admin/google/callback`;
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (appUrl && !appUrl.includes("localhost")) {
-    return `${appUrl.replace(/\/$/, "")}/api/admin/google/callback`;
+  if (configuredAppUrl) {
+    return `${configuredAppUrl.replace(/\/$/, "")}/api/admin/google/callback`;
   }
 
   return "http://localhost:3000/api/admin/google/callback";
