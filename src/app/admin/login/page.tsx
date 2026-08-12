@@ -1,8 +1,9 @@
 "use client";
 
-import React, { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ShieldCheck, Lock } from "lucide-react";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -42,8 +43,39 @@ function GoogleIcon() {
 }
 
 function LoginContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
+
+  const handlePasswordLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setPasswordError("");
+    setIsPasswordSubmitting(true);
+
+    try {
+      const response = await fetch("/api/admin/password/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setPasswordError(data.error || "Unable to sign in with password.");
+        return;
+      }
+
+      router.replace("/admin");
+      router.refresh();
+    } catch {
+      setPasswordError("Network error while signing in. Please try again.");
+    } finally {
+      setIsPasswordSubmitting(false);
+    }
+  };
 
   return (
     <div className="bg-[#F8FAFC] py-20 min-h-screen text-slate-900 flex items-center justify-center">
@@ -62,7 +94,7 @@ function LoginContent() {
               STORE ADMIN LOGIN
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Sign in with your authorized Google account to manage the store.
+              Sign in with Google or your secure admin password to manage the store.
             </p>
           </div>
 
@@ -77,6 +109,36 @@ function LoginContent() {
               <GoogleIcon /> Continue with Google
             </a>
           </Button>
+
+          <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <span className="h-px flex-1 bg-slate-100" />
+            or use password
+            <span className="h-px flex-1 bg-slate-100" />
+          </div>
+
+          <form onSubmit={handlePasswordLogin} className="space-y-3 text-left">
+            <label htmlFor="admin-password" className="text-xs font-bold text-slate-600">
+              Admin password
+            </label>
+            <Input
+              id="admin-password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Enter your admin password"
+              autoComplete="current-password"
+              required
+              disabled={isPasswordSubmitting}
+            />
+            {passwordError && (
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-xs font-bold text-red-700">
+                {passwordError}
+              </p>
+            )}
+            <Button type="submit" variant="default" size="lg" className="w-full h-11 text-xs font-black" disabled={isPasswordSubmitting}>
+              {isPasswordSubmitting ? "Signing in..." : "Sign in with password"}
+            </Button>
+          </form>
 
           <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-400">
             Access is restricted to the authorized store owner.
