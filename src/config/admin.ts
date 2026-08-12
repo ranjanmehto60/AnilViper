@@ -1,6 +1,7 @@
 export const ADMIN_CONFIG = {
   allowedEmails: [
     "theviper.gears@gmail.com",
+    "ranjanmehto60@gmail.com",
     "thevper.gears@gmail.com"
   ],
   allowedPhones: [
