@@ -7,21 +7,29 @@
 		"nodejs_compat",
 		"global_fetch_strictly_public"
 	],
+	"keep_vars": true,
+	"observability": {
+		"enabled": true
+	},
 	"assets": {
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"
 	},
+	"routes": [
+		{
+			"pattern": "vipergears.fit",
+			"custom_domain": true
+		}
+	],
 	"services": [
 		{
 			// Self-reference service binding, the service name must match the worker name
 			// see https://opennext.js.org/cloudflare/caching
 			"binding": "WORKER_SELF_REFERENCE",
-			"service": "anilviper"
+			"service": "anilviper",
+			"environment": "production"
 		}
-	],
-	"images": {
-		// Enable image optimization
-		// see https://opennext.js.org/cloudflare/howtos/image
-		"binding": "IMAGES"
-	}
+	]
+	// Images are served from static assets; Next image transformation is disabled
+	// to preserve Cloudflare free-tier transformation quota.
 }

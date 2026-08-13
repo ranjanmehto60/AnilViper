@@ -24,6 +24,14 @@ function parseItems(raw: string): StoredItem[] {
   }
 }
 
+function getPublicAppUrl(): string {
+  const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  if (configuredUrl && !configuredUrl.includes("localhost") && !configuredUrl.includes("127.0.0.1")) {
+    return configuredUrl;
+  }
+  return "https://vipergears.fit";
+}
+
 export function buildWhatsAppOrderMessage(order: OrderRecord): string {
   const items = parseItems(order.items);
   const itemLines = items.map((item) => {
@@ -48,7 +56,7 @@ export function buildWhatsAppOrderMessage(order: OrderRecord): string {
     "",
     "Estimated delivery: 2-4 business days.",
     "",
-    `Track your order anytime: ${process.env.NEXT_PUBLIC_APP_URL || "https://vipergears.in"}/account?tab=orders`,
+    `Track your order anytime: ${getPublicAppUrl()}/account?tab=orders`,
     "",
     "Viper Gears India — Chattarpur, New Delhi",
   ];

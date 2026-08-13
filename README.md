@@ -30,7 +30,7 @@ Viper Gears is a fast, mobile-first, modern D2C e-commerce platform built for Ta
 
 1. **Home Page (`/`)**:
    - Hero section with action Dobok imagery & Framer Motion text animations.
-   - Highlights bar: WT Approved Fabric, Free Pan-India Shipping above ₹999, 7-Day Returns, 500+ Dojangs.
+   - Highlights bar: WT Approved Fabric, Free Pan-India Shipping above ₹5,000, 7-Day Returns, 500+ Dojangs.
    - Featured products grid with `@storefront-ui/react` elements & quick add to cart.
    - Why Viper Gears pillars (Ultra-light 220 GSM, Reinforced 10-stitch cuffs, 3D Mesh air cooling).
    - Testimonial carousel, Gallery preview, Newsletter capture, and floating WhatsApp CTA button.
@@ -119,7 +119,7 @@ Deployed and ready for Vercel deployment!
 2. **Finalize (exactly once)**: both the client-side `verify-razorpay-payment` route and the Razorpay webhook (`/api/webhooks/razorpay`) call `finalizePaidOrder()`, which atomically:
    - marks the order `PAID` (single `UPDATE ... WHERE payment_status = 'PENDING'` — only one caller wins),
    - decrements inventory for each line item,
-   - pushes the order to Shiprocket (`/orders/create/adhoc`) and assigns an AWB, guarded by the `shiprocket_pushed` flag so duplicate shipments are impossible.
+   - creates the shipment in Shiprocket (`/orders/create/adhoc`), guarded by the `shiprocket_pushed` flag so duplicate shipments are impossible. The admin then selects the delivery partner in Shiprocket and assigns the AWB there.
 3. **Retries**: if the Shiprocket push fails, the webhook returns `500` so Razorpay retries it; the claim is released so the retry re-pushes. Admins can also trigger a manual re-push from the admin dashboard ("Sync Shiprocket").
 4. **Tracking**: customers see a "Track" button on their orders in `/account`; admins see one on each order. Both call `/api/shipping/track/{awb}`, which fetches live Shiprocket scan data.
 

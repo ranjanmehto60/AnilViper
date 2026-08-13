@@ -18,6 +18,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://vipergears.fit"),
   title: "Viper Gears | Official Taekwondo Doboks & Sparring Gear India",
   description:
     "Strike With Precision. Shop WT Approved Taekwondo Uniforms (Dobok), Black Belt Competition Uniforms, Hogu, Headguards & Sparring Gear. Made in Chattarpur, Delhi.",
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Viper Gears | Premium Taekwondo Uniforms & Armor India",
     description: "Ultra-Light 220 GSM Jacquard Ripstop Doboks. Made for Champions.",
-    url: "https://vipergears.in",
+    url: "https://vipergears.fit",
     siteName: "Viper Gears",
     locale: "en_IN",
     type: "website",

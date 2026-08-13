@@ -11,6 +11,7 @@ export const runtime = "nodejs";
 
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 const MAX_FAILED_ATTEMPTS = 10;
+const MAX_TRACKED_CLIENTS = 1_000;
 const failedAttempts = new Map<string, { count: number; resetAt: number }>();
 
 function getClientKey(request: Request): string {
@@ -25,6 +26,14 @@ function getClientKey(request: Request): string {
 function getAttemptRecord(key: string, now: number) {
   const current = failedAttempts.get(key);
   if (!current || current.resetAt <= now) {
+    if (failedAttempts.size >= MAX_TRACKED_CLIENTS) {
+      for (const [clientKey, record] of failedAttempts) {
+        if (record.resetAt <= now) failedAttempts.delete(clientKey);
+      }
+      if (failedAttempts.size >= MAX_TRACKED_CLIENTS) {
+        failedAttempts.delete(failedAttempts.keys().next().value as string);
+      }
+    }
     const next = { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
     failedAttempts.set(key, next);
     return next;

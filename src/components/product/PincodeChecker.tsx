@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MapPin, Truck, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
-export function PincodeChecker() {
+export function PincodeChecker({ weightKg = 1 }: { weightKg?: number }) {
   const [pincode, setPincode] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{
@@ -32,7 +32,7 @@ export function PincodeChecker() {
     setStatus(null);
 
     try {
-      const res = await fetch(`/api/shipping/check-serviceability?pincode=${cleanPin}`);
+      const res = await fetch(`/api/shipping/check-serviceability?pincode=${cleanPin}&weight=${weightKg}`);
       const text = await res.text();
       let data: { available?: boolean; courierName?: string; message?: string; estimatedDays?: string; etd?: string; error?: string } = {};
       try {

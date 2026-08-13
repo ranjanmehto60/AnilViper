@@ -5,6 +5,8 @@ import { sql } from "@vercel/postgres";
 import { createHash, randomBytes, randomInt } from "node:crypto";
 
 let schemaReady: Promise<void> | null = null;
+const STORE_STATUS_CACHE_TTL_MS = 30 * 1000;
+let storeStatusCache: { ordersPaused: boolean; message: string; expiresAt: number } | null = null;
 
 function ensureSchema(): Promise<void> {
   if (!schemaReady) {
@@ -202,14 +204,37 @@ export async function setSetting(key: string, value: string): Promise<void> {
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
     `;
   });
+  storeStatusCache = null;
+}
+
+export async function getStoreStatus(): Promise<{ ordersPaused: boolean; message: string }> {
+  if (storeStatusCache && storeStatusCache.expiresAt > Date.now()) {
+    return {
+      ordersPaused: storeStatusCache.ordersPaused,
+      message: storeStatusCache.message,
+    };
+  }
+
+  const rows = await withSchemaFallback(async () =>
+    sql<{ key: string; value: string }>`
+      SELECT key, value FROM settings WHERE key IN ('orders_paused', 'pause_message')
+    `
+  );
+  const values = new Map(rows.rows.map((row) => [row.key, row.value]));
+  const status = {
+    ordersPaused: values.get("orders_paused") === "1",
+    message: values.get("pause_message") || DEFAULT_PAUSE_MESSAGE,
+  };
+  storeStatusCache = { ...status, expiresAt: Date.now() + STORE_STATUS_CACHE_TTL_MS };
+  return status;
 }
 
 export async function isOrdersPaused(): Promise<boolean> {
-  return (await getSetting("orders_paused")) === "1";
+  return (await getStoreStatus()).ordersPaused;
 }
 
 export async function getPauseMessage(): Promise<string> {
-  return (await getSetting("pause_message", DEFAULT_PAUSE_MESSAGE)) ?? DEFAULT_PAUSE_MESSAGE;
+  return (await getStoreStatus()).message;
 }
 
 // ---------------------------------------------------------------------------
@@ -426,6 +451,24 @@ export async function claimShiprocketPush(id: string): Promise<boolean> {
 export async function resetShiprocketPushClaim(id: string): Promise<void> {
   await withSchemaFallback(async () => {
     await sql`UPDATE orders SET shiprocket_pushed = FALSE WHERE id = ${id}`;
+  });
+}
+
+export async function resetMockShiprocketShipment(id: string): Promise<boolean> {
+  return withSchemaFallback(async () => {
+    const result = await sql`
+      UPDATE orders
+      SET
+        shiprocket_pushed = FALSE,
+        shiprocket_order_id = NULL,
+        shipment_id = NULL,
+        awb = NULL,
+        courier_name = NULL
+      WHERE id = ${id}
+        AND (LEFT(COALESCE(awb, ''), 3) = 'SR_' OR LEFT(COALESCE(shiprocket_order_id, ''), 11) = 'MOCK_ORDER_')
+      RETURNING id
+    `;
+    return result.rows.length > 0;
   });
 }
 

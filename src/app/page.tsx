@@ -21,7 +21,7 @@ export default function HomePage() {
   const [activeFilter, setActiveFilter] = useState<FilterCategory>("ALL");
 
   useEffect(() => {
-    fetch("/api/products", { cache: "no-store" })
+    fetch("/api/products")
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (data && Array.isArray(data.products)) setProducts(data.products);
@@ -67,7 +67,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="product-grid-stagger grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {isLoading ? (
               <div className="col-span-full flex min-h-64 flex-col items-center justify-center gap-3 text-sm text-muted">
                 <Loader2 className="h-5 w-5 animate-spin text-accent" /> Loading the edit...

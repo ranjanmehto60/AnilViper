@@ -2,7 +2,6 @@
 
 import React from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { ArrowUpRight, Feather, Flag, Move3d } from "lucide-react";
 
 const pillars = [
@@ -11,21 +10,21 @@ const pillars = [
     title: "Light on the body",
     description: "Breathable 210 GSM fabric keeps the uniform responsive through long training sessions and tournament days.",
     icon: Feather,
-    image: "/images/kpnp-dobok-1.jpg",
+    image: "/images/gallery/gallery-04.webp",
   },
   {
     number: "02",
     title: "Made to move",
     description: "A considered cut and generous gusset leave room for high kicks, deep stances, and quick footwork.",
     icon: Move3d,
-    image: "/images/kpnp-dobok-2.jpg",
+    image: "/images/gallery/gallery-05.webp",
   },
   {
     number: "03",
     title: "Proudly India",
     description: "Thoughtful flag and WT details let the uniform carry your identity without getting in the way.",
     icon: Flag,
-    image: "/images/kpnp-dobok-chest.jpg",
+    image: "/images/gallery/gallery-08.webp",
   },
 ];
 
@@ -41,16 +40,13 @@ export function WhyViperSection() {
           {pillars.map((pillar, index) => {
             const Icon = pillar.icon;
             return (
-              <motion.article
+              <article
                 key={pillar.number}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.45, delay: index * 0.08 }}
-                className="surface-card surface-card-hover overflow-hidden rounded-2xl"
+                className="animate-float-in surface-card surface-card-hover overflow-hidden rounded-2xl"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="relative aspect-[1.25] overflow-hidden bg-surface-2">
-                  <Image src={pillar.image} alt={pillar.title} fill className="object-cover object-top transition duration-700 hover:scale-[1.03]" />
+                <div className="relative aspect-[1.08] overflow-hidden bg-surface-2">
+                  <Image src={pillar.image} alt={pillar.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="animate-image-pan object-cover object-center transition duration-700 hover:scale-[1.03]" />
                   <span className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xs font-semibold text-ink shadow-sm">{pillar.number}</span>
                 </div>
                 <div className="p-5 sm:p-6">
@@ -61,7 +57,7 @@ export function WhyViperSection() {
                   <p className="mt-3 text-sm leading-relaxed text-muted">{pillar.description}</p>
                   <span className="mt-6 inline-flex items-center gap-1 text-xs font-semibold text-ink">Explore the details <ArrowUpRight className="h-3.5 w-3.5 text-accent" /></span>
                 </div>
-              </motion.article>
+              </article>
             );
           })}
         </div>

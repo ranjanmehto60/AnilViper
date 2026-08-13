@@ -18,6 +18,7 @@ export interface FinalizePaidOrderInput {
 
 export interface FinalizePaidOrderResult {
   claimed: boolean;
+  shiprocketPushClaimed: boolean;
   awb?: string | null;
   courierName?: string | null;
   shiprocketOrderId?: number | string | null;
@@ -37,9 +38,11 @@ interface AddressData {
 interface StoredItem {
   name?: string;
   productId?: string;
+  category?: string;
   size?: number;
   quantity?: number;
   price?: number;
+  unitPrice?: number;
 }
 
 function parseAddress(raw: string, fallbackName: string, fallbackPhone: string): AddressData {
@@ -50,7 +53,7 @@ function parseAddress(raw: string, fallbackName: string, fallbackPhone: string):
   }
 }
 
-function parseItems(raw: string, fallbackTotal: number): Array<{ name: string; sku: string; units: number; selling_price: number }> {
+function parseItems(raw: string, fallbackTotal: number): Array<{ name: string; sku: string; units: number; selling_price: number; category?: string }> {
   try {
     const parsed = JSON.parse(raw) as StoredItem[];
     if (Array.isArray(parsed)) {
@@ -58,7 +61,8 @@ function parseItems(raw: string, fallbackTotal: number): Array<{ name: string; s
         name: `${it.name || "Viper Gear Item"} (${it.size || ""} cm)`,
         sku: `${it.productId || "SKU"}_${it.size || "STD"}`,
         units: Number(it.quantity || 1),
-        selling_price: Number(it.price || 0),
+        selling_price: Number(it.unitPrice ?? it.price ?? 0),
+        category: it.category,
       }));
     }
   } catch {
@@ -82,7 +86,7 @@ export async function finalizePaidOrder(
 ): Promise<FinalizePaidOrderResult> {
   const order = await getOrderById(orderId);
   if (!order) {
-    return { claimed: false, shiprocketError: "Order not found" };
+    return { claimed: false, shiprocketPushClaimed: false, shiprocketError: "Order not found" };
   }
 
   const claimed = await markOrderPaid(orderId);
@@ -159,5 +163,5 @@ export async function finalizePaidOrder(
     });
   }
 
-  return { claimed, awb, courierName, shiprocketOrderId, shipmentId, shiprocketError };
+  return { claimed, shiprocketPushClaimed: pushClaimed, awb, courierName, shiprocketOrderId, shipmentId, shiprocketError };
 }

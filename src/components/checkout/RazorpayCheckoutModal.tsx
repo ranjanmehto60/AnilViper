@@ -114,7 +114,7 @@ export function RazorpayCheckoutModal({
             contact: customerPhone,
           },
           theme: {
-          color: "#D94735",
+          color: "#2563EB",
           },
           handler: async function (response: {
             razorpay_payment_id: string;

@@ -1,15 +1,9 @@
 import { listProducts } from "@/lib/product-db";
+import { calculateShippingFee } from "@/config/commerce";
 
-export const FREE_SHIPPING_THRESHOLD = 0;
-export const SHIPPING_FEE = 0;
-
-// Booking amount collected online for Cash on Delivery orders.
-// Non-refundable in case of cancellation after the order is placed.
-export const DEFAULT_COD_BOOKING_AMOUNT = 400;
-export const BELT_COD_BOOKING_AMOUNT = 200;
-
-export function getCodBookingAmount(hasBeltsAndAccessories: boolean): number {
-  return hasBeltsAndAccessories ? BELT_COD_BOOKING_AMOUNT : DEFAULT_COD_BOOKING_AMOUNT;
+// COD customers pay the applicable delivery fee online as the booking amount.
+export function getCodBookingAmount(shipping: number): number {
+  return Math.max(0, Math.round(shipping));
 }
 
 const PROMO_CODES: Record<string, number> = {
@@ -20,6 +14,7 @@ const PROMO_CODES: Record<string, number> = {
 export interface PricingLine {
   productId: string;
   name: string;
+  category: string;
   size: number;
   quantity: number;
   unitPrice: number;
@@ -66,6 +61,7 @@ export async function computePricing(
     items.push({
       productId: product.id,
       name: product.name,
+      category: product.category,
       size: line.size,
       quantity,
       unitPrice: product.price,
@@ -75,33 +71,10 @@ export async function computePricing(
 
   const percent = getDiscountPercent(discountCode);
   const discount = Math.round((subtotal * percent) / 100);
-  const isTestProductInCart = items.some((it) => it.productId === "test-gateway-sample-1-rupee");
-  
-  let dressSubtotal = 0;
-  let hasDresses = false;
-  let hasBeltsAndAccessories = false;
-
-  for (const it of items) {
-    const prod = products.find((p) => p.id === it.productId);
-    if (prod?.category === "Belts & Accessories") {
-      hasBeltsAndAccessories = true;
-    } else if (it.productId !== "test-gateway-sample-1-rupee") {
-      hasDresses = true;
-      dressSubtotal += it.lineTotal;
-    }
-  }
-
-  let shipping = 0;
-  if (isTestProductInCart) {
-    shipping = 0;
-  } else {
-    let dressShipping = 0;
-    if (hasDresses) {
-      dressShipping = dressSubtotal < 3000 ? 400 : 0;
-    }
-    const beltShipping = hasBeltsAndAccessories ? 200 : 0;
-    shipping = dressShipping + beltShipping;
-  }
+  const shipping = calculateShippingFee(
+    subtotal,
+    items.map((item) => ({ productId: item.productId, category: item.category, quantity: item.quantity }))
+  );
 
   const total = Math.max(0, subtotal - discount + shipping);
 

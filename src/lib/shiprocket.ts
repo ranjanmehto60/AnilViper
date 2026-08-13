@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getSetting, setSetting } from "@/lib/store-db";
+import { DRESS_PACKAGE, getShippingPackageDetails } from "@/config/commerce";
 
 const SHIPROCKET_API_BASE = "https://apiv2.shiprocket.in/v1/external";
 
@@ -128,7 +129,7 @@ export async function checkShiprocketServiceability(
   const token = await getShiprocketToken();
   const pickupPincode = req.pickupPincode || "110074"; // Default Delhi warehouse pincode
   const deliveryPincode = req.deliveryPincode;
-  const weight = req.weightKg || 0.8;
+  const weight = req.weightKg || DRESS_PACKAGE.weightKg;
   const cod = req.cod ? 1 : 0;
 
   if (!token) {
@@ -194,6 +195,7 @@ export interface ShiprocketOrderPayload {
     sku: string;
     units: number;
     selling_price: number;
+    category?: string;
   }>;
   subtotal: number;
   paymentMethod?: "PREPAID" | "COD";
@@ -202,8 +204,8 @@ export interface ShiprocketOrderPayload {
 
 export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Promise<{
   success: boolean;
-  shiprocketOrderId?: number;
-  shipmentId?: number;
+  shiprocketOrderId?: number | string;
+  shipmentId?: number | string;
   awb?: string;
   courierName?: string;
   error?: string;
@@ -212,29 +214,28 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
   const pickupLocation = process.env.SHIPROCKET_PICKUP_LOCATION || "PRIMARY";
 
   if (!token) {
-    // Return simulated response for dev mode
-    const mockAwb = `SR_${Math.floor(1000000000 + Math.random() * 9000000000)}`;
+    if (process.env.NODE_ENV === "production") {
+      return {
+        success: false,
+        error: isShiprocketConfigured()
+          ? "Shiprocket authentication failed. Verify the API user email and password."
+          : "Shiprocket is not configured. Set SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD.",
+      };
+    }
+
+    // Simulate order creation only during local development. Courier selection
+    // and AWB generation are intentionally left for the admin in Shiprocket.
     return {
       success: true,
-      shiprocketOrderId: Math.floor(1000000 + Math.random() * 9000000),
-      shipmentId: Math.floor(1000000 + Math.random() * 9000000),
-      awb: mockAwb,
-      courierName: "Delhivery Air (Shiprocket)",
+      shiprocketOrderId: `MOCK_ORDER_${Math.floor(1000000 + Math.random() * 9000000)}`,
+      shipmentId: `MOCK_SHIPMENT_${Math.floor(1000000 + Math.random() * 9000000)}`,
     };
   }
 
   try {
-    // Calculate total item units in order
-    const totalUnits = payload.items.reduce((sum, item) => sum + (item.units || 1), 0);
-
-    // Exact packaging dimensions specified: 41cm x 31cm x 3.7cm
-    // 1 item box/flyer: 41cm x 31cm x 3.7cm -> Volumetric weight = (41*31*3.7)/5000 = 0.941kg
-    const packageLength = 41;
-    const packageBreadth = 31;
-    const packageHeight = Math.min(30, Math.max(3.7, Math.round(totalUnits * 3.7 * 10) / 10));
-
-    // Actual dead weight: 0.5kg (500 grams) per unit for belts, accessories and light gear
-    const packageWeight = Math.min(10, Math.max(0.5, Math.round(totalUnits * 0.5 * 10) / 10));
+    const packageDetails = getShippingPackageDetails(
+      payload.items.map((item) => ({ category: item.category, quantity: item.units }))
+    );
 
     const isCod = payload.paymentMethod === "COD";
     const body = {
@@ -260,10 +261,10 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
       payment_method: isCod ? "COD" : "Prepaid",
       ...(isCod ? { cod_amount: payload.codAmount || 0 } : {}),
       sub_total: payload.subtotal,
-      length: packageLength,
-      breadth: packageBreadth,
-      height: packageHeight,
-      weight: packageWeight,
+      length: packageDetails.lengthCm,
+      breadth: packageDetails.breadthCm,
+      height: packageDetails.heightCm,
+      weight: packageDetails.weightKg,
     };
 
     const response = await fetch(`${SHIPROCKET_API_BASE}/orders/create/adhoc`, {
@@ -281,24 +282,14 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
       const shiprocketOrderId = data.order_id;
       const shipmentId = data.shipment_id;
 
-      // Automatically assign AWB if shipment_id present
-      let awb = "";
-      let courierName = "";
-
-      if (shipmentId) {
-        const awbResult = await assignShiprocketAWB(shipmentId);
-        if (awbResult.awb) {
-          awb = awbResult.awb;
-          courierName = awbResult.courierName || "Shiprocket Express";
-        }
-      }
-
+      // Do not assign an AWB here. Assigning without a courier ID makes
+      // Shiprocket choose its default partner (currently DTDC). The admin
+      // should select the delivery partner in Shiprocket after this shipment
+      // is created.
       return {
         success: true,
         shiprocketOrderId,
         shipmentId,
-        awb,
-        courierName,
       };
     } else {
       return {
@@ -380,7 +371,7 @@ export async function getShiprocketTracking(awb: string): Promise<NormalizedTrac
   }
 
   try {
-    const response = await fetch(`${SHIPROCKET_API_BASE}/courier/track/awb/${awb}`, {
+    const response = await fetch(`${SHIPROCKET_API_BASE}/courier/track/awb/${encodeURIComponent(awb)}`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,

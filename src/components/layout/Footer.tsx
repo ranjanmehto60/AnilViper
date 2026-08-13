@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,6 +39,7 @@ export function Footer() {
             title="Explore"
             links={[
               ["Our story", "/about"],
+              ["Gallery", "/gallery"],
               ["Bulk academy orders", "/contact"],
               ["Account & orders", "/account"],
               ["Shopping cart", "/cart"],

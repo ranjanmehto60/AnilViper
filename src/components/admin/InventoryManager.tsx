@@ -13,9 +13,9 @@ import { InventoryItem } from "@/types/inventory";
 type InventoryDraft = { quantity: number; reorderLevel: number };
 
 function statusFor(item: InventoryItem) {
-  if (item.quantity === 0) return { label: "Out of stock", className: "text-red-400 bg-red-950/40 border-red-900" };
-  if (item.quantity <= item.reorderLevel) return { label: "Low stock", className: "text-amber-300 bg-amber-950/40 border-amber-900" };
-  return { label: "In stock", className: "text-emerald-300 bg-emerald-950/40 border-emerald-900" };
+  if (item.quantity === 0) return { label: "Out of stock", className: "text-slate-300 bg-slate-950/60 border-slate-700" };
+  if (item.quantity <= item.reorderLevel) return { label: "Low stock", className: "text-blue-200 bg-blue-950/40 border-blue-800" };
+  return { label: "In stock", className: "text-white bg-slate-800 border-slate-700" };
 }
 
 export function InventoryManager() {

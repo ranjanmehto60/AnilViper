@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { CartItem, Product } from "@/types/product";
+import { calculateShippingFee } from "@/config/commerce";
 
 interface CartState {
   items: CartItem[];
@@ -109,29 +110,15 @@ export const useCartStore = create<CartState>()(
       getShippingFee: () => {
         const items = get().items;
         if (items.length === 0) return 0;
-        
-        const isTestProduct = items.some((it) => it.product.id === "test-gateway-sample-1-rupee");
-        if (isTestProduct) return 0;
 
-        let dressSubtotal = 0;
-        let hasDresses = false;
-        let hasBeltsAndAccessories = false;
-
-        for (const it of items) {
-          if (it.product.category === "Belts & Accessories") {
-            hasBeltsAndAccessories = true;
-          } else {
-            hasDresses = true;
-            dressSubtotal += it.product.price * it.quantity;
-          }
-        }
-
-        let dressShipping = 0;
-        if (hasDresses) {
-          dressShipping = dressSubtotal < 3000 ? 400 : 0;
-        }
-        const beltShipping = hasBeltsAndAccessories ? 200 : 0;
-        return dressShipping + beltShipping;
+        return calculateShippingFee(
+          get().getSubtotal(),
+          items.map((item) => ({
+            productId: item.product.id,
+            category: item.product.category,
+            quantity: item.quantity,
+          }))
+        );
       },
 
       getTotal: () => {

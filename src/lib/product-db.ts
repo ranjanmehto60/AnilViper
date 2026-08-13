@@ -7,6 +7,9 @@ import { Product } from "@/types/product";
 import { filterStorefrontProducts, isStorefrontVisible } from "@/lib/product-visibility";
 
 let schemaReady: Promise<void> | null = null;
+const PRODUCT_CACHE_TTL_MS = 30 * 1000;
+let productCache: { products: Product[]; expiresAt: number } | null = null;
+let productLoad: Promise<Product[]> | null = null;
 
 function ensureSchema(): Promise<void> {
   if (!schemaReady) {
@@ -76,12 +79,35 @@ const fetchProductsFromDb = async (): Promise<Product[]> => {
   });
 };
 
+function invalidateProductCache(): void {
+  productCache = null;
+  productLoad = null;
+}
+
 export async function listProducts(): Promise<Product[]> {
+  if (productCache && productCache.expiresAt > Date.now()) {
+    return productCache.products;
+  }
+
+  if (productLoad) {
+    try {
+      return await productLoad;
+    } catch (error) {
+      console.error("Postgres connection or query error in listProducts:", error);
+      return [];
+    }
+  }
+
+  productLoad = fetchProductsFromDb();
   try {
-    return await fetchProductsFromDb();
+    const products = await productLoad;
+    productCache = { products, expiresAt: Date.now() + PRODUCT_CACHE_TTL_MS };
+    return products;
   } catch (error) {
     console.error("Postgres connection or query error in listProducts:", error);
     return [];
+  } finally {
+    productLoad = null;
   }
 }
 
@@ -124,6 +150,7 @@ export async function createProduct(product: Product): Promise<Product> {
     `;
     return product;
   });
+  invalidateProductCache();
   return result;
 }
 
@@ -138,6 +165,8 @@ export async function updateProduct(id: string, fields: Partial<Product>): Promi
     `;
   });
 
+  invalidateProductCache();
+
   return next;
 }
 
@@ -146,5 +175,6 @@ export async function deleteProduct(id: string): Promise<boolean> {
     const res = await sql`DELETE FROM products WHERE id = ${id} RETURNING id`;
     return res.rows.length > 0;
   });
+  if (result) invalidateProductCache();
   return result;
 }

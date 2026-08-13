@@ -31,8 +31,8 @@ export function FlashDropBanner({ product }: { product?: Product }) {
           </div>
         </div>
 
-        <div className="relative mx-auto aspect-[1.12] w-full max-w-xl overflow-hidden rounded-2xl bg-[#d8d6d4]">
-          <Image src="/images/kpnp-dobok-chest.jpg" alt="India Edition dobok chest detail" fill className="object-cover object-center transition duration-700 hover:scale-[1.03]" />
+        <div className="relative mx-auto aspect-[1.05] w-full max-w-xl overflow-hidden rounded-2xl bg-surface-2 ring-1 ring-white/10">
+          <Image src="/images/gallery/gallery-03.webp" alt="Athlete wearing a competition taekwondo uniform" fill sizes="(max-width: 1024px) 100vw, 45vw" className="animate-image-pan object-cover object-center transition duration-700 hover:scale-[1.03]" />
           <div className="absolute bottom-4 left-4 rounded-full bg-ink/80 px-4 py-2 text-[10px] font-semibold tracking-[0.12em] text-white uppercase backdrop-blur-sm">
             210 GSM / WT-approved options
           </div>

@@ -12,7 +12,7 @@ export function PauseBanner() {
   const [status, setStatus] = useState<StoreStatus | null>(null);
 
   useEffect(() => {
-    fetch("/api/store-status", { cache: "no-store" })
+    fetch("/api/store-status")
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (data) setStatus(data);

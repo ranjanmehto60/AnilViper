@@ -28,6 +28,7 @@ import { useHydrated } from "@/hooks/useHydrated";
 
 const navLinks = [
   { name: "Shop doboks", href: "/shop" },
+  { name: "Gallery", href: "/gallery" },
   { name: "Our story", href: "/about" },
   { name: "Bulk orders", href: "/contact" },
 ];
@@ -38,6 +39,8 @@ export function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoaded, setProductsLoaded] = useState(false);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const hydrated = useHydrated();
 
@@ -45,17 +48,31 @@ export function Header() {
   const wishlistCount = useWishlistStore((state) => state.items.length);
 
   useEffect(() => {
-    fetch("/api/products", { cache: "no-store" })
+    const handleScroll = () => setScrolled(window.scrollY > 16);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!isSearchOpen || productsLoaded) return;
+
+    const controller = new AbortController();
+    setIsSearchLoading(true);
+    fetch("/api/products", { signal: controller.signal })
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (data && Array.isArray(data.products)) setProducts(data.products);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setProductsLoaded(true);
+          setIsSearchLoading(false);
+        }
+      });
 
-    const handleScroll = () => setScrolled(window.scrollY > 16);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    return () => controller.abort();
+  }, [isSearchOpen, productsLoaded]);
 
   const filteredProducts = searchQuery.trim()
     ? products.filter(
@@ -201,7 +218,9 @@ export function Header() {
 
               {searchQuery.trim() && (
                 <div className="surface-card absolute left-0 right-0 top-14 z-50 max-h-80 overflow-y-auto rounded-lg p-2 shadow-lg">
-                  {filteredProducts.length === 0 ? (
+                  {isSearchLoading ? (
+                    <div className="p-4 text-center text-sm text-muted">Loading products...</div>
+                  ) : filteredProducts.length === 0 ? (
                     <div className="p-4 text-center text-sm text-muted">No products found.</div>
                   ) : (
                     filteredProducts.map((product) => (

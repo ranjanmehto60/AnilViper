@@ -211,13 +211,13 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
           <button
             type="button"
             onClick={() => setShowUrlField(!showUrlField)}
-            className="text-[11px] text-[#FF3B30] hover:underline font-bold"
+            className="text-[11px] text-[#2563EB] hover:underline font-bold"
           >
             {showUrlField ? "Hide URL Input" : "+ Add by URL link"}
           </button>
         </div>
 
-        <label className="border-2 border-dashed border-slate-300 hover:border-[#FF3B30] bg-slate-50 hover:bg-red-50/40 rounded-2xl p-4 text-center cursor-pointer transition-all space-y-1 block">
+        <label className="border-2 border-dashed border-slate-300 hover:border-[#2563EB] bg-slate-50 hover:bg-blue-50/40 rounded-2xl p-4 text-center cursor-pointer transition-all space-y-1 block">
           <input
             type="file"
             accept="image/*"
@@ -225,7 +225,7 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
             onChange={handleFileUpload}
             className="hidden"
           />
-          <div className="w-10 h-10 rounded-full bg-red-100 text-[#FF3B30] flex items-center justify-center mx-auto">
+          <div className="w-10 h-10 rounded-full bg-blue-100 text-[#2563EB] flex items-center justify-center mx-auto">
             <Upload className="w-5 h-5" />
           </div>
           <p className="text-xs font-bold text-slate-900">Click to Upload Images from Device</p>
@@ -240,7 +240,7 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
               placeholder={"/images/kpnp-dobok-1.jpg\n/images/kpnp-dobok-chest.jpg"}
               value={rawUrls}
               onChange={(e) => setRawUrls(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#FF3B30] font-mono"
+              className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#2563EB] font-mono"
             />
           </div>
         )}
@@ -281,7 +281,7 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
                 onClick={() => toggleSize(size)}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all ${
                   selected
-                    ? "bg-[#FF3B30] text-white border-[#FF3B30] shadow-md shadow-red-500/20"
+                    ? "bg-[#2563EB] text-white border-[#2563EB] shadow-md shadow-blue-500/20"
                     : "bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-300"
                 }`}
               >
@@ -299,7 +299,7 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
           placeholder="Enter detailed description of uniform..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#FF3B30]"
+          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#2563EB]"
         />
       </div>
 
@@ -310,7 +310,7 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
           placeholder={"Elite Performance Fabric: moisture-wicking poly-blend.\nErgonomic Fit: 180-degree movement."}
           value={features}
           onChange={(e) => setFeatures(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#FF3B30]"
+          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#2563EB]"
         />
       </div>
 
@@ -328,7 +328,7 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
           type="checkbox"
           checked={isWTApproved}
           onChange={(e) => setIsWTApproved(e.target.checked)}
-          className="w-4 h-4 rounded accent-[#FF3B30]"
+          className="w-4 h-4 rounded accent-[#2563EB]"
         />
         <span>WT Approved Fabric</span>
       </label>
@@ -339,7 +339,7 @@ export function ProductForm({ initial, submitLabel, onSubmit, onCancel }: Produc
           variant="default"
           size="lg"
           disabled={isSubmitting}
-          className="flex-1 text-xs font-black gap-2 h-12 bg-[#FF3B30] hover:bg-[#D92D20] text-white shadow-lg"
+          className="flex-1 text-xs font-black gap-2 h-12 bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-lg"
         >
           {isSubmitting ? (
             <Loader2 className="w-4 h-4 animate-spin" />

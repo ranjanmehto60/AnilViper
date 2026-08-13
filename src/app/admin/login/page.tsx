@@ -82,13 +82,13 @@ function LoginContent() {
       <div className="container mx-auto px-4 max-w-md">
         <div className="bg-white border border-slate-200 rounded-3xl p-8 space-y-6 shadow-2xl text-center">
 
-          <div className="relative w-16 h-16 rounded-2xl bg-slate-900 p-2 mx-auto shadow-md overflow-hidden flex items-center justify-center text-[#FF3B30]">
+          <div className="relative w-16 h-16 rounded-2xl bg-slate-900 p-2 mx-auto shadow-md overflow-hidden flex items-center justify-center text-[#2563EB]">
             <Lock className="w-8 h-8" />
           </div>
 
           <div>
-            <div className="inline-flex items-center gap-1.5 bg-red-50 border border-red-200 px-3 py-1 rounded-full text-xs font-bold text-[#FF6B61] mb-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#FF3B30]" /> SECURE ADMIN PORTAL
+            <div className="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold text-blue-700 mb-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#2563EB]" /> SECURE ADMIN PORTAL
             </div>
             <h1 className="text-2xl font-black text-slate-900 uppercase tracking-wider">
               STORE ADMIN LOGIN

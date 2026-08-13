@@ -3,26 +3,25 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SizeGuideModal } from "@/components/product/SizeGuideModal";
 
 const slides = [
   {
-    image: "/images/kpnp-dobok-1.jpg",
-    label: "India Edition",
-    detail: "Black V-neck competition dobok",
+    image: "/images/gallery/gallery-02.webp",
+    label: "The lookbook",
+    detail: "A clean competition silhouette",
   },
   {
-    image: "/images/kpnp-dobok-2.jpg",
-    label: "India Edition",
-    detail: "Color-belt competition dobok",
+    image: "/images/gallery/gallery-07.webp",
+    label: "Made to move",
+    detail: "Built for long rounds and sharp footwork",
   },
   {
-    image: "/images/kpnp-dobok-chest.jpg",
-    label: "Built for the details",
-    detail: "WT emblem, flag patch, and clean finish",
+    image: "/images/gallery/gallery-01.webp",
+    label: "Details that travel",
+    detail: "India detailing from every angle",
   },
 ];
 
@@ -46,14 +45,9 @@ export function HeroSection() {
 
   return (
     <section className="relative overflow-hidden border-b border-border bg-surface">
-      <div className="pointer-events-none absolute -right-32 top-0 h-[32rem] w-[32rem] rounded-full bg-accent/10 blur-3xl" />
+      <div className="animate-pulse-soft pointer-events-none absolute -right-32 top-0 h-[32rem] w-[32rem] rounded-full bg-accent/10 blur-3xl" />
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: "easeOut" }}
-          className="relative z-10 max-w-xl"
-        >
+        <div className="animate-reveal-up relative z-10 max-w-xl">
           <p className="section-kicker mb-5">Taekwondo equipment / India</p>
           <h1 className="display-title text-[clamp(4.2rem,10vw,8.6rem)] leading-[0.82] text-ink">
             TRAIN IN IT.<br />
@@ -78,35 +72,24 @@ export function HeroSection() {
               <Ruler className="h-4 w-4 text-accent" /> Find your size
             </Button>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
-          className="relative mx-auto w-full max-w-2xl"
+        <div
+          className="animate-reveal-up animation-delay-100 relative mx-auto w-full max-w-2xl"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <div className="relative aspect-[0.94] overflow-hidden rounded-[2rem] bg-[#d8d6d4] shadow-lg">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={slide.image}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.45 }}
-                className="absolute inset-0"
-              >
-                <Image
-                  src={slide.image}
-                  alt={`${slide.label}: ${slide.detail}`}
-                  fill
-                  priority={activeSlide === 0}
-                  className="object-cover object-top"
-                />
-              </motion.div>
-            </AnimatePresence>
+          <div className="relative aspect-[0.82] overflow-hidden rounded-[2rem] bg-surface-2 shadow-lg ring-1 ring-ink/5 sm:aspect-[0.86]">
+            <div key={slide.image} className="animate-fade-in absolute inset-0">
+              <Image
+                src={slide.image}
+                alt={`${slide.label}: ${slide.detail}`}
+                fill
+                priority={activeSlide === 0}
+                sizes="(max-width: 1024px) 100vw, 55vw"
+                className="animate-image-pan object-cover object-center"
+              />
+            </div>
             <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-transparent to-transparent" />
 
             <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4 text-white sm:inset-x-6 sm:bottom-6">
@@ -150,7 +133,7 @@ export function HeroSection() {
             </div>
             <span className="text-[10px] font-semibold tracking-[0.14em] text-muted uppercase">{String(activeSlide + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}</span>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       <SizeGuideModal open={sizeModalOpen} onOpenChange={setSizeModalOpen} />

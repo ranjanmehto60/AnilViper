@@ -1,12 +1,14 @@
-import { NextResponse } from "next/server";
-import { getPauseMessage, getSetting, isOrdersPaused } from "@/lib/store-db";
+import { getStoreStatus } from "@/lib/store-db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json({
-    ordersPaused: await isOrdersPaused(),
-    message: (await getSetting("pause_message")) ?? (await getPauseMessage()),
+  const body = JSON.stringify(await getStoreStatus());
+  return new Response(body, {
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=300",
+    },
   });
 }

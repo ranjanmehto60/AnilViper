@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     status: order.orderStatus,
     total: order.total,
     items: JSON.parse(order.items) as unknown[],
-    courier: order.awb ? "Shiprocket / Delhivery" : null,
+    courier: order.courierName || null,
     tracking: order.awb,
     paymentStatus: order.paymentStatus,
     paymentMethod: order.paymentMethod,

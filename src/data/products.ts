@@ -26,7 +26,7 @@ export const PRODUCTS: Product[] = [
     features: [
       "Priced at exactly ₹1 for live payment testing.",
       "Supports instant Razorpay checkout via UPI, Cards, and Netbanking.",
-      "Triggers automatic Shiprocket delivery AWB generation upon payment."
+      "Creates a Shiprocket shipment after payment; the admin selects the delivery partner in Shiprocket."
     ]
   },
   {
@@ -157,13 +157,13 @@ export const PRODUCTS: Product[] = [
       "/images/kpnp-dobok-1.jpg",
       "/images/kpnp-dobok-chest.jpg"
     ],
-    description: "Official Dan grade Taekwondo Black Belt crafted with 100% thick cotton core, 8-row reinforced stitching, and gold embroidered Korean & English lettering. Weight: 500 grams.",
+    description: "Official Dan grade Taekwondo Black Belt crafted with 100% thick cotton core, 8-row reinforced stitching, and gold embroidered Korean & English lettering. Delivery weight: under 500 grams.",
     fabricSpecs: "100% Thick Cotton Weave - 8 Row Stitching",
     weightGsm: 500,
     availableSizes: [160, 170, 180, 190, 200, 210, 220, 230, 240],
     features: [
-      "500g High Quality Heavy Duty Cotton Construction.",
-      "Delivery Weight: 500 Grams (Flat ₹200 Delivery Fee across India).",
+      "Under 500g high-quality heavy-duty cotton construction.",
+      "Delivery parcel: 40 × 12 × 5 cm; ₹200 delivery below ₹1,000 and ₹350 below ₹5,000.",
       "Reinforced 8-line stitching prevents fold sagging.",
       "Official WT & Dan Grade Gold Embroidery."
     ]
@@ -189,7 +189,7 @@ export const PRODUCTS: Product[] = [
     availableSizes: [140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240],
     features: [
       "500g High Impact EVA Protection Guards.",
-      "Delivery Weight: 500 Grams (Flat ₹200 Delivery Fee across India).",
+      "Delivery parcel: ₹200 delivery below ₹1,000 and ₹350 below ₹5,000.",
       "Ergonomic fit with non-slip dual velcro straps.",
       "WT Approved for national sparring tournaments."
     ]

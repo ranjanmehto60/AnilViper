@@ -28,7 +28,7 @@ function ShopContent() {
   const availableSizes = [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240];
 
   useEffect(() => {
-    fetch("/api/products", { cache: "no-store" })
+    fetch("/api/products")
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (data && Array.isArray(data.products)) setProducts(data.products);
@@ -80,10 +80,10 @@ function ShopContent() {
       </div>
       <div className="space-y-3">
         <div className="flex items-center justify-between"><p className="text-[10px] font-semibold tracking-[0.14em] text-muted uppercase">Maximum price</p><span className="text-xs font-semibold text-ink">{formatINR(maxPrice)}</span></div>
-        <input type="range" min="500" max="5000" step="100" value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} className="w-full accent-[#d94735]" />
+        <input type="range" min="500" max="5000" step="100" value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} className="w-full accent-[#2563eb]" />
         <div className="flex justify-between text-[10px] text-muted"><span>₹500</span><span>₹5,000</span></div>
       </div>
-      <label className="flex cursor-pointer items-center gap-3 border-t border-border pt-5 text-sm font-medium text-ink"><input type="checkbox" checked={wtOnly} onChange={(event) => setWtOnly(event.target.checked)} className="h-4 w-4 accent-[#d94735]" /> WT-approved only</label>
+      <label className="flex cursor-pointer items-center gap-3 border-t border-border pt-5 text-sm font-medium text-ink"><input type="checkbox" checked={wtOnly} onChange={(event) => setWtOnly(event.target.checked)} className="h-4 w-4 accent-[#2563eb]" /> WT-approved only</label>
     </div>
   );
 

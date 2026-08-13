@@ -7,6 +7,7 @@ import { notFound, useParams, useRouter } from "next/navigation";
 import { ArrowRight, ChevronRight, Heart, Loader2, Minus, Plus, Ruler, ShoppingBag, Star } from "lucide-react";
 import { REVIEWS } from "@/data/reviews";
 import { Product } from "@/types/product";
+import { BELT_PACKAGE, DRESS_PACKAGE } from "@/config/commerce";
 import { formatINR } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
@@ -36,7 +37,7 @@ export default function ProductDetailPage() {
   const isFavorite = hydrated && product ? isInWishlist(product.id) : false;
 
   useEffect(() => {
-    fetch("/api/products", { cache: "no-store" })
+    fetch("/api/products")
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (data && Array.isArray(data.products)) setProducts(data.products);
@@ -75,7 +76,7 @@ export default function ProductDetailPage() {
     description: product.description,
     sku: product.id,
     brand: { "@type": "Brand", name: "Viper Gears" },
-    offers: { "@type": "Offer", url: `https://vipergears.in/product/${product.slug}`, priceCurrency: "INR", price: product.price, itemCondition: "https://schema.org/NewCondition", availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" },
+    offers: { "@type": "Offer", url: `https://vipergears.fit/product/${product.slug}`, priceCurrency: "INR", price: product.price, itemCondition: "https://schema.org/NewCondition", availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock" },
     aggregateRating: { "@type": "AggregateRating", ratingValue: product.rating, reviewCount: product.reviewCount },
   };
 
@@ -109,7 +110,7 @@ export default function ProductDetailPage() {
 
               <div className="mt-6 grid gap-2 sm:grid-cols-2"><Button onClick={addToCart} disabled={!product.inStock} className="h-12 rounded-full bg-ink text-sm text-white hover:bg-accent disabled:opacity-50"><ShoppingBag className="h-4 w-4" /> Add to bag</Button><Button onClick={buyNow} disabled={!product.inStock} variant="outline" className="h-12 rounded-full border-border-strong text-sm hover:border-ink">Buy now <ArrowRight className="h-4 w-4 text-accent" /></Button></div>
               <div className="mt-6 grid grid-cols-2 gap-3 border-y border-border py-5 text-xs text-muted"><div><p className="font-semibold text-ink">Free size support</p><p className="mt-1">Use the guide before ordering.</p></div><div><p className="font-semibold text-ink">Need help?</p><p className="mt-1">Message the Viper team.</p></div></div>
-              <div className="mt-5"><PincodeChecker /></div>
+              <div className="mt-5"><PincodeChecker weightKg={product.category === "Belts & Accessories" ? BELT_PACKAGE.weightKg : DRESS_PACKAGE.weightKg} /></div>
 
               <Accordion type="single" collapsible className="mt-6 border-t border-border">
                 <AccordionItem value="details" className="border-b-border"><AccordionTrigger className="py-4 text-sm font-semibold text-ink hover:no-underline">Fabric & construction</AccordionTrigger><AccordionContent className="pb-5 text-sm leading-relaxed text-muted"><p><strong className="font-semibold text-ink">Fabric:</strong> {product.fabricSpecs}</p><p className="mt-2"><strong className="font-semibold text-ink">Weight:</strong> {product.weightGsm} GSM</p><ul className="mt-3 list-disc space-y-1 pl-5">{product.features.map((feature) => <li key={feature}>{feature}</li>)}</ul></AccordionContent></AccordionItem>

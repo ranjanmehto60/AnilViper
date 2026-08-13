@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAuthorizedAdmin } from "@/lib/admin-api";
-import { getPauseMessage, getSetting, isOrdersPaused, setSetting } from "@/lib/store-db";
+import { getStoreStatus, setSetting } from "@/lib/store-db";
 
 export const runtime = "nodejs";
 
@@ -9,10 +9,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Admin authentication required" }, { status: 401 });
   }
 
-  return NextResponse.json({
-    ordersPaused: await isOrdersPaused(),
-    message: (await getSetting("pause_message")) ?? (await getPauseMessage()),
-  });
+  return NextResponse.json(await getStoreStatus());
 }
 
 export async function PATCH(request: Request) {
@@ -35,8 +32,5 @@ export async function PATCH(request: Request) {
     await setSetting("pause_message", body.message.trim());
   }
 
-  return NextResponse.json({
-    ordersPaused: await isOrdersPaused(),
-    message: (await getSetting("pause_message")) ?? (await getPauseMessage()),
-  });
+  return NextResponse.json(await getStoreStatus());
 }
