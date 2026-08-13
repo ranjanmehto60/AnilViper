@@ -65,7 +65,16 @@ export function calculateShippingFee(subtotal: number, items: ShippingLineInput[
  * than one unit, the base parcel height is scaled while length and breadth
  * remain those of the largest item type in the shipment.
  */
-export function getShippingPackageDetails(items: ShippingLineInput[]): ShippingPackageDetails {
+export function getShippingPackageDetails(items: ShippingLineInput[], subtotal?: number): ShippingPackageDetails {
+  if (typeof subtotal === "number" && subtotal <= 1000) {
+    return {
+      weightKg: 0.5,
+      lengthCm: 40,
+      breadthCm: 12,
+      heightCm: 5,
+    };
+  }
+
   let beltUnits = 0;
   let dressUnits = 0;
 
@@ -85,7 +94,8 @@ export function getShippingPackageDetails(items: ShippingLineInput[]): ShippingP
   }
 
   const basePackage = dressUnits > 0 ? DRESS_PACKAGE : BELT_PACKAGE;
-  const weightKg = dressUnits * DRESS_PACKAGE.weightKg + beltUnits * BELT_PACKAGE.weightKg;
+  const calculatedWeight = dressUnits * DRESS_PACKAGE.weightKg + beltUnits * BELT_PACKAGE.weightKg;
+  const weightKg = Math.max(1, calculatedWeight);
   const heightCm = Math.min(30, Math.max(basePackage.heightCm, basePackage.heightCm * totalUnits));
 
   return {

@@ -31,7 +31,8 @@ export default function CheckoutPage() {
   const discount = getDiscountAmount();
   const total = getTotal();
   const packageDetails = getShippingPackageDetails(
-    items.map((item) => ({ category: item.product.category, quantity: item.quantity }))
+    items.map((item) => ({ category: item.product.category, quantity: item.quantity })),
+    subtotal
   );
   const [step, setStep] = useState<1 | 2>(1);
   const [razorpayOpen, setRazorpayOpen] = useState(false);

@@ -234,7 +234,8 @@ export async function createShiprocketOrder(payload: ShiprocketOrderPayload): Pr
 
   try {
     const packageDetails = getShippingPackageDetails(
-      payload.items.map((item) => ({ category: item.category, quantity: item.units }))
+      payload.items.map((item) => ({ category: item.category, quantity: item.units })),
+      payload.subtotal
     );
 
     const isCod = payload.paymentMethod === "COD";
