@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { formatINR } from "@/lib/utils";
-import { Product } from "@/types/product";
+import { getBackPrintLabel, Product, supportsBackIndPrintCategory } from "@/types/product";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -583,7 +583,9 @@ export default function AdminDashboardPage() {
                   try {
                     return JSON.parse(order.items) as {
                       name: string;
+                      category?: string;
                       size: number;
+                      backPrintOption?: string;
                       quantity: number;
                       lineTotal: number;
                     }[];
@@ -652,7 +654,7 @@ export default function AdminDashboardPage() {
                         </p>
                         <div className="text-slate-700 font-semibold mt-2 space-y-0.5">
                           {parsedItems.map((item, index) => (
-                            <p key={index}>• {item.name} ({item.size} cm) × {item.quantity}</p>
+                            <p key={index}>• {item.name} ({item.size} cm{supportsBackIndPrintCategory(item.category) ? ` · ${getBackPrintLabel(item.backPrintOption)}` : ""}) × {item.quantity}</p>
                           ))}
                         </div>
                       </div>

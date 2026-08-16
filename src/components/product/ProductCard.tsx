@@ -4,12 +4,13 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Check, Eye, Heart, Ruler, ShoppingBag, Star } from "lucide-react";
-import { Product } from "@/types/product";
+import { DEFAULT_BACK_PRINT_OPTION, getBackPrintLabel, Product, supportsBackIndPrint } from "@/types/product";
 import { formatINR } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { QuickViewModal } from "./QuickViewModal";
 import { SizeGuideModal } from "./SizeGuideModal";
+import { BackPrintSelector } from "./BackPrintSelector";
 import { toast } from "sonner";
 import { useHydrated } from "@/hooks/useHydrated";
 
@@ -20,6 +21,7 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const initialSize = product.availableSizes?.[0] || 170;
   const [selectedSize, setSelectedSize] = useState(initialSize);
+  const [selectedBackPrint, setSelectedBackPrint] = useState(DEFAULT_BACK_PRINT_OPTION);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
@@ -29,8 +31,8 @@ export function ProductCard({ product }: ProductCardProps) {
   const discount = product.originalPrice > product.price ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
   const handleAddToCart = () => {
-    addItem(product, selectedSize, 1);
-    toast.success(`Added ${product.name} (${selectedSize} cm) to cart.`);
+    addItem(product, selectedSize, selectedBackPrint, 1);
+    toast.success(`Added ${product.name} (${selectedSize} cm, ${getBackPrintLabel(selectedBackPrint)}) to cart.`);
   };
 
   const handleToggleWishlist = () => {
@@ -82,6 +84,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </label>
             <button onClick={() => setIsSizeGuideOpen(true)} className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium text-muted transition-colors hover:text-ink"><Ruler className="h-3.5 w-3.5 text-accent" /> Guide</button>
           </div>
+          {supportsBackIndPrint(product) && <BackPrintSelector value={selectedBackPrint} onChange={setSelectedBackPrint} compact />}
           <button onClick={handleAddToCart} disabled={!product.inStock} className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-ink text-xs font-semibold text-white transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40">
             {product.inStock ? <><ShoppingBag className="h-4 w-4" /> Add to bag</> : <><Check className="h-4 w-4" /> Out of stock</>}
           </button>

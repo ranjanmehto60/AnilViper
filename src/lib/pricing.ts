@@ -1,5 +1,11 @@
 import { listProducts } from "@/lib/product-db";
 import { calculateShippingFee } from "@/config/commerce";
+import {
+  BackPrintOption,
+  DEFAULT_BACK_PRINT_OPTION,
+  isBackPrintOption,
+  supportsBackIndPrint,
+} from "@/types/product";
 
 // COD customers pay the applicable delivery fee online as the booking amount.
 export function getCodBookingAmount(shipping: number): number {
@@ -16,6 +22,7 @@ export interface PricingLine {
   name: string;
   category: string;
   size: number;
+  backPrintOption?: BackPrintOption;
   quantity: number;
   unitPrice: number;
   lineTotal: number;
@@ -36,7 +43,7 @@ export function getDiscountPercent(code: string | null | undefined): number {
 }
 
 export async function computePricing(
-  lines: { productId: string; size: number; quantity: number }[],
+  lines: { productId: string; size: number; backPrintOption?: unknown; quantity: number }[],
   discountCode: string | null | undefined
 ): Promise<{ breakdown: PricingBreakdown; error: string | null }> {
   if (!Array.isArray(lines) || lines.length === 0) {
@@ -55,6 +62,10 @@ export async function computePricing(
     if (!product.availableSizes.includes(line.size)) {
       return { breakdown: emptyBreakdown(), error: `Size ${line.size} cm is not available for ${product.name}` };
     }
+    const backPrintOption = line.backPrintOption ?? DEFAULT_BACK_PRINT_OPTION;
+    if (!isBackPrintOption(backPrintOption)) {
+      return { breakdown: emptyBreakdown(), error: `Please select a valid back print option for ${product.name}` };
+    }
     const quantity = Math.max(1, Math.min(10, Number(line.quantity) || 1));
     const lineTotal = product.price * quantity;
     subtotal += lineTotal;
@@ -63,6 +74,7 @@ export async function computePricing(
       name: product.name,
       category: product.category,
       size: line.size,
+      ...(supportsBackIndPrint(product) ? { backPrintOption } : {}),
       quantity,
       unitPrice: product.price,
       lineTotal,

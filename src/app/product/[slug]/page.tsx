@@ -6,7 +6,7 @@ import Link from "next/link";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { ArrowRight, ChevronRight, Heart, Loader2, Minus, Plus, Ruler, ShoppingBag, Star } from "lucide-react";
 import { REVIEWS } from "@/data/reviews";
-import { Product } from "@/types/product";
+import { DEFAULT_BACK_PRINT_OPTION, getBackPrintLabel, Product, supportsBackIndPrint } from "@/types/product";
 import { BELT_PACKAGE, DRESS_PACKAGE } from "@/config/commerce";
 import { formatINR } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { SizeGuideModal } from "@/components/product/SizeGuideModal";
 import { PincodeChecker } from "@/components/product/PincodeChecker";
 import { ProductCard } from "@/components/product/ProductCard";
+import { BackPrintSelector } from "@/components/product/BackPrintSelector";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import { useHydrated } from "@/hooks/useHydrated";
@@ -27,6 +28,7 @@ export default function ProductDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState(170);
+  const [selectedBackPrint, setSelectedBackPrint] = useState(DEFAULT_BACK_PRINT_OPTION);
   const [quantity, setQuantity] = useState(1);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
@@ -50,6 +52,7 @@ export default function ProductDetailPage() {
     if (!product) return;
     setActiveImageIndex(0);
     setSelectedSize(product.availableSizes.includes(170) ? 170 : product.availableSizes[0]);
+    setSelectedBackPrint(DEFAULT_BACK_PRINT_OPTION);
   }, [product, slug]);
 
   if (isLoading) return <div className="editorial-page flex min-h-screen items-center justify-center gap-2 text-sm text-muted"><Loader2 className="h-5 w-5 animate-spin text-accent" /> Loading product details...</div>;
@@ -59,12 +62,12 @@ export default function ProductDetailPage() {
   const relatedProducts = products.filter((item) => item.id !== product.id && (item.category === product.category || item.isWTApproved)).slice(0, 4);
 
   const addToCart = () => {
-    addItem(product, selectedSize, quantity);
-    toast.success(`Added ${quantity}x ${product.name} (${selectedSize} cm) to cart.`);
+    addItem(product, selectedSize, selectedBackPrint, quantity);
+    toast.success(`Added ${quantity}x ${product.name} (${selectedSize} cm, ${getBackPrintLabel(selectedBackPrint)}) to cart.`);
   };
 
   const buyNow = () => {
-    addItem(product, selectedSize, quantity);
+    addItem(product, selectedSize, selectedBackPrint, quantity);
     router.push("/checkout");
   };
 
@@ -105,6 +108,7 @@ export default function ProductDetailPage() {
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted">{product.description}</p>
 
               <div className="mt-8 space-y-3 border-t border-border pt-6"><div className="flex items-center justify-between"><span className="text-sm font-semibold text-ink">Select height</span><button onClick={() => setSizeGuideOpen(true)} className="flex items-center gap-1 text-xs font-semibold text-accent hover:underline"><Ruler className="h-3.5 w-3.5" /> Size guide</button></div><div className="flex flex-wrap gap-2">{product.availableSizes.map((size) => <button key={size} onClick={() => setSelectedSize(size)} className={`rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors ${selectedSize === size ? "border-ink bg-ink text-white" : "border-border bg-surface text-muted hover:border-ink hover:text-ink"}`}>{size} cm</button>)}</div></div>
+              {supportsBackIndPrint(product) && <BackPrintSelector value={selectedBackPrint} onChange={setSelectedBackPrint} />}
 
               <div className="mt-6 flex items-center justify-between gap-4"><span className="text-sm font-semibold text-ink">Quantity</span><div className="flex items-center rounded-full border border-border bg-surface"><button onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="p-2.5 text-muted hover:text-ink" aria-label="Decrease quantity"><Minus className="h-4 w-4" /></button><span className="min-w-8 text-center text-sm font-semibold text-ink">{quantity}</span><button onClick={() => setQuantity((value) => Math.min(10, value + 1))} className="p-2.5 text-muted hover:text-ink" aria-label="Increase quantity"><Plus className="h-4 w-4" /></button></div></div>
 

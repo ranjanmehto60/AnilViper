@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { formatINR } from "@/lib/utils";
+import { getBackPrintLabel, supportsBackIndPrintCategory } from "@/types/product";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -307,11 +308,11 @@ function AccountContent() {
                   </div>
 
                   <div className="space-y-2">
-                    {(order.items as { name: string; size: number; quantity: number; lineTotal: number }[]).map((item, index) => (
+                    {(order.items as { name: string; category?: string; size: number; backPrintOption?: string; quantity: number; lineTotal: number }[]).map((item, index) => (
                       <div key={index} className="flex justify-between items-center text-xs">
                         <div>
                           <h4 className="text-sm font-semibold text-ink">{item.name}</h4>
-                          <p className="mt-0.5 text-muted">Size: {item.size} cm × {item.quantity}</p>
+                          <p className="mt-0.5 text-muted">Size: {item.size} cm{supportsBackIndPrintCategory(item.category) ? ` · ${getBackPrintLabel(item.backPrintOption)}` : ""} × {item.quantity}</p>
                         </div>
                         <span className="font-semibold text-ink">{formatINR(item.lineTotal)}</span>
                       </div>

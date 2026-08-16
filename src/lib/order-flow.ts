@@ -10,6 +10,7 @@ import {
 import { decrementInventory } from "@/lib/inventory-db";
 import { createShiprocketOrder } from "@/lib/shiprocket";
 import { sendOrderNotification } from "@/lib/order-messages";
+import { getBackPrintLabel, isBackPrintOption } from "@/types/product";
 
 export interface FinalizePaidOrderInput {
   razorpayOrderId?: string | null;
@@ -40,6 +41,7 @@ interface StoredItem {
   productId?: string;
   category?: string;
   size?: number;
+  backPrintOption?: unknown;
   quantity?: number;
   price?: number;
   unitPrice?: number;
@@ -58,7 +60,7 @@ function parseItems(raw: string, fallbackTotal: number): Array<{ name: string; s
     const parsed = JSON.parse(raw) as StoredItem[];
     if (Array.isArray(parsed)) {
       return parsed.map((it) => ({
-        name: `${it.name || "Viper Gear Item"} (${it.size || ""} cm)`,
+        name: `${it.name || "Viper Gear Item"} (${it.size || ""} cm${isBackPrintOption(it.backPrintOption) ? `, ${getBackPrintLabel(it.backPrintOption)}` : ""})`,
         sku: `${it.productId || "SKU"}_${it.size || "STD"}`,
         units: Number(it.quantity || 1),
         selling_price: Number(it.unitPrice ?? it.price ?? 0),

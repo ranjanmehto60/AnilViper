@@ -1,15 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { CartItem, Product } from "@/types/product";
+import {
+  BackPrintOption,
+  CartItem,
+  DEFAULT_BACK_PRINT_OPTION,
+  isBackPrintOption,
+  Product,
+} from "@/types/product";
 import { calculateShippingFee } from "@/config/commerce";
 
 interface CartState {
   items: CartItem[];
   discountCode: string | null;
   discountPercentage: number;
-  addItem: (product: Product, selectedSize: number, quantity?: number) => void;
-  removeItem: (productId: string, selectedSize: number) => void;
-  updateQuantity: (productId: string, selectedSize: number, delta: number) => void;
+  addItem: (product: Product, selectedSize: number, selectedBackPrint?: BackPrintOption, quantity?: number) => void;
+  removeItem: (productId: string, selectedSize: number, selectedBackPrint?: BackPrintOption) => void;
+  updateQuantity: (productId: string, selectedSize: number, delta: number, selectedBackPrint?: BackPrintOption) => void;
   clearCart: () => void;
   applyDiscountCode: (code: string) => boolean;
   removeDiscountCode: () => void;
@@ -29,10 +35,17 @@ export const useCartStore = create<CartState>()(
       discountCode: null,
       discountPercentage: 0,
 
-      addItem: (product, selectedSize, quantity = 1) => {
+      addItem: (product, selectedSize, selectedBackPrint = DEFAULT_BACK_PRINT_OPTION, quantity = 1) => {
+        const normalizedBackPrint = isBackPrintOption(selectedBackPrint)
+          ? selectedBackPrint
+          : DEFAULT_BACK_PRINT_OPTION;
+
         set((state) => {
           const existingIndex = state.items.findIndex(
-            (item) => item.product.id === product.id && item.selectedSize === selectedSize
+            (item) =>
+              item.product.id === product.id &&
+              item.selectedSize === selectedSize &&
+              (item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION) === normalizedBackPrint
           );
 
           if (existingIndex > -1) {
@@ -45,24 +58,49 @@ export const useCartStore = create<CartState>()(
           }
 
           return {
-            items: [...state.items, { product, selectedSize, quantity: Math.min(MAX_QUANTITY_PER_LINE, quantity) }],
+            items: [
+              ...state.items,
+              {
+                product,
+                selectedSize,
+                selectedBackPrint: normalizedBackPrint,
+                quantity: Math.min(MAX_QUANTITY_PER_LINE, quantity),
+              },
+            ],
           };
         });
       },
 
-      removeItem: (productId, selectedSize) => {
+      removeItem: (productId, selectedSize, selectedBackPrint = DEFAULT_BACK_PRINT_OPTION) => {
+        const normalizedBackPrint = isBackPrintOption(selectedBackPrint)
+          ? selectedBackPrint
+          : DEFAULT_BACK_PRINT_OPTION;
+
         set((state) => ({
           items: state.items.filter(
-            (item) => !(item.product.id === productId && item.selectedSize === selectedSize)
+            (item) =>
+              !(
+                item.product.id === productId &&
+                item.selectedSize === selectedSize &&
+                (item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION) === normalizedBackPrint
+              )
           ),
         }));
       },
 
-      updateQuantity: (productId, selectedSize, delta) => {
+      updateQuantity: (productId, selectedSize, delta, selectedBackPrint = DEFAULT_BACK_PRINT_OPTION) => {
+        const normalizedBackPrint = isBackPrintOption(selectedBackPrint)
+          ? selectedBackPrint
+          : DEFAULT_BACK_PRINT_OPTION;
+
         set((state) => {
           const updatedItems = state.items
             .map((item) => {
-              if (item.product.id === productId && item.selectedSize === selectedSize) {
+              if (
+                item.product.id === productId &&
+                item.selectedSize === selectedSize &&
+                (item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION) === normalizedBackPrint
+              ) {
                 const newQty = Math.min(MAX_QUANTITY_PER_LINE, item.quantity + delta);
                 return newQty > 0 ? { ...item, quantity: newQty } : null;
               }

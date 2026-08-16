@@ -18,6 +18,7 @@ interface OrderAddress {
 interface OrderItemInput {
   productId?: unknown;
   size?: unknown;
+  backPrintOption?: unknown;
   quantity?: unknown;
 }
 
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
     const lines = (Array.isArray(body.items) ? body.items : []).map((item) => ({
       productId: typeof item?.productId === "string" ? item.productId : "",
       size: Number(item?.size),
+      backPrintOption: item?.backPrintOption,
       quantity: Number(item?.quantity),
     }));
 

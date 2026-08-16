@@ -3,13 +3,14 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Product } from "@/types/product";
+import { DEFAULT_BACK_PRINT_OPTION, getBackPrintLabel, Product, supportsBackIndPrint } from "@/types/product";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatINR } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
 import { SizeGuideModal } from "@/components/product/SizeGuideModal";
+import { BackPrintSelector } from "@/components/product/BackPrintSelector";
 import { ShieldCheck, Star, ShoppingBag, Ruler, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,13 +24,14 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
   const [selectedSize, setSelectedSize] = useState<number>(
     product.availableSizes.includes(170) ? 170 : product.availableSizes[0]
   );
+  const [selectedBackPrint, setSelectedBackPrint] = useState(DEFAULT_BACK_PRINT_OPTION);
   const [quantity] = useState<number>(1);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
 
   const handleAddToCart = () => {
-    addItem(product, selectedSize, quantity);
-    toast.success(`Added ${quantity}x ${product.name} (${selectedSize}cm) to Cart!`);
+    addItem(product, selectedSize, selectedBackPrint, quantity);
+    toast.success(`Added ${quantity}x ${product.name} (${selectedSize}cm, ${getBackPrintLabel(selectedBackPrint)}) to Cart!`);
     onClose();
   };
 
@@ -123,6 +125,8 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                     ))}
                   </div>
                 </div>
+
+                {supportsBackIndPrint(product) && <BackPrintSelector value={selectedBackPrint} onChange={setSelectedBackPrint} />}
               </div>
 
               {/* Action Buttons */}
