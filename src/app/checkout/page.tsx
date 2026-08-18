@@ -7,7 +7,7 @@ import { ArrowRight, Banknote, CheckCircle2, ChevronRight, CreditCard, PauseCirc
 import { z } from "zod";
 import { useCartStore } from "@/store/useCartStore";
 import { DEFAULT_BACK_PRINT_OPTION, getBackPrintLabel, supportsBackIndPrint } from "@/types/product";
-import { getShippingPackageDetails } from "@/config/commerce";
+import { FREE_SHIPPING_THRESHOLD, getShippingPackageDetails } from "@/config/commerce";
 import { formatINR } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +47,11 @@ export default function CheckoutPage() {
   const bookingAmount = shipping;
   const codAvailable = bookingAmount > 0 && total > bookingAmount;
   const codAmount = total - bookingAmount;
+  const freeDeliveryMessage = subtotal >= FREE_SHIPPING_THRESHOLD
+    ? "Your order qualifies for free delivery when paid online."
+    : shipping === 0
+      ? "Free delivery has already been applied to this order."
+      : `Add ${formatINR(FREE_SHIPPING_THRESHOLD - subtotal)} more to unlock free delivery with prepaid payment.`;
 
   useEffect(() => {
     fetch("/api/store-status").then((response) => response.ok ? response.json() : null).then((data) => { if (data) { setOrdersPaused(Boolean(data.ordersPaused)); setPauseMessage(String(data.message || "")); } }).catch(() => {});
@@ -77,6 +82,7 @@ export default function CheckoutPage() {
         <nav className="flex items-center gap-2 text-xs text-muted"><Link href="/" className="hover:text-ink">Home</Link><ChevronRight className="h-3 w-3" /><Link href="/cart" className="hover:text-ink">Bag</Link><ChevronRight className="h-3 w-3" /><span className="font-semibold text-ink">Checkout</span></nav>
         <div><p className="section-kicker mb-3">Almost there</p><h1 className="section-title">Checkout.</h1></div>
         {ordersPaused && <div className="flex items-start gap-3 rounded-xl border border-accent/25 bg-accent/10 p-4 text-sm text-ink"><PauseCircle className="mt-0.5 h-5 w-5 shrink-0 text-accent" /><div><p className="font-semibold">Orders are temporarily paused.</p><p className="mt-1 text-muted">{pauseMessage || "Please check back soon."}</p></div></div>}
+        {items.length > 0 && <div className="flex items-start gap-3 rounded-xl border border-accent/25 bg-accent/10 p-4 text-sm text-ink"><Truck className="mt-0.5 h-5 w-5 shrink-0 text-accent" /><div><p className="font-semibold">Free delivery on prepaid orders of {formatINR(FREE_SHIPPING_THRESHOLD)} or more.</p><p className="mt-1 text-muted">{freeDeliveryMessage}</p></div></div>}
 
         <div className="mx-auto flex max-w-2xl items-center justify-between border-b border-border pb-5 text-xs font-semibold"><Step number="1" label="Delivery" active={step >= 1} /><span className="h-px flex-1 bg-border mx-3" /><Step number="2" label="Review & pay" active={step >= 2} /><span className="h-px flex-1 bg-border mx-3" /><Step number="3" label="Confirmation" active={false} /></div>
 
