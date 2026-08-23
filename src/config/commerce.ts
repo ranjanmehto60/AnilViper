@@ -61,6 +61,16 @@ export function calculateShippingFee(subtotal: number, items: ShippingLineInput[
 }
 
 /**
+ * COD orders require an upfront online delivery booking fee:
+ * - Orders below ₹1,000: ₹200
+ * - Orders ₹1,000 and above (including above ₹3,000): ₹350
+ * The rest of the item amount is collected on delivery (COD).
+ */
+export function getCodBookingAmount(subtotal: number): number {
+  return subtotal < LOW_ORDER_SHIPPING_THRESHOLD ? LOW_ORDER_SHIPPING_FEE : SHIPPING_FEE_BELOW_FREE_THRESHOLD;
+}
+
+/**
  * Returns the parcel data for a consolidated Shiprocket shipment. For more
  * than one unit, the base parcel height is scaled while length and breadth
  * remain those of the largest item type in the shipment.

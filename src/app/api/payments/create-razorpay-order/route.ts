@@ -67,24 +67,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error }, { status: 400 });
     }
 
-    const targetBookingAmount = getCodBookingAmount(breakdown.shipping);
-
-    if (paymentMethod === "COD" && targetBookingAmount === 0) {
-      return NextResponse.json(
-        { error: "COD is unavailable on free-delivery orders. Please choose prepaid online payment." },
-        { status: 400 }
-      );
-    }
-
-    if (paymentMethod === "COD" && breakdown.total <= targetBookingAmount) {
-      return NextResponse.json(
-        { error: `Cash on Delivery requires an order total above the ₹${targetBookingAmount} delivery booking amount. Please choose prepaid online payment instead.` },
-        { status: 400 }
-      );
-    }
-
-    const bookingAmount = paymentMethod === "COD" ? targetBookingAmount : 0;
-    const codAmount = paymentMethod === "COD" ? Math.max(0, breakdown.total - targetBookingAmount) : 0;
+    const isCod = paymentMethod === "COD";
+    const bookingAmount = isCod ? getCodBookingAmount(breakdown.subtotal) : 0;
+    const codAmount = isCod ? Math.max(0, breakdown.subtotal - breakdown.discount) : 0;
+    const orderTotal = isCod ? codAmount + bookingAmount : breakdown.total;
+    const amountPaise = Math.round((isCod ? bookingAmount : breakdown.total) * 100);
 
     for (const item of breakdown.items) {
       const available = await getStockLevel(item.productId, item.size);
@@ -117,15 +104,14 @@ export async function POST(request: Request) {
       items: JSON.stringify(breakdown.items),
       subtotal: breakdown.subtotal,
       discount: breakdown.discount,
-      shipping: breakdown.shipping,
-      total: breakdown.total,
+      shipping: isCod ? bookingAmount : breakdown.shipping,
+      total: orderTotal,
       discountCode: breakdown.discountCode,
       paymentMethod,
       bookingAmount,
       codAmount,
     });
 
-    const amountPaise = Math.round((paymentMethod === "COD" ? bookingAmount : breakdown.total) * 100);
     let razorpayOrderId = `order_sim_${Math.floor(100000 + Math.random() * 900000)}`;
 
     if (isRazorpayConfigured()) {

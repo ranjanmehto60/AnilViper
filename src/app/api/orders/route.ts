@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { createOrder, getPauseMessage, isOrdersPaused, listOrders } from "@/lib/store-db";
-import { computePricing } from "@/lib/pricing";
+import { computePricing, getCodBookingAmount } from "@/lib/pricing";
 import { getStockLevel } from "@/lib/inventory-db";
 import { isAuthorizedAdmin } from "@/lib/admin-api";
+import { finalizeCodOrder } from "@/lib/order-flow";
 
 export const runtime = "nodejs";
 
@@ -23,7 +24,7 @@ interface OrderItemInput {
 }
 
 export async function POST(request: Request) {
-  let body: { items?: OrderItemInput[]; address?: OrderAddress; discountCode?: unknown };
+  let body: { items?: OrderItemInput[]; address?: OrderAddress; discountCode?: unknown; paymentMethod?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -60,10 +61,16 @@ export async function POST(request: Request) {
   }));
 
   const discountCode = typeof body.discountCode === "string" ? body.discountCode : null;
+  const paymentMethod = body.paymentMethod === "COD" ? "COD" : "PREPAID";
   const { breakdown, error } = await computePricing(lines, discountCode);
   if (error) {
     return NextResponse.json({ error }, { status: 400 });
   }
+
+  const isCod = paymentMethod === "COD";
+  const bookingAmount = isCod ? getCodBookingAmount(breakdown.subtotal) : 0;
+  const codAmount = isCod ? Math.max(0, breakdown.subtotal - breakdown.discount) : 0;
+  const orderTotal = isCod ? codAmount + bookingAmount : breakdown.total;
 
   for (const item of breakdown.items) {
     const available = await getStockLevel(item.productId, item.size);
@@ -96,18 +103,29 @@ export async function POST(request: Request) {
     items: JSON.stringify(breakdown.items),
     subtotal: breakdown.subtotal,
     discount: breakdown.discount,
-    shipping: breakdown.shipping,
-    total: breakdown.total,
+    shipping: isCod ? bookingAmount : breakdown.shipping,
+    total: orderTotal,
     discountCode: breakdown.discountCode,
+    paymentMethod,
+    bookingAmount,
+    codAmount,
   });
+
+  if (paymentMethod === "COD") {
+    await finalizeCodOrder(order.id);
+  }
 
   return NextResponse.json(
     {
+      success: true,
       orderId: order.id,
       total: order.total,
       subtotal: order.subtotal,
       discount: order.discount,
       shipping: order.shipping,
+      paymentMethod,
+      bookingAmount,
+      codAmount,
       paymentStatus: order.paymentStatus,
     },
     { status: 201 }

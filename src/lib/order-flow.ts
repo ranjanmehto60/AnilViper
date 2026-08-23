@@ -167,3 +167,83 @@ export async function finalizePaidOrder(
 
   return { claimed, shiprocketPushClaimed: pushClaimed, awb, courierName, shiprocketOrderId, shipmentId, shiprocketError };
 }
+
+export interface FinalizeCodOrderResult {
+  success: boolean;
+  shiprocketPushClaimed: boolean;
+  awb?: string | null;
+  courierName?: string | null;
+  shiprocketOrderId?: number | string | null;
+  shipmentId?: number | string | null;
+  shiprocketError?: string | null;
+}
+
+export async function finalizeCodOrder(orderId: string): Promise<FinalizeCodOrderResult> {
+  const order = await getOrderById(orderId);
+  if (!order) {
+    return { success: false, shiprocketPushClaimed: false, shiprocketError: "Order not found" };
+  }
+
+  try {
+    const items = JSON.parse(order.items) as StoredItem[];
+    if (Array.isArray(items)) {
+      for (const item of items) {
+        if (item.productId && item.size && item.quantity) {
+          await decrementInventory(item.productId, Number(item.size), Number(item.quantity));
+        }
+      }
+    }
+  } catch {
+    // Ignore malformed items
+  }
+
+  // Fire-and-forget order confirmation (never blocks or fails finalization)
+  await sendOrderNotification(order);
+
+  const pushClaimed = await claimShiprocketPush(orderId);
+  let awb = order.awb;
+  let courierName = order.courierName;
+  let shiprocketOrderId: string | number | null = order.shiprocketOrderId ?? null;
+  let shipmentId: string | number | null = order.shipmentId ?? null;
+  let shiprocketError: string | null = null;
+
+  if (pushClaimed) {
+    const address = parseAddress(order.address, order.customerName, order.phone);
+    const shiprocketRes = await createShiprocketOrder({
+      orderId: order.id,
+      orderDate: new Date(order.createdAt).toISOString(),
+      customerName: address.fullName || order.customerName,
+      phone: address.phone || order.phone,
+      street: address.street || "Main Street",
+      city: address.city || "Delhi",
+      state: address.state || "Delhi",
+      pincode: address.pincode || "110001",
+      items: parseItems(order.items, order.total),
+      subtotal: order.subtotal,
+      paymentMethod: "COD",
+      codAmount: order.codAmount || order.total,
+    });
+
+    if (shiprocketRes.success) {
+      awb = shiprocketRes.awb || order.awb;
+      courierName = shiprocketRes.courierName || order.courierName;
+      shiprocketOrderId = shiprocketRes.shiprocketOrderId ?? order.shiprocketOrderId ?? null;
+      shipmentId = shiprocketRes.shipmentId ?? order.shipmentId ?? null;
+    } else {
+      shiprocketError = shiprocketRes.error || "Shiprocket push failed";
+      console.error(`[Shiprocket Push Failed] order=${order.id}: ${shiprocketError}`);
+      await resetShiprocketPushClaim(order.id);
+    }
+
+    await updateOrderPaymentAndShipping(order.id, {
+      shiprocketOrderId,
+      shipmentId,
+      awb,
+      courierName,
+      orderStatus: "Processing",
+    });
+  }
+
+  return { success: true, shiprocketPushClaimed: pushClaimed, awb, courierName, shiprocketOrderId, shipmentId, shiprocketError };
+}
+

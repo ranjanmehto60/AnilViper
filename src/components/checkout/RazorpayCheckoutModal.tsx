@@ -202,8 +202,8 @@ export function RazorpayCheckoutModal({
           <p className="mt-1 text-xs text-muted">
             {paymentMethod === "COD" ? (
               <>
-                Paying <span className="font-semibold text-ink">{formatINR(totalAmount)}</span> as COD booking fee ·{" "}
-                <span className="text-muted">{formatINR(codAmount)}</span> payable at delivery
+                Paying <span className="font-semibold text-ink">{formatINR(totalAmount)}</span> advance delivery charge ·{" "}
+                <span className="text-muted">{formatINR(codAmount)}</span> product price payable on delivery
               </>
             ) : (
               <>
@@ -292,7 +292,7 @@ export function RazorpayCheckoutModal({
               </>
             ) : paymentMethod === "COD" ? (
               <>
-                Pay {formatINR(totalAmount)} Booking & Place Order <ArrowRight className="w-4 h-4" />
+                Pay {formatINR(totalAmount)} Advance Delivery Charge & Place Order <ArrowRight className="w-4 h-4" />
               </>
             ) : (
               <>

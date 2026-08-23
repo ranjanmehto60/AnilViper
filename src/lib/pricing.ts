@@ -7,10 +7,7 @@ import {
   supportsBackIndPrint,
 } from "@/types/product";
 
-// COD customers pay the applicable delivery fee online as the booking amount.
-export function getCodBookingAmount(shipping: number): number {
-  return Math.max(0, Math.round(shipping));
-}
+export { getCodBookingAmount } from "@/config/commerce";
 
 const PROMO_CODES: Record<string, number> = {
   VIPER10: 10,

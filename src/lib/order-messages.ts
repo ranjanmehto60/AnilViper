@@ -54,7 +54,9 @@ export function buildWhatsAppOrderMessage(order: OrderRecord): string {
     ...(itemLines.length > 0 ? itemLines : ["• Viper Gear Equipment"]),
     "",
     order.paymentMethod === "COD"
-      ? `Total: ${formatMoney(order.total)} (${formatMoney(order.bookingAmount)} booking paid online, ${formatMoney(order.codAmount)} payable at delivery)`
+      ? (order.bookingAmount > 0
+          ? `Total: ${formatMoney(order.total)} (${formatMoney(order.bookingAmount)} advance delivery charge paid online, ${formatMoney(order.codAmount || order.total)} product price payable on delivery)`
+          : `Total: ${formatMoney(order.total)} (Cash on Delivery — ${formatMoney(order.codAmount || order.total)} payable at delivery)`)
       : `Total: ${formatMoney(order.total)} (paid online)`,
     "",
     "Estimated delivery: 2-4 business days.",
