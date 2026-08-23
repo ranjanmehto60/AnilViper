@@ -163,7 +163,7 @@ export const PRODUCTS: Product[] = [
     availableSizes: [160, 170, 180, 190, 200, 210, 220, 230, 240],
     features: [
       "Under 500g high-quality heavy-duty cotton construction.",
-      "Delivery parcel: 40 × 12 × 5 cm; ₹200 delivery below ₹1,000 and ₹350 below ₹5,000.",
+      "Delivery parcel: 40 × 12 × 5 cm; ₹200 delivery below ₹1,000 and ₹350 below ₹3,000.",
       "Reinforced 8-line stitching prevents fold sagging.",
       "Official WT & Dan Grade Gold Embroidery."
     ]
@@ -189,7 +189,7 @@ export const PRODUCTS: Product[] = [
     availableSizes: [140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240],
     features: [
       "500g High Impact EVA Protection Guards.",
-      "Delivery parcel: ₹200 delivery below ₹1,000 and ₹350 below ₹5,000.",
+      "Delivery parcel: ₹200 delivery below ₹1,000 and ₹350 below ₹3,000.",
       "Ergonomic fit with non-slip dual velcro straps.",
       "WT Approved for national sparring tournaments."
     ]

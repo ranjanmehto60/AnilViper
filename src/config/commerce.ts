@@ -3,7 +3,7 @@ const FREE_SHIPPING_PRODUCT_IDS = new Set([
   "viper-custom-1786626527750",
 ]);
 
-export const FREE_SHIPPING_THRESHOLD = 5000;
+export const FREE_SHIPPING_THRESHOLD = 3000;
 export const LOW_ORDER_SHIPPING_THRESHOLD = 1000;
 export const LOW_ORDER_SHIPPING_FEE = 200;
 export const SHIPPING_FEE_BELOW_FREE_THRESHOLD = 350;
@@ -47,7 +47,7 @@ function isBeltLine(line: ShippingLineInput): boolean {
 
 /**
  * Orders below ₹1,000 use ₹200 delivery; orders from ₹1,000 to below
- * ₹5,000 use ₹350. The free-shipping threshold uses the merchandise
+ * ₹3,000 use ₹350. The free-shipping threshold uses the merchandise
  * subtotal before promo discounts.
  */
 export function calculateShippingFee(subtotal: number, items: ShippingLineInput[]): number {

@@ -30,7 +30,7 @@ Viper Gears is a fast, mobile-first, modern D2C e-commerce platform built for Ta
 
 1. **Home Page (`/`)**:
    - Hero section with action Dobok imagery & Framer Motion text animations.
-   - Highlights bar: WT Approved Fabric, Free Pan-India Shipping above ₹5,000, 7-Day Returns, 500+ Dojangs.
+   - Highlights bar: WT Approved Fabric, Free Pan-India Shipping from ₹3,000 on prepaid orders, 7-Day Returns, 500+ Dojangs.
    - Featured products grid with `@storefront-ui/react` elements & quick add to cart.
    - Why Viper Gears pillars (Ultra-light 220 GSM, Reinforced 10-stitch cuffs, 3D Mesh air cooling).
    - Testimonial carousel, Gallery preview, Newsletter capture, and floating WhatsApp CTA button.
