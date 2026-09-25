@@ -182,10 +182,13 @@ function AccountContent() {
                     <span className="absolute left-3.5 top-3 text-xs font-semibold text-muted">+91</span>
                     <Input
                       placeholder="Enter 10-digit mobile number"
+                      type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel"
                       maxLength={10}
                       value={phoneInput}
                       onChange={(e) => setPhoneInput(e.target.value)}
-                      className="pl-12 h-11 text-xs"
+                      className="pl-12 h-11 text-base sm:text-xs"
                       autoFocus
                     />
                   </div>
@@ -203,10 +206,14 @@ function AccountContent() {
                     <KeyRound className="absolute left-3.5 top-3.5 h-4 w-4 text-muted" />
                     <Input
                       placeholder="Enter 6-digit OTP"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      autoComplete="one-time-code"
                       maxLength={6}
                       value={otpInput}
                       onChange={(e) => setOtpInput(e.target.value)}
-                      className="pl-10 h-11 text-xs font-mono text-center tracking-widest text-lg"
+                      className="pl-10 h-11 text-base sm:text-xs font-mono text-center tracking-widest text-lg"
                       autoFocus
                     />
                   </div>

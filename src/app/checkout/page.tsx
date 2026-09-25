@@ -150,14 +150,57 @@ export default function CheckoutPage() {
                     <p className="mt-2 text-sm text-muted">Use the address that should receive your order updates.</p>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Full name" name="fullName" value={formData.fullName} onChange={handleChange} />
-                    <Field label="Phone number" name="phone" value={formData.phone} onChange={handleChange} />
+                    <Field
+                      label="Full name"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      autoComplete="name"
+                    />
+                    <Field
+                      label="Phone number"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      maxLength={10}
+                    />
                   </div>
-                  <Field label="Flat / house / street address" name="street" value={formData.street} onChange={handleChange} />
+                  <Field
+                    label="Flat / house / street address"
+                    name="street"
+                    value={formData.street}
+                    onChange={handleChange}
+                    autoComplete="street-address"
+                  />
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <Field label="City" name="city" value={formData.city} onChange={handleChange} />
-                    <Field label="State" name="state" value={formData.state} onChange={handleChange} />
-                    <Field label="Pincode" name="pincode" value={formData.pincode} onChange={handleChange} maxLength={6} />
+                    <Field
+                      label="City"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      autoComplete="address-level2"
+                    />
+                    <Field
+                      label="State"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleChange}
+                      autoComplete="address-level1"
+                    />
+                    <Field
+                      label="Pincode"
+                      name="pincode"
+                      value={formData.pincode}
+                      onChange={handleChange}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      autoComplete="postal-code"
+                      maxLength={6}
+                    />
                   </div>
                   <Button type="submit" disabled={ordersPaused} className="mt-2 h-12 w-full rounded-full bg-ink text-sm text-white hover:bg-accent">
                     Continue to review <ArrowRight className="h-4 w-4" />
@@ -299,8 +342,44 @@ export default function CheckoutPage() {
   );
 }
 
-function Field({ label, name, value, onChange, maxLength }: { label: string; name: string; value: string; onChange: (event: React.ChangeEvent<HTMLInputElement>) => void; maxLength?: number }) {
-  return <label className="space-y-1.5"><span className="text-xs font-semibold text-ink">{label}</span><Input name={name} value={value} onChange={onChange} maxLength={maxLength} required className="bg-background" /></label>;
+function Field({
+  label,
+  name,
+  value,
+  onChange,
+  maxLength,
+  type = "text",
+  inputMode,
+  autoComplete,
+  pattern,
+}: {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  maxLength?: number;
+  type?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  autoComplete?: string;
+  pattern?: string;
+}) {
+  return (
+    <label className="space-y-1.5">
+      <span className="text-xs font-semibold text-ink">{label}</span>
+      <Input
+        name={name}
+        value={value}
+        onChange={onChange}
+        maxLength={maxLength}
+        type={type}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
+        pattern={pattern}
+        required
+        className="bg-background text-base sm:text-sm"
+      />
+    </label>
+  );
 }
 
 function Step({ number, label, active }: { number: string; label: string; active: boolean }) {

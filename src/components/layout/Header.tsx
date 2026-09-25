@@ -129,11 +129,25 @@ export function Header() {
                     </Link>
                   ))}
                 </nav>
-                <div className="mt-auto border-t border-border pt-5">
+                <div className="mt-auto space-y-3 border-t border-border pt-5">
+                  <Link
+                    href="/account?tab=wishlist"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-between text-sm font-semibold text-muted hover:text-foreground"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Heart className="h-4 w-4" /> Wishlist
+                    </span>
+                    {hydrated && wishlistCount > 0 && (
+                      <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-white">
+                        {wishlistCount}
+                      </span>
+                    )}
+                  </Link>
                   <Link
                     href="/account"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 text-sm font-semibold text-muted"
+                    className="flex items-center gap-2 text-sm font-semibold text-muted hover:text-foreground"
                   >
                     <User className="h-4 w-4" /> Account & orders
                   </Link>
@@ -202,7 +216,7 @@ export function Header() {
                 placeholder="Search doboks, belts, sparring gear..."
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                className="h-11 w-full rounded-lg border border-border bg-background px-11 pr-11 text-sm text-foreground outline-none transition-colors placeholder:text-subtle focus:border-accent"
+                className="h-11 w-full rounded-lg border border-border bg-background px-11 pr-11 text-base sm:text-sm text-foreground outline-none transition-colors placeholder:text-subtle focus:border-accent"
                 autoFocus
               />
               <button

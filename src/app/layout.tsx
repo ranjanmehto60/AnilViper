@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Outfit } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
@@ -16,6 +16,14 @@ const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
 });
+
+export const viewport: Viewport = {
+  themeColor: "#0b1220",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://vipergears.fit"),

@@ -86,7 +86,11 @@ export function PincodeChecker({ weightKg = 1 }: { weightKg?: number }) {
             value={pincode}
             onChange={(e) => setPincode(e.target.value)}
             maxLength={6}
-            className="h-10 bg-surface pl-9 text-xs text-foreground"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            autoComplete="postal-code"
+            className="h-10 bg-surface pl-9 text-base sm:text-xs text-foreground"
           />
         </div>
         <Button

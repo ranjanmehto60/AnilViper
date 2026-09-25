@@ -86,7 +86,7 @@ export default function ProductDetailPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <div className="editorial-page min-h-screen py-8 sm:py-12">
+      <div className="editorial-page min-h-screen py-8 pb-24 sm:py-12 lg:pb-12">
         <div className="mx-auto max-w-7xl space-y-12 px-4 sm:px-6">
           <nav className="flex items-center gap-2 text-xs text-muted"><Link href="/" className="hover:text-ink">Home</Link><ChevronRight className="h-3 w-3" /><Link href="/shop" className="hover:text-ink">Shop</Link><ChevronRight className="h-3 w-3" /><span className="max-w-xs truncate font-semibold text-ink">{product.name}</span></nav>
 
@@ -97,7 +97,7 @@ export default function ProductDetailPage() {
                 {discount > 0 && <span className="absolute left-4 top-4 rounded-full bg-accent px-3 py-1 text-[10px] font-semibold tracking-[0.08em] text-white uppercase">-{discount}%</span>}
                 <button onClick={() => { toggleWishlist(product); toast[isFavorite ? "info" : "success"](isFavorite ? "Removed from wishlist." : "Added to wishlist."); }} aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"} className={`absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-sm ${isFavorite ? "bg-accent text-white" : "bg-white/90 text-ink"}`}><Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} /></button>
               </div>
-              {product.images.length > 1 && <div className="mt-3 flex gap-3 overflow-x-auto pb-1">{product.images.map((image, index) => <button key={image} onClick={() => setActiveImageIndex(index)} className={`relative h-20 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-surface-2 ${activeImageIndex === index ? "border-ink" : "border-transparent opacity-65 hover:opacity-100"}`}><Image src={image} alt={`${product.name} view ${index + 1}`} fill className="object-cover object-top" /></button>)}</div>}
+              {product.images.length > 1 && <div className="mt-3 flex gap-3 overflow-x-auto pb-1 touch-scroll">{product.images.map((image, index) => <button key={image} onClick={() => setActiveImageIndex(index)} className={`relative h-20 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-surface-2 ${activeImageIndex === index ? "border-ink" : "border-transparent opacity-65 hover:opacity-100"}`}><Image src={image} alt={`${product.name} view ${index + 1}`} fill className="object-cover object-top" /></button>)}</div>}
             </div>
 
             <div className="lg:sticky lg:top-28 lg:self-start">
@@ -107,10 +107,10 @@ export default function ProductDetailPage() {
               <div className="mt-6 flex items-baseline gap-3"><span className="text-2xl font-semibold text-ink">{formatINR(product.price)}</span>{discount > 0 && <><span className="text-sm text-muted line-through">{formatINR(product.originalPrice)}</span><span className="text-xs font-semibold text-accent">Save {discount}%</span></>}</div>
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted">{product.description}</p>
 
-              <div className="mt-8 space-y-3 border-t border-border pt-6"><div className="flex items-center justify-between"><span className="text-sm font-semibold text-ink">Select height</span><button onClick={() => setSizeGuideOpen(true)} className="flex items-center gap-1 text-xs font-semibold text-accent hover:underline"><Ruler className="h-3.5 w-3.5" /> Size guide</button></div><div className="flex flex-wrap gap-2">{product.availableSizes.map((size) => <button key={size} onClick={() => setSelectedSize(size)} className={`rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors ${selectedSize === size ? "border-ink bg-ink text-white" : "border-border bg-surface text-muted hover:border-ink hover:text-ink"}`}>{size} cm</button>)}</div></div>
+              <div className="mt-8 space-y-3 border-t border-border pt-6"><div className="flex items-center justify-between"><span className="text-sm font-semibold text-ink">Select height</span><button onClick={() => setSizeGuideOpen(true)} className="flex items-center gap-1 text-xs font-semibold text-accent hover:underline"><Ruler className="h-3.5 w-3.5" /> Size guide</button></div><div className="flex flex-wrap gap-2">{product.availableSizes.map((size) => <button key={size} onClick={() => setSelectedSize(size)} className={`min-h-[40px] rounded-full border px-4 py-2 text-xs font-semibold transition-colors active:scale-95 ${selectedSize === size ? "border-ink bg-ink text-white" : "border-border bg-surface text-muted hover:border-ink hover:text-ink"}`}>{size} cm</button>)}</div></div>
               {supportsBackIndPrint(product) && <BackPrintSelector value={selectedBackPrint} onChange={setSelectedBackPrint} />}
 
-              <div className="mt-6 flex items-center justify-between gap-4"><span className="text-sm font-semibold text-ink">Quantity</span><div className="flex items-center rounded-full border border-border bg-surface"><button onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="p-2.5 text-muted hover:text-ink" aria-label="Decrease quantity"><Minus className="h-4 w-4" /></button><span className="min-w-8 text-center text-sm font-semibold text-ink">{quantity}</span><button onClick={() => setQuantity((value) => Math.min(10, value + 1))} className="p-2.5 text-muted hover:text-ink" aria-label="Increase quantity"><Plus className="h-4 w-4" /></button></div></div>
+              <div className="mt-6 flex items-center justify-between gap-4"><span className="text-sm font-semibold text-ink">Quantity</span><div className="flex items-center rounded-full border border-border bg-surface"><button onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="p-2.5 text-muted hover:text-ink active:scale-90" aria-label="Decrease quantity"><Minus className="h-4 w-4" /></button><span className="min-w-8 text-center text-sm font-semibold text-ink">{quantity}</span><button onClick={() => setQuantity((value) => Math.min(10, value + 1))} className="p-2.5 text-muted hover:text-ink active:scale-90" aria-label="Increase quantity"><Plus className="h-4 w-4" /></button></div></div>
 
               <div className="mt-6 grid gap-2 sm:grid-cols-2"><Button onClick={addToCart} disabled={!product.inStock} className="h-12 rounded-full bg-ink text-sm text-white hover:bg-accent disabled:opacity-50"><ShoppingBag className="h-4 w-4" /> Add to bag</Button><Button onClick={buyNow} disabled={!product.inStock} variant="outline" className="h-12 rounded-full border-border-strong text-sm hover:border-ink">Buy now <ArrowRight className="h-4 w-4 text-accent" /></Button></div>
               <div className="mt-6 grid grid-cols-2 gap-3 border-y border-border py-5 text-xs text-muted"><div><p className="font-semibold text-ink">Free size support</p><p className="mt-1">Use the guide before ordering.</p></div><div><p className="font-semibold text-ink">Need help?</p><p className="mt-1">Message the Viper team.</p></div></div>
@@ -128,6 +128,37 @@ export default function ProductDetailPage() {
           {relatedProducts.length > 0 && <section className="border-t border-border pt-12"><div className="mb-7"><p className="section-kicker mb-3">Keep exploring</p><h2 className="text-3xl font-medium tracking-tight text-ink sm:text-4xl">You may also like.</h2></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{relatedProducts.map((item) => <ProductCard key={item.id} product={item} />)}</div></section>}
         </div>
       </div>
+      {/* Mobile Sticky Add to Bag Bar */}
+      <aside aria-label="Quick order bar" className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-surface/95 p-3 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] backdrop-blur-md lg:hidden">
+        <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
+          <div className="min-w-0">
+            <span className="block truncate text-base font-bold text-ink">{formatINR(product.price)}</span>
+            <span className="block text-[11px] text-muted">
+              Size: <strong className="text-ink">{selectedSize} cm</strong>
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={addToCart}
+              disabled={!product.inStock}
+              size="sm"
+              className="h-11 rounded-full bg-ink px-5 text-xs font-semibold text-white hover:bg-accent active:scale-95 disabled:opacity-50"
+            >
+              <ShoppingBag className="mr-1.5 h-3.5 w-3.5" />
+              Add to bag
+            </Button>
+            <Button
+              onClick={buyNow}
+              disabled={!product.inStock}
+              size="sm"
+              variant="outline"
+              className="h-11 rounded-full border-border-strong px-4 text-xs font-semibold hover:border-ink active:scale-95"
+            >
+              Buy now
+            </Button>
+          </div>
+        </div>
+      </aside>
       <SizeGuideModal open={sizeGuideOpen} onOpenChange={setSizeGuideOpen} />
     </>
   );
