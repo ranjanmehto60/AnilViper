@@ -9,11 +9,6 @@ import {
 
 export { getCodBookingAmount } from "@/config/commerce";
 
-const PROMO_CODES: Record<string, number> = {
-  VIPER10: 10,
-  DOJANG20: 20,
-};
-
 export interface PricingLine {
   productId: string;
   name: string;
@@ -34,14 +29,8 @@ export interface PricingBreakdown {
   discountCode: string | null;
 }
 
-export function getDiscountPercent(code: string | null | undefined): number {
-  if (!code) return 0;
-  return PROMO_CODES[code.trim().toUpperCase()] ?? 0;
-}
-
 export async function computePricing(
-  lines: { productId: string; size: number; backPrintOption?: unknown; quantity: number }[],
-  discountCode: string | null | undefined
+  lines: { productId: string; size: number; backPrintOption?: unknown; quantity: number }[]
 ): Promise<{ breakdown: PricingBreakdown; error: string | null }> {
   if (!Array.isArray(lines) || lines.length === 0) {
     return { breakdown: emptyBreakdown(), error: "Your cart is empty" };
@@ -78,23 +67,21 @@ export async function computePricing(
     });
   }
 
-  const percent = getDiscountPercent(discountCode);
-  const discount = Math.round((subtotal * percent) / 100);
   const shipping = calculateShippingFee(
     subtotal,
     items.map((item) => ({ productId: item.productId, category: item.category, quantity: item.quantity }))
   );
 
-  const total = Math.max(0, subtotal - discount + shipping);
+  const total = Math.max(0, subtotal + shipping);
 
   return {
     breakdown: {
       items,
       subtotal,
-      discount,
+      discount: 0,
       shipping,
       total,
-      discountCode: percent > 0 && discountCode ? discountCode.trim().toUpperCase() : null,
+      discountCode: null,
     },
     error: null,
   };

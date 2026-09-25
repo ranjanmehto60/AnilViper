@@ -24,7 +24,7 @@ interface OrderItemInput {
 
 export async function POST(request: Request) {
   try {
-    let body: { items?: OrderItemInput[]; address?: OrderAddress; discountCode?: unknown; paymentMethod?: unknown };
+    let body: { items?: OrderItemInput[]; address?: OrderAddress; paymentMethod?: unknown };
     try {
       body = await request.json();
     } catch {
@@ -60,16 +60,15 @@ export async function POST(request: Request) {
       quantity: Number(item?.quantity),
     }));
 
-    const discountCode = typeof body.discountCode === "string" ? body.discountCode : null;
     const paymentMethod = body.paymentMethod === "COD" ? "COD" : "PREPAID";
-    const { breakdown, error } = await computePricing(lines, discountCode);
+    const { breakdown, error } = await computePricing(lines);
     if (error) {
       return NextResponse.json({ error }, { status: 400 });
     }
 
     const isCod = paymentMethod === "COD";
     const bookingAmount = isCod ? getCodBookingAmount(breakdown.subtotal) : 0;
-    const codAmount = isCod ? Math.max(0, breakdown.subtotal - breakdown.discount) : 0;
+    const codAmount = isCod ? breakdown.subtotal : 0;
     const orderTotal = isCod ? codAmount + bookingAmount : breakdown.total;
     const amountPaise = Math.round((isCod ? bookingAmount : breakdown.total) * 100);
 

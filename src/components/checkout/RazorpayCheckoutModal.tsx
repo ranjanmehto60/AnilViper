@@ -38,7 +38,6 @@ interface RazorpayCheckoutModalProps {
   customerPhone: string;
   items: CartOrderLine[];
   address: AddressPayload;
-  discountCode?: string | null;
   paymentMethod: "PREPAID" | "COD";
   codAmount?: number;
   onSuccess: (orderId: string, paymentId: string) => void;
@@ -52,7 +51,6 @@ export function RazorpayCheckoutModal({
   customerPhone,
   items,
   address,
-  discountCode,
   paymentMethod,
   codAmount = 0,
   onSuccess,
@@ -90,7 +88,7 @@ export function RazorpayCheckoutModal({
       const createResponse = await fetch("/api/payments/create-razorpay-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, address, discountCode, paymentMethod }),
+        body: JSON.stringify({ items, address, paymentMethod }),
       });
 
       const created = await parseJsonResponse(createResponse);

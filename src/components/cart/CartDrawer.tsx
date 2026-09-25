@@ -3,14 +3,12 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Minus, Plus, ShoppingBag, Tag, Trash2 } from "lucide-react";
+import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 import { DEFAULT_BACK_PRINT_OPTION, getBackPrintLabel, supportsBackIndPrint } from "@/types/product";
 import { formatINR } from "@/lib/utils";
 import { Sheet as SheetRoot, SheetContent as Content, SheetHeader as Header, SheetTitle as Title, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 
 interface CartDrawerProps {
   children?: React.ReactNode;
@@ -19,24 +17,14 @@ interface CartDrawerProps {
 }
 
 export function CartDrawer({ children, isOpen, onClose }: CartDrawerProps) {
-  const { items, removeItem, updateQuantity, getSubtotal, getShippingFee, getDiscountAmount, getTotal, getItemCount, applyDiscountCode, discountCode, removeDiscountCode, discountPercentage } = useCartStore();
-  const [promoInput, setPromoInput] = useState("");
+  const { items, removeItem, updateQuantity, getSubtotal, getShippingFee, getTotal, getItemCount } = useCartStore();
   const [internalOpen, setInternalOpen] = useState(false);
   const controlled = typeof isOpen === "boolean";
   const openState = controlled ? isOpen : internalOpen;
   const handleOpenChange = (value: boolean) => controlled ? (!value && onClose?.()) : setInternalOpen(value);
   const subtotal = getSubtotal();
   const shipping = getShippingFee();
-  const discount = getDiscountAmount();
   const total = getTotal();
-
-  const handleApplyPromo = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (applyDiscountCode(promoInput)) {
-      toast.success(`Promo code ${promoInput.toUpperCase()} applied.`);
-      setPromoInput("");
-    } else toast.error("Invalid code. Try VIPER10 or DOJANG20.");
-  };
 
   return (
     <SheetRoot open={openState} onOpenChange={handleOpenChange}>
@@ -62,10 +50,9 @@ export function CartDrawer({ children, isOpen, onClose }: CartDrawerProps) {
                   <button onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedBackPrint)} aria-label={`Remove ${item.product.name}`} className="absolute right-0 top-0 text-subtle transition-colors hover:text-danger"><Trash2 className="h-4 w-4" /></button>
                 </div>
               ))}
-              {discountCode ? <div className="flex items-center justify-between rounded-lg border border-accent/25 bg-accent/10 p-3 text-xs"><span className="flex items-center gap-1.5 font-semibold text-accent"><Tag className="h-3.5 w-3.5" /> {discountCode} ({discountPercentage}% off)</span><button onClick={removeDiscountCode} className="text-muted underline">Remove</button></div> : <form onSubmit={handleApplyPromo} className="flex gap-2"><Input placeholder="Promo code" value={promoInput} onChange={(event) => setPromoInput(event.target.value)} className="h-10 bg-background text-xs" /><Button type="submit" variant="outline" className="h-10 rounded-full px-4 text-xs">Apply</Button></form>}
             </div>
             <div className="space-y-4 border-t border-border bg-background p-6">
-              <div className="space-y-2 text-sm"><div className="flex justify-between text-muted"><span>Subtotal</span><span className="font-semibold text-ink">{formatINR(subtotal)}</span></div>{discount > 0 && <div className="flex justify-between text-accent"><span>Discount</span><span>-{formatINR(discount)}</span></div>}<div className="flex justify-between text-muted"><span>Shipping</span><span className="font-semibold text-ink">{shipping === 0 ? "Free" : formatINR(shipping)}</span></div><div className="flex justify-between border-t border-border pt-3 text-base font-semibold text-ink"><span>Total</span><span>{formatINR(total)}</span></div></div>
+              <div className="space-y-2 text-sm"><div className="flex justify-between text-muted"><span>Subtotal</span><span className="font-semibold text-ink">{formatINR(subtotal)}</span></div><div className="flex justify-between text-muted"><span>Shipping</span><span className="font-semibold text-ink">{shipping === 0 ? "Free" : formatINR(shipping)}</span></div><div className="flex justify-between border-t border-border pt-3 text-base font-semibold text-ink"><span>Total</span><span>{formatINR(total)}</span></div></div>
               <Button asChild onClick={() => handleOpenChange(false)} className="h-12 w-full rounded-full bg-ink text-sm text-white hover:bg-accent"><Link href="/checkout">Checkout <ArrowRight className="h-4 w-4" /></Link></Button>
               <p className="text-center text-[11px] text-muted">Secure checkout via Razorpay.</p>
             </div>

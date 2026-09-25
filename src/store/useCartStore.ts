@@ -11,16 +11,11 @@ import { calculateShippingFee } from "@/config/commerce";
 
 interface CartState {
   items: CartItem[];
-  discountCode: string | null;
-  discountPercentage: number;
   addItem: (product: Product, selectedSize: number, selectedBackPrint?: BackPrintOption, quantity?: number) => void;
   removeItem: (productId: string, selectedSize: number, selectedBackPrint?: BackPrintOption) => void;
   updateQuantity: (productId: string, selectedSize: number, delta: number, selectedBackPrint?: BackPrintOption) => void;
   clearCart: () => void;
-  applyDiscountCode: (code: string) => boolean;
-  removeDiscountCode: () => void;
   getSubtotal: () => number;
-  getDiscountAmount: () => number;
   getShippingFee: () => number;
   getTotal: () => number;
   getItemCount: () => number;
@@ -32,8 +27,6 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      discountCode: null,
-      discountPercentage: 0,
 
       addItem: (product, selectedSize, selectedBackPrint = DEFAULT_BACK_PRINT_OPTION, quantity = 1) => {
         const normalizedBackPrint = isBackPrintOption(selectedBackPrint)
@@ -113,23 +106,7 @@ export const useCartStore = create<CartState>()(
       },
 
       clearCart: () => {
-        set({ items: [], discountCode: null, discountPercentage: 0 });
-      },
-
-      applyDiscountCode: (code: string) => {
-        const cleanCode = code.trim().toUpperCase();
-        if (cleanCode === "VIPER10") {
-          set({ discountCode: "VIPER10", discountPercentage: 10 });
-          return true;
-        } else if (cleanCode === "DOJANG20") {
-          set({ discountCode: "DOJANG20", discountPercentage: 20 });
-          return true;
-        }
-        return false;
-      },
-
-      removeDiscountCode: () => {
-        set({ discountCode: null, discountPercentage: 0 });
+        set({ items: [] });
       },
 
       getSubtotal: () => {
@@ -137,12 +114,6 @@ export const useCartStore = create<CartState>()(
           (total, item) => total + item.product.price * item.quantity,
           0
         );
-      },
-
-      getDiscountAmount: () => {
-        const subtotal = get().getSubtotal();
-        const pct = get().discountPercentage;
-        return Math.round((subtotal * pct) / 100);
       },
 
       getShippingFee: () => {
@@ -161,9 +132,8 @@ export const useCartStore = create<CartState>()(
 
       getTotal: () => {
         const subtotal = get().getSubtotal();
-        const discount = get().getDiscountAmount();
         const shipping = get().getShippingFee();
-        return Math.max(0, subtotal - discount + shipping);
+        return Math.max(0, subtotal + shipping);
       },
 
       getItemCount: () => {

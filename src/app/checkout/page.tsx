@@ -25,14 +25,13 @@ const checkoutSchema = z.object({
 });
 
 export default function CheckoutPage() {
-  const { items, discountCode, getSubtotal, getShippingFee, getDiscountAmount, getTotal, clearCart } = useCartStore();
+  const { items, getSubtotal, getShippingFee, getTotal, clearCart } = useCartStore();
   const hydrated = useHydrated();
   const subtotal = getSubtotal();
   const shipping = getShippingFee();
-  const discount = getDiscountAmount();
   const prepaidTotal = getTotal();
   const bookingAmount = getCodBookingAmount(subtotal);
-  const codAmount = Math.max(0, subtotal - discount);
+  const codAmount = subtotal;
   const codTotal = codAmount + bookingAmount;
   const packageDetails = getShippingPackageDetails(
     items.map((item) => ({ category: item.product.category, quantity: item.quantity })),
@@ -250,12 +249,6 @@ export default function CheckoutPage() {
                   <span>Product price</span>
                   <span className="font-semibold text-ink">{formatINR(subtotal)}</span>
                 </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-accent">
-                    <span>Discount</span>
-                    <span>-{formatINR(discount)}</span>
-                  </div>
-                )}
                 <div className="flex justify-between text-muted">
                   <span>Delivery charge</span>
                   <span className="font-semibold text-ink">{paymentMethod === "COD" ? formatINR(bookingAmount) : (shipping === 0 ? "Free" : formatINR(shipping))}</span>
@@ -298,7 +291,6 @@ export default function CheckoutPage() {
           quantity: item.quantity,
         }))}
         address={{ ...formData }}
-        discountCode={discountCode}
         paymentMethod={paymentMethod}
         codAmount={paymentMethod === "COD" ? codAmount : 0}
         onSuccess={handlePaymentSuccess}

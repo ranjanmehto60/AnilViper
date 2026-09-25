@@ -48,7 +48,7 @@ function isBeltLine(line: ShippingLineInput): boolean {
 /**
  * Orders below ₹1,000 use ₹200 delivery; orders from ₹1,000 to below
  * ₹3,000 use ₹350. The free-shipping threshold uses the merchandise
- * subtotal before promo discounts.
+ * subtotal.
  */
 export function calculateShippingFee(subtotal: number, items: ShippingLineInput[]): number {
   if (items.length === 0 || items.some((item) => item.productId && hasFreeShippingOverride(item.productId))) {

@@ -57,7 +57,7 @@ Viper Gears is a fast, mobile-first, modern D2C e-commerce platform built for Ta
    - Chattarpur Delhi location info, clickable phone link (+91-9871674886), Google Maps iframe embed.
 
 6. **Cart & 3-Step Checkout (`/cart`, `/checkout`)**:
-   - Slide-over Cart Drawer + Full Cart Page with promo codes (`VIPER10`).
+   - Slide-over Cart Drawer + Full Cart Page.
    - 3-step checkout leading to simulated Razorpay Gateway modal.
 
 7. **User Account (`/account`)**:
