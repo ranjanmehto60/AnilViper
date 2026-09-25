@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { HeroSection } from "@/components/sections/HeroSection";
-import { FlashDropBanner } from "@/components/sections/FlashDropBanner";
 import { WhyViperSection } from "@/components/sections/WhyViperSection";
 import { DojangBulkSection } from "@/components/sections/DojangBulkSection";
 import { TestimonialsCarousel } from "@/components/sections/TestimonialsCarousel";
@@ -88,7 +87,6 @@ export default function HomePage() {
       </section>
 
       <WhyViperSection />
-      <FlashDropBanner product={products.find((product) => product.slug.includes("competition-taekwondo-dobok-india-edition"))} />
       <DojangBulkSection />
       <TestimonialsCarousel />
       <NewsletterSection />
