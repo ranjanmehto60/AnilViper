@@ -4,6 +4,8 @@ export type CategoryType =
   | "Kids Dobok" 
   | "Black Belt Dobok" 
   | "Belts & Accessories"
+  | "Indian edition equipments & doboks"
+  | "Indian Edition Equipments & Doboks"
   | "Test Product";
 
 export const BACK_PRINT_OPTIONS = [

@@ -8,6 +8,8 @@ const VALID_CATEGORIES: CategoryType[] = [
   "Kids Dobok",
   "Black Belt Dobok",
   "Belts & Accessories",
+  "Indian edition equipments & doboks",
+  "Indian Edition Equipments & Doboks",
 ];
 
 function slugify(value: string): string {

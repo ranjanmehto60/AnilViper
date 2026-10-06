@@ -12,20 +12,47 @@ import { Input } from "@/components/ui/input";
 import { formatINR } from "@/lib/utils";
 import { Sheet as SheetRoot, SheetContent as Content, SheetTrigger } from "@/components/ui/sheet";
 
+const SHOP_CATEGORIES: (CategoryType | "All")[] = [
+  "All",
+  "Beginner Dobok",
+  "Advanced Competition Dobok",
+  "Kids Dobok",
+  "Black Belt Dobok",
+  "Belts & Accessories",
+  "Indian edition equipments & doboks",
+];
+
 function ShopContent() {
   const searchParams = useSearchParams();
-  const initialCategory = searchParams.get("category") as CategoryType | null;
+  const rawCategoryParam = searchParams.get("category");
+  const matchedCategory = SHOP_CATEGORIES.find(
+    (c) => c.toLowerCase() === rawCategoryParam?.toLowerCase()
+  );
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType | "All">(initialCategory || "All");
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType | "All">(
+    matchedCategory || "All"
+  );
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [maxPrice, setMaxPrice] = useState(5000);
   const [wtOnly, setWtOnly] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const categories: (CategoryType | "All")[] = ["All", "Beginner Dobok", "Advanced Competition Dobok", "Kids Dobok", "Black Belt Dobok", "Belts & Accessories"];
+  const categories = SHOP_CATEGORIES;
   const availableSizes = [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240];
+
+  useEffect(() => {
+    const rawCategory = searchParams.get("category");
+    if (rawCategory) {
+      const match = SHOP_CATEGORIES.find(
+        (c) => c.toLowerCase() === rawCategory.toLowerCase()
+      );
+      if (match) {
+        setSelectedCategory(match);
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetch("/api/products")
@@ -38,7 +65,12 @@ function ShopContent() {
   }, []);
 
   const filteredProducts = useMemo(() => products.filter((product) => {
-    if (selectedCategory !== "All" && product.category !== selectedCategory) return false;
+    if (
+      selectedCategory !== "All" &&
+      product.category.toLowerCase() !== selectedCategory.toLowerCase()
+    ) {
+      return false;
+    }
     if (selectedSize !== null && !product.availableSizes.includes(selectedSize)) return false;
     if (product.price > maxPrice) return false;
     if (wtOnly && !product.isWTApproved) return false;

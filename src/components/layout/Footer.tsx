@@ -33,6 +33,7 @@ export function Footer() {
               ["Black belt doboks", "/shop?category=Black+Belt+Dobok"],
               ["Junior doboks", "/shop?category=Kids+Dobok"],
               ["Belts & accessories", "/shop?category=Belts+%26+Accessories"],
+              ["Indian edition equipments & doboks", "/shop?category=Indian+edition+equipments+%26+doboks"],
             ]}
           />
           <FooterColumn
