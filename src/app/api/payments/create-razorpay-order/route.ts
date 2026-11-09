@@ -19,6 +19,7 @@ interface OrderItemInput {
   productId?: unknown;
   size?: unknown;
   backPrintOption?: unknown;
+  shoulderFlagOption?: unknown;
   quantity?: unknown;
 }
 
@@ -57,6 +58,7 @@ export async function POST(request: Request) {
       productId: typeof item?.productId === "string" ? item.productId : "",
       size: Number(item?.size),
       backPrintOption: item?.backPrintOption,
+      shoulderFlagOption: item?.shoulderFlagOption,
       quantity: Number(item?.quantity),
     }));
 

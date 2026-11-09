@@ -3,8 +3,12 @@ import { calculateShippingFee } from "@/config/commerce";
 import {
   BackPrintOption,
   DEFAULT_BACK_PRINT_OPTION,
+  DEFAULT_SHOULDER_FLAG_OPTION,
   isBackPrintOption,
+  isShoulderFlagOption,
+  ShoulderFlagOption,
   supportsBackIndPrint,
+  supportsShoulderFlag,
 } from "@/types/product";
 
 export { getCodBookingAmount } from "@/config/commerce";
@@ -15,6 +19,7 @@ export interface PricingLine {
   category: string;
   size: number;
   backPrintOption?: BackPrintOption;
+  shoulderFlagOption?: ShoulderFlagOption;
   quantity: number;
   unitPrice: number;
   lineTotal: number;
@@ -30,7 +35,13 @@ export interface PricingBreakdown {
 }
 
 export async function computePricing(
-  lines: { productId: string; size: number; backPrintOption?: unknown; quantity: number }[]
+  lines: {
+    productId: string;
+    size: number;
+    backPrintOption?: unknown;
+    shoulderFlagOption?: unknown;
+    quantity: number;
+  }[]
 ): Promise<{ breakdown: PricingBreakdown; error: string | null }> {
   if (!Array.isArray(lines) || lines.length === 0) {
     return { breakdown: emptyBreakdown(), error: "Your cart is empty" };
@@ -52,6 +63,10 @@ export async function computePricing(
     if (!isBackPrintOption(backPrintOption)) {
       return { breakdown: emptyBreakdown(), error: `Please select a valid back print option for ${product.name}` };
     }
+    const shoulderFlagOption = line.shoulderFlagOption ?? DEFAULT_SHOULDER_FLAG_OPTION;
+    if (!isShoulderFlagOption(shoulderFlagOption)) {
+      return { breakdown: emptyBreakdown(), error: `Please select a valid shoulder flag option for ${product.name}` };
+    }
     const quantity = Math.max(1, Math.min(10, Number(line.quantity) || 1));
     const lineTotal = product.price * quantity;
     subtotal += lineTotal;
@@ -61,6 +76,7 @@ export async function computePricing(
       category: product.category,
       size: line.size,
       ...(supportsBackIndPrint(product) ? { backPrintOption } : {}),
+      ...(supportsShoulderFlag(product) ? { shoulderFlagOption } : {}),
       quantity,
       unitPrice: product.price,
       lineTotal,

@@ -4,16 +4,36 @@ import {
   BackPrintOption,
   CartItem,
   DEFAULT_BACK_PRINT_OPTION,
+  DEFAULT_SHOULDER_FLAG_OPTION,
   isBackPrintOption,
+  isShoulderFlagOption,
   Product,
+  ShoulderFlagOption,
 } from "@/types/product";
 import { calculateShippingFee } from "@/config/commerce";
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: Product, selectedSize: number, selectedBackPrint?: BackPrintOption, quantity?: number) => void;
-  removeItem: (productId: string, selectedSize: number, selectedBackPrint?: BackPrintOption) => void;
-  updateQuantity: (productId: string, selectedSize: number, delta: number, selectedBackPrint?: BackPrintOption) => void;
+  addItem: (
+    product: Product,
+    selectedSize: number,
+    selectedBackPrint?: BackPrintOption,
+    selectedShoulderFlagOrQty?: ShoulderFlagOption | number,
+    quantity?: number
+  ) => void;
+  removeItem: (
+    productId: string,
+    selectedSize: number,
+    selectedBackPrint?: BackPrintOption,
+    selectedShoulderFlag?: ShoulderFlagOption
+  ) => void;
+  updateQuantity: (
+    productId: string,
+    selectedSize: number,
+    delta: number,
+    selectedBackPrint?: BackPrintOption,
+    selectedShoulderFlag?: ShoulderFlagOption
+  ) => void;
   clearCart: () => void;
   getSubtotal: () => number;
   getShippingFee: () => number;
@@ -28,24 +48,43 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      addItem: (product, selectedSize, selectedBackPrint = DEFAULT_BACK_PRINT_OPTION, quantity = 1) => {
+      addItem: (
+        product,
+        selectedSize,
+        selectedBackPrint = DEFAULT_BACK_PRINT_OPTION,
+        selectedShoulderFlagOrQty = DEFAULT_SHOULDER_FLAG_OPTION,
+        quantity = 1
+      ) => {
         const normalizedBackPrint = isBackPrintOption(selectedBackPrint)
           ? selectedBackPrint
           : DEFAULT_BACK_PRINT_OPTION;
+
+        let normalizedShoulderFlag: ShoulderFlagOption = DEFAULT_SHOULDER_FLAG_OPTION;
+        let finalQuantity = 1;
+
+        if (typeof selectedShoulderFlagOrQty === "number") {
+          finalQuantity = selectedShoulderFlagOrQty;
+        } else {
+          normalizedShoulderFlag = isShoulderFlagOption(selectedShoulderFlagOrQty)
+            ? selectedShoulderFlagOrQty
+            : DEFAULT_SHOULDER_FLAG_OPTION;
+          finalQuantity = typeof quantity === "number" ? quantity : 1;
+        }
 
         set((state) => {
           const existingIndex = state.items.findIndex(
             (item) =>
               item.product.id === product.id &&
               item.selectedSize === selectedSize &&
-              (item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION) === normalizedBackPrint
+              (item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION) === normalizedBackPrint &&
+              (item.selectedShoulderFlag ?? DEFAULT_SHOULDER_FLAG_OPTION) === normalizedShoulderFlag
           );
 
           if (existingIndex > -1) {
             const updatedItems = [...state.items];
             updatedItems[existingIndex].quantity = Math.min(
               MAX_QUANTITY_PER_LINE,
-              updatedItems[existingIndex].quantity + quantity
+              updatedItems[existingIndex].quantity + finalQuantity
             );
             return { items: updatedItems };
           }
@@ -57,17 +96,26 @@ export const useCartStore = create<CartState>()(
                 product,
                 selectedSize,
                 selectedBackPrint: normalizedBackPrint,
-                quantity: Math.min(MAX_QUANTITY_PER_LINE, quantity),
+                selectedShoulderFlag: normalizedShoulderFlag,
+                quantity: Math.min(MAX_QUANTITY_PER_LINE, finalQuantity),
               },
             ],
           };
         });
       },
 
-      removeItem: (productId, selectedSize, selectedBackPrint = DEFAULT_BACK_PRINT_OPTION) => {
+      removeItem: (
+        productId,
+        selectedSize,
+        selectedBackPrint = DEFAULT_BACK_PRINT_OPTION,
+        selectedShoulderFlag = DEFAULT_SHOULDER_FLAG_OPTION
+      ) => {
         const normalizedBackPrint = isBackPrintOption(selectedBackPrint)
           ? selectedBackPrint
           : DEFAULT_BACK_PRINT_OPTION;
+        const normalizedShoulderFlag = isShoulderFlagOption(selectedShoulderFlag)
+          ? selectedShoulderFlag
+          : DEFAULT_SHOULDER_FLAG_OPTION;
 
         set((state) => ({
           items: state.items.filter(
@@ -75,16 +123,26 @@ export const useCartStore = create<CartState>()(
               !(
                 item.product.id === productId &&
                 item.selectedSize === selectedSize &&
-                (item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION) === normalizedBackPrint
+                (item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION) === normalizedBackPrint &&
+                (item.selectedShoulderFlag ?? DEFAULT_SHOULDER_FLAG_OPTION) === normalizedShoulderFlag
               )
           ),
         }));
       },
 
-      updateQuantity: (productId, selectedSize, delta, selectedBackPrint = DEFAULT_BACK_PRINT_OPTION) => {
+      updateQuantity: (
+        productId,
+        selectedSize,
+        delta,
+        selectedBackPrint = DEFAULT_BACK_PRINT_OPTION,
+        selectedShoulderFlag = DEFAULT_SHOULDER_FLAG_OPTION
+      ) => {
         const normalizedBackPrint = isBackPrintOption(selectedBackPrint)
           ? selectedBackPrint
           : DEFAULT_BACK_PRINT_OPTION;
+        const normalizedShoulderFlag = isShoulderFlagOption(selectedShoulderFlag)
+          ? selectedShoulderFlag
+          : DEFAULT_SHOULDER_FLAG_OPTION;
 
         set((state) => {
           const updatedItems = state.items
@@ -92,7 +150,8 @@ export const useCartStore = create<CartState>()(
               if (
                 item.product.id === productId &&
                 item.selectedSize === selectedSize &&
-                (item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION) === normalizedBackPrint
+                (item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION) === normalizedBackPrint &&
+                (item.selectedShoulderFlag ?? DEFAULT_SHOULDER_FLAG_OPTION) === normalizedShoulderFlag
               ) {
                 const newQty = Math.min(MAX_QUANTITY_PER_LINE, item.quantity + delta);
                 return newQty > 0 ? { ...item, quantity: newQty } : null;

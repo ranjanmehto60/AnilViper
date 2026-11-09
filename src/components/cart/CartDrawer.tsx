@@ -5,7 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
-import { DEFAULT_BACK_PRINT_OPTION, getBackPrintLabel, supportsBackIndPrint } from "@/types/product";
+import {
+  DEFAULT_BACK_PRINT_OPTION,
+  DEFAULT_SHOULDER_FLAG_OPTION,
+  getBackPrintLabel,
+  getShoulderFlagLabel,
+  supportsBackIndPrint,
+  supportsShoulderFlag,
+} from "@/types/product";
 import { formatINR } from "@/lib/utils";
 import { Sheet as SheetRoot, SheetContent as Content, SheetHeader as Header, SheetTitle as Title, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -44,10 +51,10 @@ export function CartDrawer({ children, isOpen, onClose }: CartDrawerProps) {
           <>
             <div className="flex-1 space-y-4 overflow-y-auto p-6">
               {items.map((item) => (
-                <div key={`${item.product.id}-${item.selectedSize}-${item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION}`} className="relative flex gap-3 border-b border-border pb-4">
+                <div key={`${item.product.id}-${item.selectedSize}-${item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION}-${item.selectedShoulderFlag ?? DEFAULT_SHOULDER_FLAG_OPTION}`} className="relative flex gap-3 border-b border-border pb-4">
                   <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-lg bg-surface-2"><Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover object-top" /></div>
-                  <div className="min-w-0 flex-1"><h4 className="line-clamp-2 pr-5 text-sm font-medium leading-snug text-ink">{item.product.name}</h4><p className="mt-1 text-xs text-accent">{item.selectedSize} cm</p>{supportsBackIndPrint(item.product) && <p className="mt-1 text-[11px] text-muted">{getBackPrintLabel(item.selectedBackPrint)}</p>}<div className="mt-3 flex items-center justify-between gap-3"><div className="flex items-center rounded-full border border-border bg-background"><button onClick={() => updateQuantity(item.product.id, item.selectedSize, -1, item.selectedBackPrint)} aria-label="Decrease quantity" className="p-2 sm:p-1.5 text-muted hover:text-ink active:scale-90"><Minus className="h-3.5 w-3.5" /></button><span className="min-w-6 text-center text-xs font-semibold text-ink">{item.quantity}</span><button onClick={() => updateQuantity(item.product.id, item.selectedSize, 1, item.selectedBackPrint)} aria-label="Increase quantity" className="p-2 sm:p-1.5 text-muted hover:text-ink active:scale-90"><Plus className="h-3.5 w-3.5" /></button></div><span className="text-sm font-semibold text-ink">{formatINR(item.product.price * item.quantity)}</span></div></div>
-                  <button onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedBackPrint)} aria-label={`Remove ${item.product.name}`} className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-full text-subtle transition-colors hover:text-danger active:text-danger"><Trash2 className="h-4 w-4" /></button>
+                  <div className="min-w-0 flex-1"><h4 className="line-clamp-2 pr-5 text-sm font-medium leading-snug text-ink">{item.product.name}</h4><p className="mt-1 text-xs text-accent">{item.selectedSize} cm</p>{supportsBackIndPrint(item.product) && <p className="mt-1 text-[11px] text-muted">{getBackPrintLabel(item.selectedBackPrint)}</p>}{supportsShoulderFlag(item.product) && <p className="mt-1 text-[11px] text-muted">Flag: {getShoulderFlagLabel(item.selectedShoulderFlag)}</p>}<div className="mt-3 flex items-center justify-between gap-3"><div className="flex items-center rounded-full border border-border bg-background"><button onClick={() => updateQuantity(item.product.id, item.selectedSize, -1, item.selectedBackPrint, item.selectedShoulderFlag)} aria-label="Decrease quantity" className="p-2 sm:p-1.5 text-muted hover:text-ink active:scale-90"><Minus className="h-3.5 w-3.5" /></button><span className="min-w-6 text-center text-xs font-semibold text-ink">{item.quantity}</span><button onClick={() => updateQuantity(item.product.id, item.selectedSize, 1, item.selectedBackPrint, item.selectedShoulderFlag)} aria-label="Increase quantity" className="p-2 sm:p-1.5 text-muted hover:text-ink active:scale-90"><Plus className="h-3.5 w-3.5" /></button></div><span className="text-sm font-semibold text-ink">{formatINR(item.product.price * item.quantity)}</span></div></div>
+                  <button onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedBackPrint, item.selectedShoulderFlag)} aria-label={`Remove ${item.product.name}`} className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-full text-subtle transition-colors hover:text-danger active:text-danger"><Trash2 className="h-4 w-4" /></button>
                 </div>
               ))}
             </div>

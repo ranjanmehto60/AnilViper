@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { BackPrintOption } from "@/types/product";
+import { BackPrintOption, ShoulderFlagOption } from "@/types/product";
 import { formatINR } from "@/lib/utils";
 import { ShieldCheck, CheckCircle2, CreditCard, Smartphone, Building2, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ interface CartOrderLine {
   productId: string;
   size: number;
   backPrintOption: BackPrintOption;
+  shoulderFlagOption?: ShoulderFlagOption;
   quantity: number;
 }
 

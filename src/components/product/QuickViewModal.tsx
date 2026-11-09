@@ -3,7 +3,15 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { DEFAULT_BACK_PRINT_OPTION, getBackPrintLabel, Product, supportsBackIndPrint } from "@/types/product";
+import {
+  DEFAULT_BACK_PRINT_OPTION,
+  DEFAULT_SHOULDER_FLAG_OPTION,
+  getBackPrintLabel,
+  getShoulderFlagLabel,
+  Product,
+  supportsBackIndPrint,
+  supportsShoulderFlag,
+} from "@/types/product";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +19,7 @@ import { formatINR } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
 import { SizeGuideModal } from "@/components/product/SizeGuideModal";
 import { BackPrintSelector } from "@/components/product/BackPrintSelector";
+import { ShoulderFlagSelector } from "@/components/product/ShoulderFlagSelector";
 import { ShieldCheck, Star, ShoppingBag, Ruler, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
@@ -25,13 +34,14 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
     product.availableSizes.includes(170) ? 170 : product.availableSizes[0]
   );
   const [selectedBackPrint, setSelectedBackPrint] = useState(DEFAULT_BACK_PRINT_OPTION);
+  const [selectedShoulderFlag, setSelectedShoulderFlag] = useState(DEFAULT_SHOULDER_FLAG_OPTION);
   const [quantity] = useState<number>(1);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
 
   const handleAddToCart = () => {
-    addItem(product, selectedSize, selectedBackPrint, quantity);
-    toast.success(`Added ${quantity}x ${product.name} (${selectedSize}cm, ${getBackPrintLabel(selectedBackPrint)}) to Cart!`);
+    addItem(product, selectedSize, selectedBackPrint, selectedShoulderFlag, quantity);
+    toast.success(`Added ${quantity}x ${product.name} (${selectedSize}cm, ${getBackPrintLabel(selectedBackPrint)}, Flag: ${getShoulderFlagLabel(selectedShoulderFlag)}) to Cart!`);
     onClose();
   };
 
@@ -127,6 +137,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                 </div>
 
                 {supportsBackIndPrint(product) && <BackPrintSelector value={selectedBackPrint} onChange={setSelectedBackPrint} />}
+                {supportsShoulderFlag(product) && <ShoulderFlagSelector value={selectedShoulderFlag} onChange={setSelectedShoulderFlag} />}
               </div>
 
               {/* Action Buttons */}

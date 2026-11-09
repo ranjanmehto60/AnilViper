@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { formatINR } from "@/lib/utils";
-import { getBackPrintLabel, Product, supportsBackIndPrintCategory } from "@/types/product";
+import {
+  getBackPrintLabel,
+  getShoulderFlagLabel,
+  Product,
+  supportsBackIndPrintCategory,
+  supportsShoulderFlagCategory,
+} from "@/types/product";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -586,6 +592,7 @@ export default function AdminDashboardPage() {
                       category?: string;
                       size: number;
                       backPrintOption?: string;
+                      shoulderFlagOption?: string;
                       quantity: number;
                       lineTotal: number;
                     }[];
@@ -654,7 +661,7 @@ export default function AdminDashboardPage() {
                         </p>
                         <div className="text-slate-700 font-semibold mt-2 space-y-0.5">
                           {parsedItems.map((item, index) => (
-                            <p key={index}>• {item.name} ({item.size} cm{supportsBackIndPrintCategory(item.category) ? ` · ${getBackPrintLabel(item.backPrintOption)}` : ""}) × {item.quantity}</p>
+                            <p key={index}>• {item.name} ({item.size} cm{supportsBackIndPrintCategory(item.category) ? ` · ${getBackPrintLabel(item.backPrintOption)}` : ""}{supportsShoulderFlagCategory(item.category) ? ` · Flag: ${getShoulderFlagLabel(item.shoulderFlagOption)}` : ""}) × {item.quantity}</p>
                           ))}
                         </div>
                       </div>

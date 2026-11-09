@@ -6,7 +6,14 @@ import Link from "next/link";
 import { ArrowRight, Banknote, CheckCircle2, ChevronRight, CreditCard, PauseCircle, ShieldCheck, Truck } from "lucide-react";
 import { z } from "zod";
 import { useCartStore } from "@/store/useCartStore";
-import { DEFAULT_BACK_PRINT_OPTION, getBackPrintLabel, supportsBackIndPrint } from "@/types/product";
+import {
+  DEFAULT_BACK_PRINT_OPTION,
+  DEFAULT_SHOULDER_FLAG_OPTION,
+  getBackPrintLabel,
+  getShoulderFlagLabel,
+  supportsBackIndPrint,
+  supportsShoulderFlag,
+} from "@/types/product";
 import { FREE_SHIPPING_THRESHOLD, getCodBookingAmount, getShippingPackageDetails } from "@/config/commerce";
 import { formatINR } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -223,7 +230,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="space-y-4">
                     {items.map((item) => (
-                      <div key={`${item.product.id}-${item.selectedSize}-${item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION}`} className="flex items-center justify-between gap-3 border-b border-border pb-4">
+                      <div key={`${item.product.id}-${item.selectedSize}-${item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION}-${item.selectedShoulderFlag ?? DEFAULT_SHOULDER_FLAG_OPTION}`} className="flex items-center justify-between gap-3 border-b border-border pb-4">
                         <div className="flex min-w-0 items-center gap-3">
                           <div className="relative h-12 w-10 shrink-0 overflow-hidden rounded-md bg-surface-2">
                             <Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover object-top" />
@@ -231,7 +238,7 @@ export default function CheckoutPage() {
                           <div className="min-w-0">
                             <p className="line-clamp-1 text-sm font-medium text-ink">{item.product.name}</p>
                             <p className="mt-1 text-xs text-muted">
-                              {item.selectedSize} cm{supportsBackIndPrint(item.product) ? ` · ${getBackPrintLabel(item.selectedBackPrint)}` : ""} · Qty {item.quantity}
+                              {item.selectedSize} cm{supportsBackIndPrint(item.product) ? ` · ${getBackPrintLabel(item.selectedBackPrint)}` : ""}{supportsShoulderFlag(item.product) ? ` · Flag: ${getShoulderFlagLabel(item.selectedShoulderFlag)}` : ""} · Qty {item.quantity}
                             </p>
                           </div>
                         </div>
@@ -331,6 +338,7 @@ export default function CheckoutPage() {
           productId: item.product.id,
           size: item.selectedSize,
           backPrintOption: item.selectedBackPrint ?? DEFAULT_BACK_PRINT_OPTION,
+          shoulderFlagOption: item.selectedShoulderFlag ?? DEFAULT_SHOULDER_FLAG_OPTION,
           quantity: item.quantity,
         }))}
         address={{ ...formData }}

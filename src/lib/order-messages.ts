@@ -2,13 +2,19 @@ import "server-only";
 
 import type { OrderRecord } from "@/lib/store-db";
 import { sendWhatsApp } from "@/lib/twilio";
-import { getBackPrintLabel, isBackPrintOption } from "@/types/product";
+import {
+  getBackPrintLabel,
+  getShoulderFlagLabel,
+  isBackPrintOption,
+  isShoulderFlagOption,
+} from "@/types/product";
 
 interface StoredItem {
   name?: string;
   productId?: string;
   size?: number;
   backPrintOption?: unknown;
+  shoulderFlagOption?: unknown;
   quantity?: number;
   price?: number;
 }
@@ -40,8 +46,9 @@ export function buildWhatsAppOrderMessage(order: OrderRecord): string {
     const name = item.name || "Viper Gear Item";
     const size = item.size ? ` (${item.size} cm)` : "";
     const backPrint = isBackPrintOption(item.backPrintOption) ? ` — ${getBackPrintLabel(item.backPrintOption)}` : "";
+    const flag = isShoulderFlagOption(item.shoulderFlagOption) ? ` · Flag: ${getShoulderFlagLabel(item.shoulderFlagOption)}` : "";
     const qty = Number(item.quantity || 1);
-    return `• ${name}${size}${backPrint} x${qty}`;
+    return `• ${name}${size}${backPrint}${flag} x${qty}`;
   });
 
   const lines = [

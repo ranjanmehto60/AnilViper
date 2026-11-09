@@ -41,6 +41,39 @@ export function supportsBackIndPrint(product: Pick<Product, "category">): boolea
   return supportsBackIndPrintCategory(product.category);
 }
 
+export const SHOULDER_FLAG_OPTIONS = [
+  {
+    value: "yes",
+    label: "Yes",
+    description: "Indian flag on shoulder",
+  },
+  {
+    value: "no",
+    label: "No",
+    description: "Plain shoulder — no flag",
+  },
+] as const;
+
+export type ShoulderFlagOption = (typeof SHOULDER_FLAG_OPTIONS)[number]["value"];
+
+export const DEFAULT_SHOULDER_FLAG_OPTION: ShoulderFlagOption = "yes";
+
+export function isShoulderFlagOption(value: unknown): value is ShoulderFlagOption {
+  return SHOULDER_FLAG_OPTIONS.some((option) => option.value === value);
+}
+
+export function getShoulderFlagLabel(value: unknown): string {
+  return SHOULDER_FLAG_OPTIONS.find((option) => option.value === value)?.label ?? SHOULDER_FLAG_OPTIONS[0].label;
+}
+
+export function supportsShoulderFlagCategory(category: unknown): boolean {
+  return category !== "Belts & Accessories" && category !== "Test Product";
+}
+
+export function supportsShoulderFlag(product: Pick<Product, "category">): boolean {
+  return supportsShoulderFlagCategory(product.category);
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -80,6 +113,7 @@ export interface CartItem {
   quantity: number;
   /** Optional for backwards compatibility with carts saved before this option existed. */
   selectedBackPrint?: BackPrintOption;
+  selectedShoulderFlag?: ShoulderFlagOption;
 }
 
 export interface Address {
